@@ -17,8 +17,8 @@ func NewDriverRepo(db *sql.DB) *DriverRepo {
 }
 
 func (r *DriverRepo) Create(driver entities.Driver) error {
-	query := `INSERT INTO drivers (iduser, rating, image) VALUES (?, ?, ?)`
-	_, err := r.db.Exec(query, driver.IdUser, driver.Rating, driver.Image)
+	query := `INSERT INTO drivers (iduser, rating, citywork) VALUES (?, ?, ?)`
+	_, err := r.db.Exec(query, driver.IdUser, driver.Rating, driver.Citywork)
 	if err != nil {
 		return fmt.Errorf("error al crear conductor: %w", err)
 	}
@@ -46,7 +46,6 @@ func (r *DriverRepo) GetByUserID(userID int32) (*domain.DriverDetail, error) {
 }
 
 func (r *DriverRepo) GetByID(driverID int32) (*domain.DriverDetail, error) {
-	// Es el mismo método que GetByUserID, ya que el ID del conductor es el iduser
 	return r.GetByUserID(driverID)
 }
 
@@ -75,7 +74,7 @@ func (r *DriverRepo) GetAll() ([]domain.DriverDetail, error) {
 
 func (r *DriverRepo) Update(driver entities.Driver) error {
 	query := `UPDATE drivers SET rating = ?, image = ? WHERE iduser = ?`
-	result, err := r.db.Exec(query, driver.Rating, driver.Image, driver.IdUser)
+	result, err := r.db.Exec(query, driver.Rating, driver.Citywork, driver.IdUser)
 	if err != nil {
 		return fmt.Errorf("error al actualizar conductor: %w", err)
 	}
@@ -115,4 +114,13 @@ func (r *DriverRepo) Exists(userID int32) (bool, error) {
 		return false, fmt.Errorf("error al verificar existencia: %w", err)
 	}
 	return count > 0, nil
+}
+
+func (r *DriverRepo) CreateTx(tx *sql.Tx, driver entities.Driver) error {
+	query := "INSERT INTO drivers (iduser, rating, citywork) VALUES (?, ?, ?)"
+	_, err := tx.Exec(query, driver.IdUser, driver.Rating, driver.Citywork)
+	if err != nil {
+		return fmt.Errorf("error al crear conductor: %w", err)
+	}
+	return nil
 }

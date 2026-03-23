@@ -1,6 +1,9 @@
 package domain
 
-import "logired/src/internal/users/domain/entities"
+import (
+	"database/sql"
+	"logired/src/internal/users/domain/entities"
+)
 
 type UserRepository interface {
 	CreateUser(entities.User) (entities.User, error)
@@ -9,4 +12,6 @@ type UserRepository interface {
 	UpdateUser(IdUsuario int32, user entities.User) error
 	UpdatePassword(IdUsuario int32, password string) error
 	DeleteUser(IdUsuario int32) error
+	CreateUserTx(tx *sql.Tx, u entities.User) (entities.User, error)
+	BeginTx() (*sql.Tx, error)
 }

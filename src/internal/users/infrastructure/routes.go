@@ -39,7 +39,7 @@ func NewUserRoutes(
 func (r *UserRoutes) AttachRoutes(router *gin.Engine) {
 	userGroup := router.Group("/users")
 	{
-		userGroup.POST("", r.CreateUserController.CreateUser)
+		userGroup.POST("", r.CreateUserController.Create)
 		userGroup.GET("", r.GetAllUsersController.GetAll)
 		userGroup.GET("/:id", r.GetUserController.GetByUserID)
 		userGroup.PUT("/:id", r.UpdateUserController.UpdateUser)

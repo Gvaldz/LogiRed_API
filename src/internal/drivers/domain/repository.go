@@ -1,6 +1,9 @@
 package domain
 
-import "logired/src/internal/drivers/domain/entities"
+import (
+	"database/sql"
+	"logired/src/internal/drivers/domain/entities"
+)
 
 type DriverDetail struct {
 	IdUser   int32   `json:"id_user"`
@@ -19,4 +22,6 @@ type IDriver interface {
 	Update(driver entities.Driver) error
 	Delete(userID int32) error
 	Exists(userID int32) (bool, error)
+	CreateTx(tx *sql.Tx, driver entities.Driver) error
+
 }

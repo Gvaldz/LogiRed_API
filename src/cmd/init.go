@@ -5,6 +5,7 @@ import (
 	"logired/src/core"
 	"logired/src/server"
 	"logired/src/server/middleware"
+	driverRepo 		"logired/src/internal/drivers/infrastructure/repositories"
 	loginDeps 		"logired/src/internal/services/auth/infrastructure"
 	usersDeps	 	"logired/src/internal/users/infrastructure"
 	carsDeps 		"logired/src/internal/cars/infrastructure/dependences"
@@ -25,9 +26,8 @@ func Init() {
 
 	userRepo := usersDeps.NewUserRepository(db)
 	authRepo := loginDeps.NewAuthRepository(db)
-
+	
 	authMiddleware := middleware.AuthMiddleware(tokenService, userRepo)
-
 	carsDeps := carsDeps.NewCarDependencies(db, authMiddleware)
 	carsRoutes := carsDeps.GetRoutes()
 
@@ -40,6 +40,7 @@ func Init() {
 	reviewDeps := reviewDeps.NewReviewDependencies(db, authMiddleware)
 	reviewRoutes := reviewDeps.GetRoutes()
 
+	driverRepo := driverRepo.NewDriverRepo(db)
 	driversDeps := driversDeps.NewDriverDependencies(db, authMiddleware)
 	driversRoutes := driversDeps.GetRoutes()
 
@@ -50,6 +51,7 @@ func Init() {
 		tokenService,
 		authRepo,
 		userRepo,
+		driverRepo,
 	)
 	userRoutes := userDependencies.GetRoutes()
 

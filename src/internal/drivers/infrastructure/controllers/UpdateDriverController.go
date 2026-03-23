@@ -25,8 +25,8 @@ func (ctrl *UpdateDriverController) Update(c *gin.Context) {
 	userID := userIDInterface.(int32)
 
 	var req struct {
-		Rating float32 `json:"rating"`
-		Image  string  `json:"image"`
+		Rating 		float32 `json:"rating"`
+		Citywork  	string  `json:"citywork"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -37,7 +37,7 @@ func (ctrl *UpdateDriverController) Update(c *gin.Context) {
 	driver := entities.Driver{
 		IdUser: userID,
 		Rating: req.Rating,
-		Image:  req.Image,
+		Citywork:  req.Citywork,
 	}
 
 	if err := ctrl.updateDriver.Execute(driver); err != nil {
