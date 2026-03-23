@@ -25,8 +25,9 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 	driverID := userIDInterface.(int32)
 
 	var req struct {
-		Price  float32 `json:"price"`
-		IdRide int32   `json:"id_ride"`
+		Price  	float32 `json:"price"`
+		IdRide 	int32   `json:"id_ride"`
+		Comment string	`json:"comment"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -38,7 +39,8 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 		Price:    req.Price,
 		IdDriver: driverID,
 		IdRide:   req.IdRide,
-		Accepted: false, // Por defecto no aceptada
+		Comment:  req.Comment,
+		IdStatus: 2, 
 	}
 
 	if err := ctrl.createProposal.Execute(proposal); err != nil {

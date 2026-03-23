@@ -24,8 +24,6 @@ func (ctrl *AcceptProposalController) Accept(c *gin.Context) {
 		return
 	}
 
-	// Se asume que cualquier usuario autenticado (cliente o conductor) puede aceptar.
-	// Si se requiere validación adicional, puede obtenerse el userID del contexto y usarse.
 	if err := ctrl.acceptProposal.Execute(int32(idProposal)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -38,7 +38,7 @@ func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
 	ridesGroup.Use(r.authMiddleware)
 
 	ridesGroup.POST("", r.createRideController.Create)
-	ridesGroup.DELETE("/:id", r.cancelRideController.Cancel)
+	ridesGroup.PUT("/:id", r.cancelRideController.Cancel)
 	ridesGroup.GET("/client/me", r.getRidesByClientController.GetByClient)
 	ridesGroup.GET("/:id", r.getRideByIdController.GetById)
 	ridesGroup.GET("/driver/me", r.getRidesByDriverController.GetByDriver)

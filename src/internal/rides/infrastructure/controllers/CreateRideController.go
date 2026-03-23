@@ -25,11 +25,13 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 	clientID := userIDInterface.(int32)
 
 	var req struct {
-		Date        string `json:"date"`
-		Hour        string `json:"hour"`
-		Origin      string `json:"origin"`
-		Destination string `json:"destination"`
-		Description string `json:"description"`
+		Origin 		string 	`json:"origin"`
+		Destination string 	`json:"destination"`
+		Date 		string 	`json:"date"`
+		Hour 		string 	`json:"hour"`
+		AproxWeight float64 `json:"aprow_weight"`
+		Description string 	`json:"description"`
+		IdStatus 	int32	`json:"idstatus"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -39,11 +41,13 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 
 	ride := entities.Ride{
 		IdClient:    clientID,
-		Date:        req.Date,
-		Hour:        req.Hour,
 		Origin:      req.Origin,
 		Destination: req.Destination,
+		Date:        req.Date,
+		Hour:        req.Hour,
+		AproxWeight: req.AproxWeight,
 		Description: req.Description,
+		IdStatus: 6,
 	}
 
 	if err := ctrl.createRide.Execute(ride); err != nil {

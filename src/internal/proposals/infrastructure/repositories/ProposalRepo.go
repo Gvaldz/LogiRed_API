@@ -16,9 +16,9 @@ func NewProposalRepo(db *sql.DB) *ProposalRepo {
 }
 
 func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
-	query := `INSERT INTO proposals (price, iddriver, idride, accepted) 
+	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus) 
 	          VALUES (?, ?, ?, ?)`
-	_, err := r.db.Exec(query, proposal.Price, proposal.IdDriver, proposal.IdRide, proposal.Accepted)
+	_, err := r.db.Exec(query, proposal.Price, proposal.Comment, proposal.IdDriver, proposal.IdRide, proposal.IdStatus)
 	if err != nil {
 		return fmt.Errorf("error al crear propuesta: %w", err)
 	}
@@ -27,7 +27,7 @@ func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
 }
 
 func (r *ProposalRepo) AcceptProposal(idProposal int32) error {
-	query := `UPDATE proposals SET accepted = true WHERE idproposal = ?`
+	query := `UPDATE proposals SET idproposalstatus = 1 WHERE idproposal = ?`
 	result, err := r.db.Exec(query, idProposal)
 	if err != nil {
 		return fmt.Errorf("error al aceptar propuesta: %w", err)
