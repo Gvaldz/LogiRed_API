@@ -4,6 +4,8 @@ import (
 	"logired/src/internal/cars/application"
 	"logired/src/internal/cars/domain/entities"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,9 +15,7 @@ type CreateCarController struct {
 }
 
 func NewCreateCarController(create *application.CreateCar) *CreateCarController {
-	return &CreateCarController{
-		createCar: create,
-	}
+	return &CreateCarController{createCar: create}
 }
 
 func (ctrl *CreateCarController) Create(c *gin.Context) {
@@ -26,32 +26,59 @@ func (ctrl *CreateCarController) Create(c *gin.Context) {
 	}
 	idDriver := userIDInterface.(int32)
 
-	var request struct {
-		CarRegistration string `json:"car_registration"`
-		Brand           string `json:"brand"`
-		Model           string `json:"model"`
-		Color           string `json:"color"`
-		MaxCapacity     int32  `json:"max_capacity"`
-		Image           string `json:"image"`
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type debe ser multipart/form-data"})
 		return
 	}
 
-	car := entities.Car{
-		IdDriver:        idDriver,
-		CarRegistration: request.CarRegistration,
-		Brand:           request.Brand,
-		Model:           request.Model,
-		Color:           request.Color,
-		MaxCapacity:     request.MaxCapacity,
-		Image:           request.Image,
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al parsear formulario: " + err.Error()})
+		return
 	}
 
-	err := ctrl.createCar.Execute(car)
+	carRegistration := c.Request.FormValue("car_registration")
+	brand           := c.Request.FormValue("brand")
+	model           := c.Request.FormValue("model")
+	color           := c.Request.FormValue("color")
+	maxCapacityStr  := c.Request.FormValue("max_capacity")
+
+	if carRegistration == "" || brand == "" || model == "" || color == "" || maxCapacityStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Faltan campos obligatorios"})
+		return
+	}
+
+	maxCapacity, err := strconv.ParseInt(maxCapacityStr, 10, 32)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "max_capacity inválido"})
+		return
+	}
+
+	frontView, err := saveCarImage(c, "frontview_image")
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	backView, err := saveCarImage(c, "backview_image")
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	plates, err := saveCarImage(c, "plates_image")
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	spaces, err := saveCarImage(c, "space_image")
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	car := entities.Car{
+		IdDriver:        idDriver,
+		CarRegistration: carRegistration,
+		Brand:           brand,
+		Model:           model,
+		Color:           color,
+		MaxCapacity:     int32(maxCapacity),
+		FrontViewImage:  frontView,
+		BackViewImage:   backView,
+		PlatesImage:     plates,
+		SpacesImage:     spaces,
+	}
+
+	if err := ctrl.createCar.Execute(car); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
