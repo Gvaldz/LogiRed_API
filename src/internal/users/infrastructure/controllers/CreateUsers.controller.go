@@ -49,7 +49,7 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
     name        := c.Request.FormValue("name")
     lastname    := c.Request.FormValue("lastname")
     email       := c.Request.FormValue("email")
-    phone       := c.Request.FormValue("phone_number")
+    phone       := c.Request.FormValue("numberphone")
     birthdate   := c.Request.FormValue("birthdate")
     password    := c.Request.FormValue("password")
     userTypeStr := c.Request.FormValue("user_type")

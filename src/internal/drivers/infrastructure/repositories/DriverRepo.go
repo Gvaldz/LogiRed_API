@@ -124,3 +124,9 @@ func (r *DriverRepo) CreateTx(tx *sql.Tx, driver entities.Driver) error {
 	}
 	return nil
 }
+
+func (r *DriverRepo) UpdateCitywork(idUser int32, citywork string) error {
+    query := "UPDATE drivers SET citywork = ? WHERE iduser = ?"
+    _, err := r.db.Exec(query, citywork, idUser)
+    return err
+}

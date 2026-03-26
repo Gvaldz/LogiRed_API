@@ -100,25 +100,42 @@ func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
 	return u, nil
 }
 
-func (r *UserRepository) UpdateUser(id int32, user user.User) error {
+func (r *UserRepository) UpdateUser(id int32, u user.User) error {
     setClauses := []string{}
     args := []interface{}{}
 
-    if user.Name != ""        { setClauses = append(setClauses, "name = ?");         args = append(args, user.Name) }
-    if user.Lastname != ""    { setClauses = append(setClauses, "lastname = ?");      args = append(args, user.Lastname) }
-    if user.Email != ""       { setClauses = append(setClauses, "email = ?");         args = append(args, user.Email) }
-    if user.NumberPhone != "" { setClauses = append(setClauses, "number_phone = ?");  args = append(args, user.NumberPhone) }
-    if user.Birthdate != ""   { setClauses = append(setClauses, "birthdate = ?");     args = append(args, user.Birthdate) }
-    if user.ImageURL != ""    { setClauses = append(setClauses, "image_url = ?");     args = append(args, user.ImageURL) }
+    if u.Name != ""        { setClauses = append(setClauses, "name = ?");       args = append(args, u.Name) }
+    if u.Lastname != ""    { setClauses = append(setClauses, "lastname = ?");    args = append(args, u.Lastname) }
+    if u.Email != ""       { setClauses = append(setClauses, "email = ?");       args = append(args, u.Email) }
+    if u.NumberPhone != "" { setClauses = append(setClauses, "numberphone = ?"); args = append(args, u.NumberPhone) }
+    if u.Birthdate != ""   { setClauses = append(setClauses, "birthdate = ?");   args = append(args, u.Birthdate) }
+    if u.ImageURL != ""    { setClauses = append(setClauses, "image_url = ?");   args = append(args, u.ImageURL) }
 
     if len(setClauses) == 0 {
         return errors.New("no hay campos para actualizar")
     }
 
+    var exists int
+    err := r.DB.QueryRow("SELECT COUNT(*) FROM users WHERE iduser = ?", id).Scan(&exists)
+    if err != nil {
+        return fmt.Errorf("error al verificar usuario: %w", err)
+    }
+    if exists == 0 {
+        return fmt.Errorf("usuario no encontrado")
+    }
+
     args = append(args, id)
     query := fmt.Sprintf("UPDATE users SET %s WHERE iduser = ?", strings.Join(setClauses, ", "))
-    _, err := r.DB.Exec(query, args...)
-    return err
+
+    result, err := r.DB.Exec(query, args...)
+    if err != nil {
+        return fmt.Errorf("error al actualizar usuario: %w", err)
+    }
+
+    rows, _ := result.RowsAffected()
+    fmt.Printf(">>> RowsAffected: %d\n", rows)
+
+    return nil
 }
 
 func (r *UserRepository) UpdatePassword(id int32, newHashedPassword string) error {
@@ -187,3 +204,45 @@ func (r *UserRepository) CreateUserTx(tx *sql.Tx, u user.User) (user.User, error
 func (r *UserRepository) BeginTx() (*sql.Tx, error) {
 	return r.DB.Begin()
 }
+
+func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) {
+    query := `
+        SELECT 
+            u.iduser, u.name, u.lastname, u.email, u.numberphone, 
+            u.birthdate, u.usertype, u.image_url,
+            d.citywork, d.rating
+        FROM users u
+        LEFT JOIN drivers d ON u.iduser = d.iduser
+        WHERE u.iduser = ?
+    `
+
+    var profile user.UserProfile
+    var citywork sql.NullString
+    var rating   sql.NullFloat64
+
+    err := r.DB.QueryRow(query, id).Scan(
+        &profile.IdUser,
+        &profile.Name,
+        &profile.Lastname,
+        &profile.Email,
+        &profile.NumberPhone,
+        &profile.Birthdate,
+        &profile.UserType,
+        &profile.ImageURL,
+        &citywork,
+        &rating,
+    )
+    if err != nil {
+        return user.UserProfile{}, fmt.Errorf("usuario no encontrado: %w", err)
+    }
+
+    if citywork.Valid {
+        profile.DriverInfo = &user.DriverInfo{
+            Citywork: citywork.String,
+            Rating:   float32(rating.Float64),
+        }
+    }
+
+    return profile, nil
+}
+

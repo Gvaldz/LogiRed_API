@@ -29,20 +29,17 @@ func (d *DriverDependencies) GetRoutes() *routes.DriverRoutes {
 	getByUserUseCase := application.NewGetDriverByUser(driverRepo)
 	getByIDUseCase := application.NewGetDriverByID(driverRepo)
 	getAllUseCase := application.NewGetAllDrivers(driverRepo)
-	updateUseCase := application.NewUpdateDriver(driverRepo)
 	deleteUseCase := application.NewDeleteDriver(driverRepo)
 
 	createController := controllers.NewCreateDriverController(createUseCase)
 	getController := controllers.NewGetDriverController(getByUserUseCase, getByIDUseCase)
 	getAllController := controllers.NewGetAllDriversController(getAllUseCase)
-	updateController := controllers.NewUpdateDriverController(updateUseCase)
 	deleteController := controllers.NewDeleteDriverController(deleteUseCase)
 
 	return routes.NewDriverRoutes(
 		createController,
 		getController,
 		getAllController,
-		updateController,
 		deleteController,
 		d.AuthMiddleware,
 	)

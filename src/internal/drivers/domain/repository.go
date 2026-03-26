@@ -19,9 +19,8 @@ type IDriver interface {
 	GetByUserID(userID int32) (*DriverDetail, error)
 	GetByID(driverID int32) (*DriverDetail, error) 
 	GetAll() ([]DriverDetail, error)
-	Update(driver entities.Driver) error
+	UpdateCitywork(driverID int32, citywork string) error
 	Delete(userID int32) error
 	Exists(userID int32) (bool, error)
 	CreateTx(tx *sql.Tx, driver entities.Driver) error
-
 }
