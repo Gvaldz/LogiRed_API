@@ -40,17 +40,17 @@ func NewUserDependencies(
 }
 
 func (d *UserDependencies) GetRoutes() *UserRoutes {
-	createUserUseCase        := application.NewCreateUser(d.UserRepo, d.Hasher)
-	getAllUserUseCase         := application.NewGetAllUsers(d.UserRepo)
-	getUserUseCase            := application.NewGetUserByID(d.UserRepo)
-	getUserProfileUseCase     := application.NewGetUserProfile(d.UserRepo)
-	updateUserUseCase         := application.NewUpdateUser(d.UserRepo)
+	createUserUseCase          := application.NewCreateUser(d.UserRepo, d.Hasher)
+	getAllUserUseCase          := application.NewGetAllUsers(d.UserRepo)
+	getUserUseCase             := application.NewGetUserByID(d.UserRepo)
+	getUserProfileUseCase      := application.NewGetUserProfile(d.UserRepo)
+	updateUserUseCase          := application.NewUpdateUser(d.UserRepo)
 	updateDriverProfileUseCase := driverApp.NewUpdateDriverProfile(d.DriverRepo) 
-	updatePasswordUseCase     := application.NewUpdatePassword(d.UserRepo, d.Hasher)
-	deleteUserUseCase         := application.NewDeleteUser(d.UserRepo)
-	createDriverUseCase       := application.NewRegisterDriver(d.UserRepo, d.DriverRepo, d.Hasher)
+	updatePasswordUseCase      := application.NewUpdatePassword(d.UserRepo, d.Hasher)
+	deleteUserUseCase          := application.NewDeleteUser(d.UserRepo)
+	createDriverUseCase        := application.NewRegisterDriver(d.UserRepo, d.DriverRepo, d.Hasher)
 
-	createUserController      := controllers.NewCreateUserController(createUserUseCase, createDriverUseCase)
+	createUserController       := controllers.NewCreateUserController(createUserUseCase, createDriverUseCase)
 	getUsersController         := controllers.NewGetAllUsersController(getAllUserUseCase)
 	getUserController          := controllers.NewGetByUserIDController(getUserUseCase)
 	getUserProfileController   := controllers.NewGetUserProfileController(getUserProfileUseCase)   

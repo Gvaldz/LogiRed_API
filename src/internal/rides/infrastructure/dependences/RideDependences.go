@@ -30,12 +30,14 @@ func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
 	getRidesByClientUseCase := application.NewGetRidesByClient(rideRepo)
 	getRideByIdUseCase := application.NewGetRideById(rideRepo)
 	getRidesByDriverUseCase := application.NewGetRidesByDriver(rideRepo)
+	getRidesByCityUseCase := application.NewGetRidesByCity(rideRepo)
 
 	createRideController := controllers.NewCreateRideController(createRideUseCase)
 	cancelRideController := controllers.NewCancelRideController(cancelRideUseCase)
 	getRidesByClientController := controllers.NewGetRidesByClientController(getRidesByClientUseCase)
 	getRideByIdController := controllers.NewGetRideByIdController(getRideByIdUseCase)
 	getRidesByDriverController := controllers.NewGetRidesByDriverController(getRidesByDriverUseCase)
+	getRidesByCityController := controllers.NewGetRideByCityController(getRidesByCityUseCase)
 
 	return routes.NewRideRoutes(
 		createRideController,
@@ -43,6 +45,7 @@ func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
 		getRidesByClientController,
 		getRideByIdController,
 		getRidesByDriverController,
+		getRidesByCityController,
 		d.AuthMiddleware,
 	)
 }

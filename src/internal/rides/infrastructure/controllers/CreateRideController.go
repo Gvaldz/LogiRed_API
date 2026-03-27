@@ -26,10 +26,11 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 
 	var req struct {
 		Origin 		string 	`json:"origin"`
+		OriginCity	string  `json:"origin_city"`
 		Destination string 	`json:"destination"`
 		Date 		string 	`json:"date"`
 		Hour 		string 	`json:"hour"`
-		AproxWeight float64 `json:"aprow_weight"`
+		AproxWeight float64 `json:"aprox_weight"`
 		Description string 	`json:"description"`
 		IdStatus 	int32	`json:"idstatus"`
 	}
@@ -42,6 +43,7 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 	ride := entities.Ride{
 		IdClient:    clientID,
 		Origin:      req.Origin,
+		OriginCity:  req.OriginCity,
 		Destination: req.Destination,
 		Date:        req.Date,
 		Hour:        req.Hour,

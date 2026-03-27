@@ -25,22 +25,13 @@ func NewDriverDependencies(db *sql.DB, authMiddleware gin.HandlerFunc) *DriverDe
 func (d *DriverDependencies) GetRoutes() *routes.DriverRoutes {
 	driverRepo := repositories.NewDriverRepo(d.DB)
 
-	createUseCase := application.NewCreateDriver(driverRepo)
-	getByUserUseCase := application.NewGetDriverByUser(driverRepo)
-	getByIDUseCase := application.NewGetDriverByID(driverRepo)
-	getAllUseCase := application.NewGetAllDrivers(driverRepo)
-	deleteUseCase := application.NewDeleteDriver(driverRepo)
+	getByCityUseCase := application.NewGetDriversByCity(driverRepo)
 
-	createController := controllers.NewCreateDriverController(createUseCase)
-	getController := controllers.NewGetDriverController(getByUserUseCase, getByIDUseCase)
-	getAllController := controllers.NewGetAllDriversController(getAllUseCase)
-	deleteController := controllers.NewDeleteDriverController(deleteUseCase)
+	getByCityController := controllers.NewGetRideByCityController(getByCityUseCase)
+
 
 	return routes.NewDriverRoutes(
-		createController,
-		getController,
-		getAllController,
-		deleteController,
+		getByCityController,
 		d.AuthMiddleware,
 	)
 }

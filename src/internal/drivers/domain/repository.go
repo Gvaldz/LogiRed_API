@@ -15,12 +15,8 @@ type DriverDetail struct {
 }
 
 type IDriver interface {
-	Create(driver entities.Driver) error
-	GetByUserID(userID int32) (*DriverDetail, error)
-	GetByID(driverID int32) (*DriverDetail, error) 
-	GetAll() ([]DriverDetail, error)
+	GetDriversByCity(city string) ([]DriverDetail, error)
 	UpdateCitywork(driverID int32, citywork string) error
-	Delete(userID int32) error
 	Exists(userID int32) (bool, error)
 	CreateTx(tx *sql.Tx, driver entities.Driver) error
 }

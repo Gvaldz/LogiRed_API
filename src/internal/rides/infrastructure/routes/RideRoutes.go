@@ -12,6 +12,7 @@ type RideRoutes struct {
 	getRidesByClientController    *controllers.GetRidesByClientController
 	getRideByIdController         *controllers.GetRideByIdController
 	getRidesByDriverController    *controllers.GetRidesByDriverController
+	getRidesByCityController  	  *controllers.GetRideByCityController
 	authMiddleware                gin.HandlerFunc
 }
 
@@ -21,6 +22,7 @@ func NewRideRoutes(
 	getByClient 				  *controllers.GetRidesByClientController,
 	getById 					  *controllers.GetRideByIdController,
 	getByDriver 				  *controllers.GetRidesByDriverController,
+	getByCity 					  *controllers.GetRideByCityController,
 	authMiddleware 				  gin.HandlerFunc,
 ) *RideRoutes {
 	return &RideRoutes{
@@ -29,6 +31,7 @@ func NewRideRoutes(
 		getRidesByClientController:    getByClient,
 		getRideByIdController:         getById,
 		getRidesByDriverController:    getByDriver,
+		getRidesByCityController:  	   getByCity,
 		authMiddleware:                authMiddleware,
 	}
 }
@@ -42,4 +45,5 @@ func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
 	ridesGroup.GET("/client/me", r.getRidesByClientController.GetByClient)
 	ridesGroup.GET("/:id", r.getRideByIdController.GetById)
 	ridesGroup.GET("/driver/me", r.getRidesByDriverController.GetByDriver)
+	ridesGroup.GET("/city/:city", r.getRidesByCityController.GetByCity) 
 }
