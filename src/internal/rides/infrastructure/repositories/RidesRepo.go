@@ -26,23 +26,6 @@ func (r *RideRepo) CreateRide(ride entities.Ride) error {
 	return nil
 }
 
-func (r *RideRepo) CancelRide(idRide int32, idClient int32) error {
-	query := `UPDATE FROM rides WHERE idride = ? AND idclient = ?`
-	result, err := r.db.Exec(query, idRide, idClient)
-	if err != nil {
-		return fmt.Errorf("error al cancelar viaje: %w", err)
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("error al verificar filas afectadas: %w", err)
-	}
-	if rows == 0 {
-		return fmt.Errorf("viaje no encontrado o no tienes permiso para cancelarlo")
-	}
-	log.Println("[RideRepo] Viaje cancelado correctamente")
-	return nil
-}
-
 func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 	query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
 	          FROM rides WHERE idclient = ?`
@@ -81,7 +64,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	query := `
 		SELECT r.idride, r.idclient, r.date, r.hour, r.origin, r.destination, r.description, r.aproxweight, r.idridestatus
 		FROM rides r
-		WHERE p.iddriver = ? AND p.accepted = true
+		WHERE p.iddriver = ? AND p.idproposalstatus = 1
 	`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
@@ -103,7 +86,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
     query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
               FROM rides 
-              WHERE origincity LIKE ?`
+              WHERE origincity LIKE ? AND idridestatus = 6`
     rows, err := r.db.Query(query, "%"+city+"%")
     if err != nil {
         return nil, fmt.Errorf("error al obtener viajes por ciudad: %w", err)
@@ -119,4 +102,24 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
         rides = append(rides, r)
     }
     return rides, nil
+}
+
+
+func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
+	query := `UPDATE rides 
+	          SET idridestatus = ?
+	          WHERE idride = ?`
+	result, err := r.db.Exec(query, idstatus, idride)
+	if err != nil {
+		return fmt.Errorf("error al actualizar estado del viaje: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error al verificar filas afectadas: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("viaje no encontrado o no tienes permiso para editarla")
+	}
+	log.Println("[RideRepo] Viaje actualizado correctamente")
+	return nil
 }
