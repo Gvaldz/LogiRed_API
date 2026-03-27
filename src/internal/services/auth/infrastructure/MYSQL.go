@@ -41,3 +41,13 @@ func (r *AuthRepository) FindUserByID(userID int32) (user.User, error) {
 	err := r.DB.QueryRow(query, userID).Scan(&user.IdUser, &user.Email, &user.Password, &user.UserType)
 	return user, err
 }
+
+func (r *AuthRepository) FindDriverCityWorkByUserID(userID int32) (string, error) {
+    var citywork string
+    query := "SELECT citywork FROM drivers WHERE iduser = ?"
+    err := r.DB.QueryRow(query, userID).Scan(&citywork)
+    if err != nil {
+        return "", err
+    }
+    return citywork, nil
+}

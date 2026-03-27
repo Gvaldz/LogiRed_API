@@ -30,23 +30,32 @@ func NewLogin(
 }
 
 func (uc *Login) Execute(credentials user.User) (auth.Token, error) {
-	user, err := uc.authRepo.FindUserByEmail(credentials.Email)
-	if err != nil {
-		return auth.Token{}, errors.New("datos incorrectos")
-	}
+    user, err := uc.authRepo.FindUserByEmail(credentials.Email)
+    if err != nil {
+        return auth.Token{}, errors.New("datos incorrectos")
+    }
 
-	if err := uc.hasher.Compare(user.Password, credentials.Password); err != nil {
-		return auth.Token{}, errors.New("datos incorrectos")
-	}
+    if err := uc.hasher.Compare(user.Password, credentials.Password); err != nil {
+        return auth.Token{}, errors.New("datos incorrectos")
+    }
 
-	token, err := uc.tokenService.GenerateToken(user.IdUser, user.Email, user.UserType)
-	if err != nil {
-		return auth.Token{}, errors.New("fallo en generar token")
-	}
+    citywork := ""
 
-	go func() {
-		_ = uc.authRepo.UpdateLastLogin(user.IdUser)
-	}()
+    if user.UserType == 2 {
+        citywork, err = uc.authRepo.FindDriverCityWorkByUserID(user.IdUser)
+        if err != nil {
+            return auth.Token{}, errors.New("error al obtener datos del conductor")
+        }
+    }
 
-	return token, nil
+    token, err := uc.tokenService.GenerateToken(user.IdUser, user.Email, user.UserType, citywork)
+    if err != nil {
+        return auth.Token{}, errors.New("fallo en generar token")
+    }
+
+    go func() {
+        _ = uc.authRepo.UpdateLastLogin(user.IdUser)
+    }()
+
+    return token, nil
 }
