@@ -43,7 +43,6 @@ func LoadConfig() *Config {
 	}
 }
 
-// Retorna el valor de la variable o un default si no existe
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

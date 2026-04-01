@@ -6,7 +6,7 @@ import (
 	"logired/src/server"
 	"logired/src/server/middleware"
 	driverRepo   "logired/src/internal/drivers/infrastructure/repositories"
-//	deviceRepo   "logired/src/internal/devices/infrastructure/repositories"
+	deviceRepo   "logired/src/internal/devices/infrastructure/repositories"
 	loginDeps    "logired/src/internal/services/auth/infrastructure"
 	usersDeps    "logired/src/internal/users/infrastructure"
 	carsDeps     "logired/src/internal/cars/infrastructure/dependences"
@@ -14,8 +14,8 @@ import (
 	proposalDeps "logired/src/internal/proposals/infrastructure/dependences"
 	reviewDeps   "logired/src/internal/reviews/infrastructure/dependences"
 	driversDeps  "logired/src/internal/drivers/infrastructure/dependences"
-//	devicesDeps  "logired/src/internal/devices/infrastructure/dependences"
-//	notifications "logired/src/internal/services/notifications"
+	devicesDeps  "logired/src/internal/devices/infrastructure/dependences"
+	notifications "logired/src/internal/services/notifications"
 )
 
 func Init() {
@@ -30,23 +30,23 @@ func Init() {
 	// ── Servicios core ─────────────────────────────────────────────
 	hasher       := core.NewBcryptHasher(cfg.BcryptCost)
 	tokenService := core.NewJWTService()
-//	fcmService   := core.NewFCMService(cfg.FCMProjectID, cfg.FCMCredentialsFile)
+	fcmService   := core.NewFCMService(cfg.FCMProjectID, cfg.FCMCredentialsFile)
 
 	// ── Repositorios ───────────────────────────────────────────────
 	userRepo   := usersDeps.NewUserRepository(db)
 	authRepo   := loginDeps.NewAuthRepository(db)
 	driverRepo := driverRepo.NewDriverRepo(db)
-//	deviceRepo := deviceRepo.NewDeviceRepo(db)
+	deviceRepo := deviceRepo.NewDeviceRepo(db)
 
 	// ── Servicios ──────────────────────────────────────────────────
-//	notifier      := notifications.NewNotificationService(fcmService, deviceRepo)
+	notifier      := notifications.NewNotificationService(fcmService, deviceRepo)
 	authMiddleware := middleware.AuthMiddleware(tokenService, userRepo)
 
 	// ── Dependencias y rutas ───────────────────────────────────────
-//	devicesRoutes  := devicesDeps.NewDeviceDependencies(db, authMiddleware).GetRoutes()
+	devicesRoutes  := devicesDeps.NewDeviceDependencies(db, authMiddleware).GetRoutes()
 	carsRoutes     := carsDeps.NewCarDependencies(db, authMiddleware).GetRoutes()
-	ridesRoutes    := ridesDeps.NewRideDependencies(db, authMiddleware).GetRoutes()
-	proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware).GetRoutes()
+	ridesRoutes    := ridesDeps.NewRideDependencies(db, authMiddleware, notifier).GetRoutes()
+	proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, notifier).GetRoutes()
 	reviewRoutes   := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
 	driversRoutes  := driversDeps.NewDriverDependencies(db, authMiddleware).GetRoutes()
 
@@ -59,6 +59,7 @@ func Init() {
 	server.Run(
 		authRoutes,
 		userRoutes,
+		devicesRoutes,
 		carsRoutes,
 		ridesRoutes,
 		proposalRoutes,

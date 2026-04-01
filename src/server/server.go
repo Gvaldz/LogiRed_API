@@ -8,6 +8,7 @@ import (
 	proposalRoutes 	 "logired/src/internal/proposals/infrastructure/routes"
 	reviewRoutes 	 "logired/src/internal/reviews/infrastructure/routes"
 	driversRoutes 	 "logired/src/internal/drivers/infrastructure/routes"
+	devicesRoutes 	 "logired/src/internal/devices/infrastructure/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,7 @@ import (
 func Run(
 	authRoutes *loginRouters.AuthRoutes,
 	userRoutes *userRouters.UserRoutes,
+	devicesRoutes *devicesRoutes.DeviceRoutes,
 	carsRoutes *carsRoutes.CarRoutes,
 	ridesRoutes *ridesRoutes.RideRoutes,
 	proposalRoutes *proposalRoutes.ProposalRoutes,
@@ -32,6 +34,7 @@ func Run(
 
 	authRoutes.AttachRoutes(r)
 	userRoutes.AttachRoutes(r)
+	devicesRoutes.AttachRoutes(r)
 	carsRoutes.AttachRoutes(r)
 	ridesRoutes.AttachRoutes(r)
 	proposalRoutes.AttachRoutes(r)

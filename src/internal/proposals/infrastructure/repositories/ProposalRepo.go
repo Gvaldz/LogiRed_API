@@ -59,3 +59,15 @@ func (r *ProposalRepo) DeleteProposal(idProposal int32, idDriver int32) error {
 	log.Println("[ProposalRepo] Propuesta eliminada correctamente")
 	return nil
 }
+
+func (r *ProposalRepo) GetProposalById(idProposal int32) (entities.Proposal, error) {
+	var p entities.Proposal
+	query := "SELECT idproposal, price, comment, iddriver, idride, idstatus FROM proposals WHERE idproposal = ?"
+	err := r.db.QueryRow(query, idProposal).Scan(
+		&p.IdProposal, &p.Price, &p.Comment, &p.IdDriver, &p.IdRide, &p.IdStatus,
+	)
+	if err != nil {
+		return entities.Proposal{}, fmt.Errorf("propuesta no encontrada: %w", err)
+	}
+	return p, nil
+}

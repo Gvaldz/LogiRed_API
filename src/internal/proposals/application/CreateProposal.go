@@ -3,16 +3,36 @@ package application
 import (
 	"logired/src/internal/proposals/domain"
 	"logired/src/internal/proposals/domain/entities"
+	rideDomain "logired/src/internal/rides/domain"
+	notifications "logired/src/internal/services/notifications"
 )
 
 type CreateProposal struct {
-	repo domain.IProposal
+	repo     domain.IProposal
+	rideRepo rideDomain.IRide // para obtener el IdClient del viaje
+	notifier *notifications.NotificationService
 }
 
-func NewCreateProposal(repo domain.IProposal) *CreateProposal {
-	return &CreateProposal{repo: repo}
+func NewCreateProposal(
+	repo domain.IProposal,
+	rideRepo rideDomain.IRide,
+	notifier *notifications.NotificationService,
+) *CreateProposal {
+	return &CreateProposal{repo: repo, rideRepo: rideRepo, notifier: notifier}
 }
 
-func (cp *CreateProposal) Execute(proposal entities.Proposal) error {
-	return cp.repo.CreateProposal(proposal)
+func (uc *CreateProposal) Execute(proposal entities.Proposal) error {
+	if err := uc.repo.CreateProposal(proposal); err != nil {
+		return err
+	}
+
+	go func() {
+		ride, err := uc.rideRepo.GetRideById(proposal.IdRide)
+		if err != nil {
+			return
+		}
+		uc.notifier.NuevaPropuesta(ride.IdClient, proposal.IdRide)
+	}()
+
+	return nil
 }

@@ -123,3 +123,11 @@ func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
 	log.Println("[RideRepo] Viaje actualizado correctamente")
 	return nil
 }
+
+func (r *RideRepo) AssignDriver(idRide int32, idDriver int32) error {
+	_, err := r.db.Exec(
+		"UPDATE rides SET iddriver = ? WHERE idride = ?",
+		idDriver, idRide,
+	)
+	return err
+}
