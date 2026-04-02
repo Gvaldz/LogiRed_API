@@ -125,9 +125,14 @@ func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
 }
 
 func (r *RideRepo) AssignDriver(idRide int32, idDriver int32) error {
-	_, err := r.db.Exec(
-		"UPDATE rides SET iddriver = ? WHERE idride = ?",
-		idDriver, idRide,
-	)
-	return err
+    query := "UPDATE rides SET iddriver = ? WHERE idride = ?"
+    result, err := r.db.Exec(query, idDriver, idRide)
+    if err != nil {
+        return fmt.Errorf("error al asignar conductor: %w", err)
+    }
+    rows, _ := result.RowsAffected()
+    if rows == 0 {
+        return fmt.Errorf("viaje no encontrado")
+    }
+    return nil
 }

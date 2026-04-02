@@ -35,7 +35,7 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 	rideRepo     := rideRepositories.NewRideRepo(d.DB)
 
 	createProposalUseCase := application.NewCreateProposal(proposalRepo, rideRepo, d.Notifier)
-	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, d.Notifier)
+	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, rideRepo, d.Notifier)
 	getProposalByIdUseCase := application.NewGetProposalById(proposalRepo)
 	deleteProposalUseCase := application.NewDeleteProposal(proposalRepo)
 

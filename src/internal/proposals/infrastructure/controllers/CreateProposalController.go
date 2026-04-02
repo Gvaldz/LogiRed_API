@@ -28,6 +28,7 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 		Price  	float32 `json:"price"`
 		IdRide 	int32   `json:"id_ride"`
 		Comment string	`json:"comment"`
+		IdCar   int32   `json:"idcar"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -40,6 +41,7 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 		IdDriver: driverID,
 		IdRide:   req.IdRide,
 		Comment:  req.Comment,
+		IdCar:    req.IdCar,
 		IdStatus: 2, 
 	}
 

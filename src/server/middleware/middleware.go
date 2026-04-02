@@ -33,7 +33,7 @@ func AuthMiddleware(tokenService tokenService.TokenService, userRepo users_domai
 		user, err := userRepo.GetUserByID(userID)
 		
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al verificar usuario"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al verificar: " + err.Error()})
 			return
 		}
 

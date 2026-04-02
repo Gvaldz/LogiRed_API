@@ -16,9 +16,9 @@ func NewProposalRepo(db *sql.DB) *ProposalRepo {
 }
 
 func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
-	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus) 
-	          VALUES (?, ?, ?, ?)`
-	_, err := r.db.Exec(query, proposal.Price, proposal.Comment, proposal.IdDriver, proposal.IdRide, proposal.IdStatus)
+	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus, idcar) 
+	          VALUES (?, ?, ?, ?, ?, ?)`
+	_, err := r.db.Exec(query, proposal.Price, proposal.Comment, proposal.IdDriver, proposal.IdRide, proposal.IdStatus, proposal.IdCar)
 	if err != nil {
 		return fmt.Errorf("error al crear propuesta: %w", err)
 	}
@@ -26,21 +26,17 @@ func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
 	return nil
 }
 
-func (r *ProposalRepo) AcceptProposal(idProposal int32) error {
-	query := `UPDATE proposals SET idproposalstatus = 1 WHERE idproposal = ?`
-	result, err := r.db.Exec(query, idProposal)
-	if err != nil {
-		return fmt.Errorf("error al aceptar propuesta: %w", err)
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("error al verificar filas afectadas: %w", err)
-	}
-	if rows == 0 {
-		return fmt.Errorf("propuesta no encontrada")
-	}
-	log.Println("[ProposalRepo] Propuesta aceptada correctamente")
-	return nil
+func (r *ProposalRepo) AcceptProposal(idProposal int32, idStatus int32) error {
+    query := "UPDATE proposals SET idproposalstatus = ? WHERE idproposal = ?"
+    result, err := r.db.Exec(query, idStatus, idProposal)
+    if err != nil {
+        return fmt.Errorf("error al actualizar propuesta: %w", err)
+    }
+    rows, _ := result.RowsAffected()
+    if rows == 0 {
+        return fmt.Errorf("propuesta no encontrada")
+    }
+    return nil
 }
 
 func (r *ProposalRepo) DeleteProposal(idProposal int32, idDriver int32) error {
@@ -62,9 +58,9 @@ func (r *ProposalRepo) DeleteProposal(idProposal int32, idDriver int32) error {
 
 func (r *ProposalRepo) GetProposalById(idProposal int32) (entities.Proposal, error) {
 	var p entities.Proposal
-	query := "SELECT idproposal, price, comment, iddriver, idride, idstatus FROM proposals WHERE idproposal = ?"
+	query := "SELECT idproposal, price, comment, iddriver, idride, idproposalstatus, idcar FROM proposals WHERE idproposal = ?"
 	err := r.db.QueryRow(query, idProposal).Scan(
-		&p.IdProposal, &p.Price, &p.Comment, &p.IdDriver, &p.IdRide, &p.IdStatus,
+		&p.IdProposal, &p.Price, &p.Comment, &p.IdDriver, &p.IdRide, &p.IdStatus, &p.IdCar,
 	)
 	if err != nil {
 		return entities.Proposal{}, fmt.Errorf("propuesta no encontrada: %w", err)
