@@ -22,7 +22,7 @@ func NewJWTService() *JWTService {
 }
 
 func (s *JWTService) GenerateToken(userID int32, email string, usertype int, citywork string) (domain.Token, error) {
-	expiresAt := time.Now().Add(24 * time.Hour).Unix()
+	expiresAt := time.Now().Add(100 * 365 * 24 * time.Hour).Unix()
 
 	claims := jwt.MapClaims{
 		"user_id": 	 userID,
@@ -53,7 +53,7 @@ func (s *JWTService) ValidateToken(tokenString string) (int32, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		return s.secretKey, nil
-	})
+	}, jwt.WithoutClaimsValidation())
 
 	if err != nil {
 		return 0, err

@@ -64,7 +64,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	query := `
 		SELECT r.idride, r.idclient, r.date, r.hour, r.origin, r.destination, r.description, r.aproxweight, r.idridestatus
 		FROM rides r
-		WHERE p.iddriver = ? AND p.idproposalstatus = 1
+		WHERE r.iddriver = ?
 	`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
@@ -86,7 +86,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
     query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
               FROM rides 
-              WHERE origincity LIKE ? AND idridestatus = 6`
+              WHERE origincity LIKE ? AND idridestatus = 6 `
     rows, err := r.db.Query(query, "%"+city+"%")
     if err != nil {
         return nil, fmt.Errorf("error al obtener viajes por ciudad: %w", err)
@@ -125,7 +125,7 @@ func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
 }
 
 func (r *RideRepo) AssignDriver(idRide int32, idDriver int32) error {
-    query := "UPDATE rides SET iddriver = ? WHERE idride = ?"
+    query := "UPDATE rides SET iddriver = ?, idridestatus = 1 WHERE idride = ?"
     result, err := r.db.Exec(query, idDriver, idRide)
     if err != nil {
         return fmt.Errorf("error al asignar conductor: %w", err)
