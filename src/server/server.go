@@ -9,6 +9,7 @@ import (
 	reviewRoutes 	 "logired/src/internal/reviews/infrastructure/routes"
 	driversRoutes 	 "logired/src/internal/drivers/infrastructure/routes"
 	devicesRoutes 	 "logired/src/internal/devices/infrastructure/routes"
+	trackingRoutes 	 "logired/src/internal/tracking/infrastructure/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,7 @@ func Run(
 	proposalRoutes *proposalRoutes.ProposalRoutes,
 	reviewRoutes *reviewRoutes.ReviewRoutes,
 	driversRoutes *driversRoutes.DriverRoutes,
+	trackingRoutes *trackingRoutes.TrackingRoutes,
 ) {
 	r := gin.Default()
 
@@ -40,6 +42,7 @@ func Run(
 	proposalRoutes.AttachRoutes(r)
 	reviewRoutes.AttachRoutes(r)
 	driversRoutes.AttachRoutes(r)
+	trackingRoutes.AttachRoutes(r)
 
 	r.Run(":8080")
 }

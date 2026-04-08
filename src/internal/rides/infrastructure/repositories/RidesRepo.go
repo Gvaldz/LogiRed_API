@@ -58,6 +58,7 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 	query := `SELECT 
 			idride, 
 			idclient, 
+			iddriver,
 			origincity, 
 			origin_address, 
 			origin_lat, 
@@ -84,6 +85,7 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 		if err := rows.Scan(
 			&rd.IdRide, 
 			&rd.IdClient, 
+			&rd.IdDriver,
 			&rd.OriginCity,
 			&rd.OriginAddress,
 			&rd.OriginLat,
@@ -109,6 +111,7 @@ func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 	query := `SELECT 
 			idride, 
 			idclient, 
+			iddriver,
 			origincity, 
 			origin_address, 
 			origin_lat, 
@@ -126,6 +129,7 @@ func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 	err := r.db.QueryRow(query, idRide).Scan(
 			&ride.IdRide, 
 			&ride.IdClient, 
+			&ride.IdDriver,
 			&ride.OriginCity, 
 			&ride.OriginAddress, 
 			&ride.OriginLat, 
@@ -152,7 +156,8 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	query := `
 		SELECT 
 			idride, 
-			idclient, 
+			idclient,
+			iddriver,
 			origincity, 
 			origin_address, 
 			origin_lat, 
@@ -181,6 +186,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 		if err := rows.Scan(
 			&rd.IdRide, 
 			&rd.IdClient,
+			&rd.IdDriver,
 			&rd.OriginCity,
 			&rd.OriginAddress,
 			&rd.OriginLat,
@@ -205,6 +211,7 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
     query := `SELECT 
 			idride, 
 			idclient, 
+			iddriver,
 			origincity, 
 			origin_address, 
 			origin_lat, 
@@ -232,6 +239,7 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
         if err := rows.Scan(
 			&r.IdRide, 
 			&r.IdClient, 
+			&r.IdDriver,
 			&r.OriginCity,
 			&r.OriginAddress,
 			&r.OriginLat,

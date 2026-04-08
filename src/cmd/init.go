@@ -15,6 +15,7 @@ import (
 	reviewDeps   "logired/src/internal/reviews/infrastructure/dependences"
 	driversDeps  "logired/src/internal/drivers/infrastructure/dependences"
 	devicesDeps  "logired/src/internal/devices/infrastructure/dependences"
+    trackingDeps "logired/src/internal/tracking/infrastructure/dependences"
 	notifications "logired/src/internal/services/notifications"
 )
 
@@ -49,6 +50,7 @@ func Init() {
 	proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, notifier).GetRoutes()
 	reviewRoutes   := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
 	driversRoutes  := driversDeps.NewDriverDependencies(db, authMiddleware).GetRoutes()
+	trackingRoutes := trackingDeps.NewTrackingDependencies(db, tokenService).GetRoutes() // ← NUEVA
 
 	userRoutes := usersDeps.NewUserDependencies(
 		db, hasher, tokenService, authRepo, userRepo, driverRepo,
@@ -65,5 +67,6 @@ func Init() {
 		proposalRoutes,
 		reviewRoutes,
 		driversRoutes,
+		trackingRoutes, 
 	)
 }
