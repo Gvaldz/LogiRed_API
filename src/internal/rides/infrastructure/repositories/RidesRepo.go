@@ -16,9 +16,37 @@ func NewRideRepo(db *sql.DB) *RideRepo {
 }
 
 func (r *RideRepo) CreateRide(ride entities.Ride) error {
-	query := `INSERT INTO rides (idclient, origin, origincity, destination, date, hour, aproxweight, description, idridestatus) 
-	          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	_, err := r.db.Exec(query, ride.IdClient, ride.Origin, ride.OriginCity, ride.Destination, ride.Date, ride.Hour, ride.AproxWeight, ride.Description, ride.IdStatus)
+	query := `INSERT INTO rides (
+			idclient, 
+			origincity, 
+			origin_address, 
+			origin_lat, 
+			origin_lng, 
+			destination_address, 
+			destination_lat, 
+			destination_lng,
+			distance_km,
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus) 
+	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err := r.db.Exec(query, 
+			ride.IdClient, 
+			ride.OriginCity, 
+			ride.OriginAddress, 
+			ride.OriginLat, 
+			ride.OriginLng, 
+			ride.DestinationAddres, 
+			ride.DestinationLat, 
+			ride.DestinationLng,
+			ride.DistanceKm, 
+			ride.Date, 
+			ride.Hour, 
+			ride.AproxWeight, 
+			ride.Description, 
+			ride.IdStatus)
 	if err != nil {
 		return fmt.Errorf("error al crear viaje: %w", err)
 	}
@@ -27,8 +55,23 @@ func (r *RideRepo) CreateRide(ride entities.Ride) error {
 }
 
 func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
-	query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
-	          FROM rides WHERE idclient = ?`
+	query := `SELECT 
+			idride, 
+			idclient, 
+			origincity, 
+			origin_address, 
+			origin_lat, 
+			origin_lng, 
+			destination_address, 
+			destination_lat, 
+			destination_lng, 
+			distance_km,
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus
+	        FROM rides WHERE idclient = ?`
 	rows, err := r.db.Query(query, idClient)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener viajes por cliente: %w", err)
@@ -38,7 +81,22 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 	var rides []entities.Ride
 	for rows.Next() {
 		var rd entities.Ride
-		if err := rows.Scan(&rd.IdRide, &rd.IdClient, &rd.Date, &rd.Hour, &rd.Origin, &rd.Destination, &rd.Description, &rd.AproxWeight, &rd.IdStatus); err != nil {
+		if err := rows.Scan(
+			&rd.IdRide, 
+			&rd.IdClient, 
+			&rd.OriginCity,
+			&rd.OriginAddress,
+			&rd.OriginLat,
+			&rd.OriginLng,
+			&rd.DestinationAddres,
+			&rd.DestinationLat,
+			&rd.DestinationLng, 
+			&rd.DistanceKm,
+			&rd.Date, 
+			&rd.Hour, 
+			&rd.AproxWeight, 
+			&rd.Description, 
+			&rd.IdStatus); err != nil {
 			return nil, fmt.Errorf("error al escanear viaje: %w", err)
 		}
 		rides = append(rides, rd)
@@ -48,9 +106,39 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 
 func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 	var ride entities.Ride
-	query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
-	          FROM rides WHERE idride = ?`
-	err := r.db.QueryRow(query, idRide).Scan(&ride.IdRide, &ride.IdClient, &ride.Date, &ride.Hour, &ride.Origin, &ride.Destination, &ride.Description, &ride.AproxWeight, &ride.IdStatus)
+	query := `SELECT 
+			idride, 
+			idclient, 
+			origincity, 
+			origin_address, 
+			origin_lat, 
+			origin_lng, 
+			destination_address, 
+			destination_lat, 
+			destination_lng, 
+			distance_km,
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus
+	        FROM rides WHERE idride = ?`
+	err := r.db.QueryRow(query, idRide).Scan(
+			&ride.IdRide, 
+			&ride.IdClient, 
+			&ride.OriginCity, 
+			&ride.OriginAddress, 
+			&ride.OriginLat, 
+			&ride.OriginLng, 
+			&ride.DestinationAddres, 
+			&ride.DestinationLat, 
+			&ride.DestinationLng, 
+			&ride.DistanceKm,
+			&ride.Date, 
+			&ride.Hour, 
+			&ride.AproxWeight, 
+			&ride.Description, 
+			&ride.IdStatus)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return ride, fmt.Errorf("viaje no encontrado")
@@ -62,9 +150,24 @@ func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 
 func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	query := `
-		SELECT r.idride, r.idclient, r.date, r.hour, r.origin, r.destination, r.description, r.aproxweight, r.idridestatus
-		FROM rides r
-		WHERE r.iddriver = ?
+		SELECT 
+			idride, 
+			idclient, 
+			origincity, 
+			origin_address, 
+			origin_lat, 
+			origin_lng, 
+			destination_address, 
+			destination_lat, 
+			destination_lng, 
+			distance_km,
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus
+			FROM rides 
+			WHERE iddriver = ?
 	`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
@@ -75,7 +178,22 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	var rides []entities.Ride
 	for rows.Next() {
 		var rd entities.Ride
-		if err := rows.Scan(&rd.IdRide, &rd.IdClient, &rd.Date, &rd.Hour, &rd.Origin, &rd.Destination, &rd.Description, &rd.AproxWeight, &rd.IdStatus); err != nil {
+		if err := rows.Scan(
+			&rd.IdRide, 
+			&rd.IdClient,
+			&rd.OriginCity,
+			&rd.OriginAddress,
+			&rd.OriginLat,
+			&rd.OriginLng,
+			&rd.DestinationAddres,
+			&rd.DestinationLat,
+			&rd.DestinationLng, 
+			&rd.DistanceKm,
+			&rd.Date, 
+			&rd.Hour,
+			&rd.Description, 
+			&rd.AproxWeight, 
+			&rd.IdStatus); err != nil {
 			return nil, fmt.Errorf("error al escanear viaje: %w", err)
 		}
 		rides = append(rides, rd)
@@ -84,9 +202,24 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 }
 
 func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
-    query := `SELECT idride, idclient, date, hour, origin, destination, description, aproxweight, idridestatus 
-              FROM rides 
-              WHERE origincity LIKE ? AND idridestatus = 6 `
+    query := `SELECT 
+			idride, 
+			idclient, 
+			origincity, 
+			origin_address, 
+			origin_lat, 
+			origin_lng, 
+			destination_address, 
+			destination_lat, 
+			destination_lng, 
+			distance_km,
+			date, 
+			hour, 
+			description, 
+			aproxweight, 
+			idridestatus 
+            FROM rides 
+            WHERE origincity LIKE ? AND idridestatus = 6 `
     rows, err := r.db.Query(query, "%"+city+"%")
     if err != nil {
         return nil, fmt.Errorf("error al obtener viajes por ciudad: %w", err)
@@ -96,7 +229,22 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
     var rides []entities.Ride
     for rows.Next() {
         var r entities.Ride
-        if err := rows.Scan(&r.IdRide, &r.IdClient, &r.Date, &r.Hour, &r.Origin, &r.Destination, &r.Description, &r.AproxWeight, &r.IdStatus); err != nil {
+        if err := rows.Scan(
+			&r.IdRide, 
+			&r.IdClient, 
+			&r.OriginCity,
+			&r.OriginAddress,
+			&r.OriginLat,
+			&r.OriginLng,
+			&r.DestinationAddres,
+			&r.DestinationLat,
+			&r.DestinationLng,
+			&r.DistanceKm,
+			&r.Date, 
+			&r.Hour, 
+			&r.Description, 
+			&r.AproxWeight, 
+			&r.IdStatus); err != nil {
             return nil, fmt.Errorf("error al escanear viaje: %w", err)
         }
         rides = append(rides, r)

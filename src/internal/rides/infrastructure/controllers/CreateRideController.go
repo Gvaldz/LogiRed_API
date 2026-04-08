@@ -25,14 +25,19 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 	clientID := userIDInterface.(int32)
 
 	var req struct {
-		Origin 		string 	`json:"origin"`
-		OriginCity	string  `json:"origin_city"`
-		Destination string 	`json:"destination"`
-		Date 		string 	`json:"date"`
-		Hour 		string 	`json:"hour"`
-		AproxWeight float64 `json:"aprox_weight"`
-		Description string 	`json:"description"`
-		IdStatus 	int32	`json:"idstatus"`
+		OriginCity			string  `json:"origin_city"`
+		OriginAddress 		string 	`json:"origin_address"`
+		OriginLat	 		float64 `json:"origin_lat"`
+		OriginLng 			float64 `json:"origin_lng"`
+		DestinationAddress 	string 	`json:"destination_address"`
+		DestinationLat 		float64 `json:"destination_lat"`
+		DestinationLng 		float64 `json:"destination_lng"`
+		DistanceKm 			float64 `json:"distance_km"`	
+		Date 				string 	`json:"date"`
+		Hour 				string 	`json:"hour"`
+		AproxWeight 		float64 `json:"aprox_weight"`
+		Description 		string 	`json:"description"`
+		IdStatus 			int32	`json:"idstatus"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -41,14 +46,19 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 	}
 
 	ride := entities.Ride{
-		IdClient:    clientID,
-		Origin:      req.Origin,
-		OriginCity:  req.OriginCity,
-		Destination: req.Destination,
-		Date:        req.Date,
-		Hour:        req.Hour,
-		AproxWeight: req.AproxWeight,
-		Description: req.Description,
+		IdClient:    		clientID,
+		OriginCity:  		req.OriginCity,
+		OriginAddress: 		req.OriginAddress,
+		OriginLat: 			req.OriginLat,
+		OriginLng: 			req.OriginLng,
+		DestinationAddres:	req.DestinationAddress,
+		DestinationLat: 	req.DestinationLat,
+		DestinationLng: 	req.DestinationLng,
+		DistanceKm: 		req.DistanceKm,
+		Date:        		req.Date,
+		Hour:        		req.Hour,
+		AproxWeight: 		req.AproxWeight,
+		Description: 		req.Description,
 		IdStatus: 6,
 	}
 
