@@ -8,6 +8,7 @@ type IRide interface {
 	GetRideById(idRide int32) (entities.Ride, error)
 	GetRidesByDriverId(idDriver int32) ([]entities.Ride, error)
 	GetRidesByCity(city string) ([]entities.Ride, error)
+	GetRidesHistory(userID int32, userType int32) ([]entities.Ride, error)
 	UpdateRideStatus(idRide int32, idStatus int32) error
 	AssignDriver(idRide int32, idDriver int32) error
 }

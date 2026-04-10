@@ -87,9 +87,10 @@ func (ctrl *TrackingController) PublishLocation(c *gin.Context) {
         c.JSON(http.StatusForbidden, gin.H{"error": "el viaje no está en proceso"})
         return
     }
-    if ride.IdDriver != userID {
-        c.JSON(http.StatusForbidden, gin.H{"error": "no eres el conductor de este viaje"})
-        return
+
+    if ride.IdDriver == nil || *ride.IdDriver != userID {
+    c.JSON(http.StatusForbidden, gin.H{"error": "no eres el conductor de este viaje"})
+    return
     }
 
     conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

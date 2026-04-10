@@ -18,10 +18,8 @@ func NewTrackingDependencies(
     db *sql.DB,
     tokenService tokenServiceDomain.TokenService,
 ) *TrackingDependencies {
-    // Reusamos el mismo repo de rides para validar permisos
     rideRepository := rideRepo.NewRideRepo(db)
 
-    // El hub es único para toda la app (estado en memoria de suscripciones)
     hub := infrastructure.NewHub()
 
     trackingController := controllers.NewTrackingController(

@@ -49,8 +49,8 @@ func (uc *UpdateRideStatus) Execute(idRide int32, idStatus int32) error {
 
 	case RideStatusCancelado:
 		uc.notifier.ViajeCancelado(ride.IdClient, idRide)
-		if ride.IdDriver != 0 {
-			uc.notifier.ViajeCancelado(ride.IdDriver, idRide)
+		if ride.IdDriver != nil {
+			uc.notifier.ViajeCancelado(*ride.IdDriver, idRide)
 		}
 
 	case RideStatusTerminado:
