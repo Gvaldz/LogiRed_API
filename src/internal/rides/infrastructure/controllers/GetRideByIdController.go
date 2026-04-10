@@ -24,7 +24,6 @@ func (ctrl *GetRideByIdController) GetById(c *gin.Context) {
 		return
 	}
 
-	// Se asume que cualquier usuario autenticado puede ver un viaje por ID
 	ride, err := ctrl.getRideById.Execute(int32(idRide))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

@@ -13,6 +13,7 @@ type RideRoutes struct {
 	getRidesByDriverController    *controllers.GetRidesByDriverController
 	getRidesByCityController  	  *controllers.GetRideByCityController
 	getRidesHistoryController     *controllers.GetRidesHistoryController
+	getRidesByStatusController	  *controllers.GetRidesByStatusController
 	updateRideStatusController    *controllers.UpdateRideStatusController
 	authMiddleware                gin.HandlerFunc
 }
@@ -24,6 +25,7 @@ func NewRideRoutes(
 	getByDriver 				  *controllers.GetRidesByDriverController,
 	getByCity 					  *controllers.GetRideByCityController,
 	getRidesHistory		  		  *controllers.GetRidesHistoryController,
+	getRidesByStatus			  *controllers.GetRidesByStatusController,
 	updateRideStatus		      *controllers.UpdateRideStatusController,
 	authMiddleware 				  gin.HandlerFunc,
 ) *RideRoutes {
@@ -34,6 +36,7 @@ func NewRideRoutes(
 		getRidesByDriverController:    getByDriver,
 		getRidesByCityController:  	   getByCity,
 		getRidesHistoryController:     getRidesHistory,
+		getRidesByStatusController:	   getRidesByStatus,
 		updateRideStatusController:    updateRideStatus,
 		authMiddleware:                authMiddleware,
 	}
@@ -45,9 +48,10 @@ func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
 
 	ridesGroup.POST("", r.createRideController.Create)
 	ridesGroup.GET("/client/me", r.getRidesByClientController.GetByClient)
-	ridesGroup.GET("/:id", r.getRideByIdController.GetById)
 	ridesGroup.GET("/driver/me", r.getRidesByDriverController.GetByDriver)
 	ridesGroup.GET("/history", r.getRidesHistoryController.GetHistory)
-	ridesGroup.GET("/city/:city", r.getRidesByCityController.GetByCity) 
+	ridesGroup.GET("/city/:city", r.getRidesByCityController.GetByCity)
+	ridesGroup.GET("/status", r.getRidesByStatusController.GetByStatus) // ← sin :status
+	ridesGroup.GET("/:id", r.getRideByIdController.GetById)             // ← siempre al final
 	ridesGroup.PUT("/:id/status", r.updateRideStatusController.Update)
 }

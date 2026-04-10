@@ -27,7 +27,6 @@ func NewUpdateRideStatus(
 }
 
 func (uc *UpdateRideStatus) Execute(idRide int32, idStatus int32) error {
-	// Obtener el ride para saber a quién notificar
 	ride, err := uc.repo.GetRideById(idRide)
 	if err != nil {
 		return err

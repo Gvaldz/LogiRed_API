@@ -34,19 +34,21 @@ func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
 	rideRepo   := repositories.NewRideRepo(d.DB)
 	driverRepo := driverRepositories.NewDriverRepo(d.DB)
 
-	createRideUseCase          := application.NewCreateRide(rideRepo, driverRepo, d.Notifier)
-	getRidesByClientUseCase    := application.NewGetRidesByClient(rideRepo)
-	getRideByIdUseCase         := application.NewGetRideById(rideRepo)
-	getRidesByDriverUseCase    := application.NewGetRidesByDriver(rideRepo)
-	getRidesByCityUseCase      := application.NewGetRidesByCity(rideRepo)
-	getRidesHistoryUseCase     := application.NewGetRidesHistory(rideRepo)
-	updateRideStatusUseCase    := application.NewUpdateRideStatus(rideRepo, d.Notifier)
+	createRideUseCase             := application.NewCreateRide(rideRepo, driverRepo, d.Notifier)
+	getRidesByClientUseCase       := application.NewGetRidesByClient(rideRepo)
+	getRideByIdUseCase            := application.NewGetRideById(rideRepo)
+	getRidesByDriverUseCase       := application.NewGetRidesByDriver(rideRepo)
+	getRidesByCityUseCase         := application.NewGetRidesByCity(rideRepo)
+	getRidesHistoryUseCase        := application.NewGetRidesHistory(rideRepo)
+	getRidesByStatusUseCase    	  := application.NewGetRidesByStatus(rideRepo)
+	updateRideStatusUseCase    	  := application.NewUpdateRideStatus(rideRepo, d.Notifier)
 
 	createRideController          := controllers.NewCreateRideController(createRideUseCase)
 	getRidesByClientController    := controllers.NewGetRidesByClientController(getRidesByClientUseCase)
 	getRideByIdController         := controllers.NewGetRideByIdController(getRideByIdUseCase)
 	getRidesByDriverController    := controllers.NewGetRidesByDriverController(getRidesByDriverUseCase)
 	getRidesByCityController      := controllers.NewGetRideByCityController(getRidesByCityUseCase)
+	getRidesByStatusController	  := controllers.NewGetRidesByStatusController(getRidesByStatusUseCase)
 	getRidesHistoryController     := controllers.NewGetRidesHistoryController(getRidesHistoryUseCase)
 	updateRideStatusController    := controllers.NewUpdateRideStatusController(updateRideStatusUseCase)
 
@@ -57,6 +59,7 @@ func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
 		getRidesByDriverController,
 		getRidesByCityController,
 		getRidesHistoryController,
+		getRidesByStatusController,
 		updateRideStatusController,
 		d.AuthMiddleware,
 	)

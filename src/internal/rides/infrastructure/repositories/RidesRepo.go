@@ -312,7 +312,6 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
     var query string
     var args []interface{}
 
-    // userType 1 = cliente, 2 = conductor
     if userType == 1 {
         query = `
 			SELECT
@@ -361,6 +360,102 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
             ORDER BY date DESC
         `
         args = append(args, userID)
+    }
+
+    rows, err := r.db.Query(query, args...)
+    if err != nil {
+        return nil, fmt.Errorf("error al obtener historial: %w", err)
+    }
+    defer rows.Close()
+
+    var rides []entities.Ride
+    for rows.Next() {
+        var ride entities.Ride
+        var idDriver sql.NullInt32
+
+        if err := rows.Scan(
+			&ride.IdRide,
+			&ride.IdClient,
+			&idDriver,
+			&ride.OriginCity,
+			&ride.OriginAddress,
+			&ride.OriginLat,
+			&ride.OriginLng,
+			&ride.DestinationAddres,
+			&ride.DestinationLat,
+			&ride.DestinationLng,
+			&ride.DistanceKm,
+			&ride.Date,
+			&ride.Hour,
+			&ride.AproxWeight,
+			&ride.Description,
+            &ride.IdStatus,
+        ); err != nil {
+            return nil, fmt.Errorf("error al escanear ride: %w", err)
+        }
+
+		if idDriver.Valid {
+			ride.IdDriver = &idDriver.Int32
+		}
+
+        rides = append(rides, ride)
+    }
+
+    return rides, nil
+}
+
+func (r *RideRepo) GetRidesByStatus(userID int32, userType int32, idstatus int32) ([]entities.Ride, error) {
+    var query string
+    var args []interface{}
+
+    if userType == 1 {
+        query = `
+            SELECT 
+			idride, 
+			idclient, 
+			iddriver, 
+			origincity, 
+           	origin_address, 
+		   	origin_lat, 
+		   	origin_lng, 
+            destination_address, 
+			destination_lat, 
+			destination_lng, 
+            distance_km, 
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus 
+            FROM rides 
+            WHERE idclient = ? AND idridestatus = ?
+            ORDER BY date DESC
+        `
+        args = append(args, userID, idstatus) 
+    } else {
+        query = `
+            SELECT
+			idride, 
+			idclient, 
+			iddriver, 
+			origincity, 
+           	origin_address, 
+		   	origin_lat, 
+		   	origin_lng, 
+            destination_address, 
+			destination_lat, 
+			destination_lng, 
+            distance_km, 
+			date, 
+			hour, 
+			aproxweight, 
+			description, 
+			idridestatus 
+            FROM rides 
+            WHERE iddriver = ? AND idridestatus = ?
+            ORDER BY date DESC
+        `
+        args = append(args, userID, idstatus) 
     }
 
     rows, err := r.db.Query(query, args...)
