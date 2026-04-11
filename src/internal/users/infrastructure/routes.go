@@ -42,20 +42,24 @@ func NewUserRoutes(
 }
 
 func (r *UserRoutes) AttachRoutes(router *gin.Engine) {
-	userGroup := router.Group("/users")
-	{
-		userGroup.POST("", r.CreateUserController.Create)
-		userGroup.GET("", r.GetAllUsersController.GetAll)
-		userGroup.GET("/:id", r.GetUserController.GetByUserID)
-		userGroup.GET("/profile/:id", r.GetUserProfileController.GetProfile)
+    userGroup := router.Group("/users")
+    {
+        userGroup.POST("", r.CreateUserController.Create)
+        userGroup.GET("", r.GetAllUsersController.GetAll)
+        userGroup.GET("/:id", r.GetUserController.GetByUserID)
+        userGroup.GET("/profile/:id", r.GetUserProfileController.GetProfile)
+        
+        userGroup.PUT("/password-reset", r.RessetPasswordController.RessetPassword)
 
-		protected := userGroup.Group("")
-		protected.Use(r.AuthMiddleware)
-		{
-			protected.PUT("/:id", r.UpdateUserController.UpdateUser)
-			protected.PUT("/update-password/:id", r.UpdatePasswordController.UpdatePassword)
-			protected.PUT("/password/:id", r.RessetPasswordController.RessetPassword)
-			protected.DELETE("/:id", r.DeleteUserController.Delete)
-		}
-	}
+        protected := userGroup.Group("")
+        protected.Use(r.AuthMiddleware)
+        {
+            protected.PUT("/:id", r.UpdateUserController.UpdateUser)
+            
+
+            protected.PUT("/update-password", r.UpdatePasswordController.UpdatePassword)
+            
+            protected.DELETE("/:id", r.DeleteUserController.Delete)
+        }
+    }
 }

@@ -26,9 +26,9 @@ func NewRessetPassword(
 }
 
 func (uc *RessetPassword) Execute(email, newPassword string) error {
-    user, err := uc.authRepo.FindUserByEmail(email)
+    _, err := uc.authRepo.FindUserByEmail(email)
     if err != nil {
-        return fmt.Errorf("usuario no encontrado o credenciales inválidas")
+        return fmt.Errorf("el correo electrónico no está registrado")
     }
 
     hashedPassword, err := uc.hasher.Hash(newPassword)
@@ -36,5 +36,5 @@ func (uc *RessetPassword) Execute(email, newPassword string) error {
         return err
     }
 
-    return uc.userRepo.RessetPassword(user.IdUser, hashedPassword)
+    return uc.userRepo.RessetPassword(email, hashedPassword)
 }

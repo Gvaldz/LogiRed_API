@@ -138,23 +138,24 @@ func (r *UserRepository) UpdateUser(id int32, u user.User) error {
     return nil
 }
 
-func (r *UserRepository) RessetPassword(id int32, newHashedPassword string) error {
-	query := "UPDATE users SET password = ? WHERE iduser = ?"
-	result, err := r.DB.Exec(query, newHashedPassword, id)
-	if err != nil {
-		return fmt.Errorf("error al actualizar contraseña: %w", err)
-	}
+func (r *UserRepository) RessetPassword(email string, newHashedPassword string) error {
+    query := "UPDATE users SET password = ? WHERE email = ?"
+    
+    result, err := r.DB.Exec(query, newHashedPassword, email)
+    if err != nil {
+        return fmt.Errorf("error al actualizar contraseña por email: %w", err)
+    }
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("error al verificar actualización de contraseña: %w", err)
-	}
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return fmt.Errorf("error al verificar filas afectadas: %w", err)
+    }
 
-	if rowsAffected == 0 {
-		return fmt.Errorf("usuario no encontrado")
-	}
+    if rowsAffected == 0 {
+        return fmt.Errorf("no se encontró ningún usuario con el email: %s", email)
+    }
 
-	return nil
+    return nil
 }
 
 func (r *UserRepository) UpdatePassword(id int32, newHashedPassword string) error {

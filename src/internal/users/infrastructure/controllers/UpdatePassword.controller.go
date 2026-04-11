@@ -18,18 +18,25 @@ func NewUpdatePasswordController(updatePasswordUC *application.UpdatePassword) *
 }
 
 func (c *UpdatePasswordController) UpdatePassword(ctx *gin.Context) {
+    userIDInterface, exists := ctx.Get("userID")
+    if !exists {
+        ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+        return
+    }
+    tokenUserID := userIDInterface.(int32)
+
     var request struct {
-        Email       string `json:"email" binding:"required,email"`
+
         OldPassword string `json:"oldPassword" binding:"required"`
         NewPassword string `json:"newPassword" binding:"required"`
     }
 
     if err := ctx.ShouldBindJSON(&request); err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
         return
     }
 
-    err := c.updatePasswordUC.Execute(request.Email, request.OldPassword, request.NewPassword)
+    err := c.updatePasswordUC.Execute(tokenUserID, request.OldPassword, request.NewPassword)
     if err != nil {
         ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
         return

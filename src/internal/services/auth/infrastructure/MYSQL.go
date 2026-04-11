@@ -26,6 +26,17 @@ func (r *AuthRepository) FindUserByEmail(email string) (user.User, error) {
 	return u, nil
 }
 
+func (r *AuthRepository) FindUserById(id int32) (user.User, error) {
+	var u user.User
+	query := "SELECT email, password, usertype FROM users WHERE iduser = ?"
+
+	err := r.DB.QueryRow(query, id).Scan(&u.IdUser, &u.Email, &u.Password, &u.UserType)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
+}
+
 func (r *AuthRepository) UpdateLastLogin(userID int32) error {
 	query := "UPDATE users SET ultimo_login = NOW() WHERE iduser = ?"
 	_, err := r.DB.Exec(query, userID)

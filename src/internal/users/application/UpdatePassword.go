@@ -25,8 +25,8 @@ func NewUpdatePassword(
     }
 }
 
-func (uc *UpdatePassword) Execute(email, oldPassword, newPassword string) error {
-    user, err := uc.authRepo.FindUserByEmail(email)
+func (uc *UpdatePassword) Execute(id int32, oldPassword string, newPassword string) error {
+    user, err := uc.authRepo.FindUserByID(id)
     if err != nil {
         return fmt.Errorf("usuario no encontrado o credenciales inválidas")
     }
