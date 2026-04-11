@@ -6,25 +6,27 @@ import (
 )
 
 type UserRoutes struct {
-	CreateUserController       *controllers.CreateUserController
-	GetAllUsersController      *controllers.GetAllUsersController
-	GetUserController          *controllers.GetByUserIDController
-	GetUserProfileController   *controllers.GetUserProfileController   // ← nuevo
-	UpdateUserController       *controllers.UpdateUserController
-	UpdatePasswordController   *controllers.UpdatePasswordController
-	DeleteUserController       *controllers.DeleteUserController
-	AuthMiddleware             gin.HandlerFunc
+	CreateUserController       	*controllers.CreateUserController
+	GetAllUsersController      	*controllers.GetAllUsersController
+	GetUserController          	*controllers.GetByUserIDController
+	GetUserProfileController   	*controllers.GetUserProfileController   
+	UpdateUserController       	*controllers.UpdateUserController
+	UpdatePasswordController  	*controllers.UpdatePasswordController
+	RessetPasswordController   	*controllers.RessetPasswordController
+	DeleteUserController       	*controllers.DeleteUserController
+	AuthMiddleware             	gin.HandlerFunc
 }
 
 func NewUserRoutes(
-	createUserController *controllers.CreateUserController,
-	getAllUsersController *controllers.GetAllUsersController,
-	getUserController *controllers.GetByUserIDController,
-	getUserProfileController *controllers.GetUserProfileController,  
-	updateUserController *controllers.UpdateUserController,
-	updatePasswordController *controllers.UpdatePasswordController,
-	deleteUserController *controllers.DeleteUserController,
-	authMiddleware gin.HandlerFunc,
+	createUserController	 	*controllers.CreateUserController,
+	getAllUsersController 		*controllers.GetAllUsersController,
+	getUserController 			*controllers.GetByUserIDController,
+	getUserProfileController 	*controllers.GetUserProfileController,  
+	updateUserController 		*controllers.UpdateUserController,
+	updatePasswordController 	*controllers.UpdatePasswordController,
+	ressetPasswordController 	*controllers.RessetPasswordController,
+	deleteUserController 		*controllers.DeleteUserController,
+	authMiddleware 				gin.HandlerFunc,
 ) *UserRoutes {
 	return &UserRoutes{
 		CreateUserController:     createUserController,
@@ -33,6 +35,7 @@ func NewUserRoutes(
 		GetUserProfileController: getUserProfileController,   
 		UpdateUserController:     updateUserController,
 		UpdatePasswordController: updatePasswordController,
+		RessetPasswordController: ressetPasswordController,
 		DeleteUserController:     deleteUserController,
 		AuthMiddleware:           authMiddleware,
 	}
@@ -50,7 +53,8 @@ func (r *UserRoutes) AttachRoutes(router *gin.Engine) {
 		protected.Use(r.AuthMiddleware)
 		{
 			protected.PUT("/:id", r.UpdateUserController.UpdateUser)
-			protected.PUT("/password/:id", r.UpdatePasswordController.UpdatePassword)
+			protected.PUT("/update-password/:id", r.UpdatePasswordController.UpdatePassword)
+			protected.PUT("/password/:id", r.RessetPasswordController.RessetPassword)
 			protected.DELETE("/:id", r.DeleteUserController.Delete)
 		}
 	}

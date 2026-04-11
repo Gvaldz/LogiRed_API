@@ -7,20 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UpdatePasswordController struct {
-	updatePasswordUC *application.UpdatePassword
+type RessetPasswordController struct {
+	ressetPasswordUC *application.RessetPassword
 }
 
-func NewUpdatePasswordController(updatePasswordUC *application.UpdatePassword) *UpdatePasswordController {
-	return &UpdatePasswordController{
-		updatePasswordUC: updatePasswordUC,
+func NewRessetPasswordController(ressetPasswordUC *application.RessetPassword) *RessetPasswordController {
+	return &RessetPasswordController{
+		ressetPasswordUC: ressetPasswordUC,
 	}
 }
 
-func (c *UpdatePasswordController) UpdatePassword(ctx *gin.Context) {
+func (c *RessetPasswordController) RessetPassword(ctx *gin.Context) {
     var request struct {
         Email       string `json:"email" binding:"required,email"`
-        OldPassword string `json:"oldPassword" binding:"required"`
         NewPassword string `json:"newPassword" binding:"required"`
     }
 
@@ -29,7 +28,7 @@ func (c *UpdatePasswordController) UpdatePassword(ctx *gin.Context) {
         return
     }
 
-    err := c.updatePasswordUC.Execute(request.Email, request.OldPassword, request.NewPassword)
+    err := c.ressetPasswordUC.Execute(request.Email, request.NewPassword)
     if err != nil {
         ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
         return

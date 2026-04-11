@@ -7,33 +7,28 @@ import (
 	authDomain "logired/src/internal/services/auth/domain"
 )
 
-type UpdatePassword struct {
+type RessetPassword struct {
     userRepo domain.UserRepository      
     authRepo authDomain.AuthRepository  
     hasher   core.PasswordHasher
 }
 
-func NewUpdatePassword(
+func NewRessetPassword(
     userRepo domain.UserRepository, 
     authRepo authDomain.AuthRepository, 
     hasher core.PasswordHasher,
-) *UpdatePassword {
-    return &UpdatePassword{
+) *RessetPassword {
+    return &RessetPassword{
         userRepo: userRepo,
         authRepo: authRepo,
         hasher:   hasher,
     }
 }
 
-func (uc *UpdatePassword) Execute(email, oldPassword, newPassword string) error {
+func (uc *RessetPassword) Execute(email, newPassword string) error {
     user, err := uc.authRepo.FindUserByEmail(email)
     if err != nil {
         return fmt.Errorf("usuario no encontrado o credenciales inválidas")
-    }
-
-    err = uc.hasher.Compare(user.Password, oldPassword)
-    if err != nil {
-        return fmt.Errorf("la contraseña actual es incorrecta")
     }
 
     hashedPassword, err := uc.hasher.Hash(newPassword)
@@ -41,5 +36,5 @@ func (uc *UpdatePassword) Execute(email, oldPassword, newPassword string) error 
         return err
     }
 
-    return uc.userRepo.UpdatePassword(user.IdUser, hashedPassword)
+    return uc.userRepo.RessetPassword(user.IdUser, hashedPassword)
 }

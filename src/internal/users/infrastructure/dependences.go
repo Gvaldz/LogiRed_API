@@ -22,12 +22,12 @@ type UserDependencies struct {
 }
 
 func NewUserDependencies(
-	db *sql.DB,
-	hasher *core.BcryptHasher,
-	tokenService *core.JWTService,
-	authRepo entities_auth.AuthRepository,
-	userRepo entities_users.UserRepository,
-	driverRepo drivers.IDriver,
+	db 					*sql.DB,
+	hasher 				*core.BcryptHasher,
+	tokenService 		*core.JWTService,
+	authRepo 			entities_auth.AuthRepository,
+	userRepo 			entities_users.UserRepository,
+	driverRepo 			drivers.IDriver,
 ) *UserDependencies {
 	return &UserDependencies{
 		DB:           db,
@@ -46,7 +46,8 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
 	getUserProfileUseCase      := application.NewGetUserProfile(d.UserRepo)
 	updateUserUseCase          := application.NewUpdateUser(d.UserRepo)
 	updateDriverProfileUseCase := driverApp.NewUpdateDriverProfile(d.DriverRepo) 
-	updatePasswordUseCase      := application.NewUpdatePassword(d.UserRepo, d.Hasher)
+	updatePasswordUseCase      := application.NewUpdatePassword(d.UserRepo, d.AuthRepo, d.Hasher)
+	ressetPasswordUseCase      := application.NewRessetPassword(d.UserRepo, d.AuthRepo, d.Hasher)
 	deleteUserUseCase          := application.NewDeleteUser(d.UserRepo)
 	createDriverUseCase        := application.NewRegisterDriver(d.UserRepo, d.DriverRepo, d.Hasher)
 
@@ -56,6 +57,7 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
 	getUserProfileController   := controllers.NewGetUserProfileController(getUserProfileUseCase)   
 	updateUserController       := controllers.NewUpdateUserController(updateUserUseCase, updateDriverProfileUseCase) 
 	updatePasswordController   := controllers.NewUpdatePasswordController(updatePasswordUseCase)
+	ressetPasswordController   := controllers.NewRessetPasswordController(ressetPasswordUseCase)
 	deleteUserController       := controllers.NewDeleteUserController(deleteUserUseCase)
 
 	authMiddleware := middleware.AuthMiddleware(d.TokenService, d.UserRepo)
@@ -67,6 +69,7 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
 		getUserProfileController,  
 		updateUserController,
 		updatePasswordController,
+		ressetPasswordController,
 		deleteUserController,
 		authMiddleware,
 	)
