@@ -53,7 +53,7 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 	var citywork string
 
 	if strings.HasPrefix(contentType, "multipart/form-data") {
-		if err := ctx.Request.ParseMultipartForm(10 << 20); err != nil {
+		if err := ctx.Request.ParseMultipartForm(15 << 20); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Error al parsear formulario: " + err.Error()})
 			return
 		}

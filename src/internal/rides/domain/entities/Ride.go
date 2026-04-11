@@ -14,7 +14,7 @@ type Ride struct{
 	DistanceKm 			float64 `json:"distance_km,omitempty"`
 	Date 				string 	`json:"date"`
 	Hour 				string 	`json:"hour"`
-	AproxWeight 		float64 `json:"aprow_weight"`
+	AproxWeight 		float64 `json:"approx_weight"`
 	Description 		string 	`json:"description"`
 	IdStatus 			int32	`json:"idstatus"`
 }

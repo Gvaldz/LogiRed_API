@@ -35,7 +35,7 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 		DistanceKm 			float64 `json:"distance_km"`	
 		Date 				string 	`json:"date"`
 		Hour 				string 	`json:"hour"`
-		AproxWeight 		float64 `json:"aprox_weight"`
+		AproxWeight 		float64 `json:"approx_weight"`
 		Description 		string 	`json:"description"`
 		IdStatus 			int32	`json:"idstatus"`
 	}

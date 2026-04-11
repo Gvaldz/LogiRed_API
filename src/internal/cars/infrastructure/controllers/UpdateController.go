@@ -37,7 +37,7 @@ func (ctrl *UpdateCarController) Update(c *gin.Context) {
 		return
 	}
 
-	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+	if err := c.Request.ParseMultipartForm(15 << 20); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al parsear formulario: " + err.Error()})
 		return
 	}
