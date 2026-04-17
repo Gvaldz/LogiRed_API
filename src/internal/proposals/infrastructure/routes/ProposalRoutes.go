@@ -7,24 +7,27 @@ import (
 )
 
 type ProposalRoutes struct {
-	createProposalController *controllers.CreateProposalController
-	acceptProposalController *controllers.AcceptProposalController
-	getProposalByIdController *controllers.GetProposalByIdController
-	deleteProposalController *controllers.DeleteProposalController
-	authMiddleware           gin.HandlerFunc
+	createProposalController		*controllers.CreateProposalController
+	acceptProposalController 		*controllers.AcceptProposalController
+	getProposalByIdController 		*controllers.GetProposalByIdController
+	getProposalsByRideController 	*controllers.GetProposalsByRideController
+	deleteProposalController 		*controllers.DeleteProposalController
+	authMiddleware          		gin.HandlerFunc
 }
 
 func NewProposalRoutes(
-	create *controllers.CreateProposalController,
-	accept *controllers.AcceptProposalController,
-	gerById *controllers.GetProposalByIdController,
-	delete *controllers.DeleteProposalController,
-	authMiddleware gin.HandlerFunc,
+	create 							*controllers.CreateProposalController,
+	accept 							*controllers.AcceptProposalController,
+	getById 						*controllers.GetProposalByIdController,
+	getProposalsByRide 				*controllers.GetProposalsByRideController,
+	delete 							*controllers.DeleteProposalController,
+	authMiddleware 					gin.HandlerFunc,
 ) *ProposalRoutes {
 	return &ProposalRoutes{
 		createProposalController: create,
 		acceptProposalController: accept,
-		getProposalByIdController: gerById,
+		getProposalByIdController: getById,
+		getProposalsByRideController: getProposalsByRide,
 		deleteProposalController: delete,
 		authMiddleware:           authMiddleware,
 	}
@@ -35,6 +38,7 @@ func (r *ProposalRoutes) AttachRoutes(router *gin.Engine) {
 	proposalsGroup.Use(r.authMiddleware)
 	proposalsGroup.POST("", r.createProposalController.Create)
 	proposalsGroup.GET("/:id", r.getProposalByIdController.GetById)
+	proposalsGroup.GET("/ride/:idride", r.getProposalsByRideController.GetByRide)
 	proposalsGroup.PUT("/:id/accept", r.acceptProposalController.Accept)
 	proposalsGroup.DELETE("/:id", r.deleteProposalController.Delete)
 }

@@ -67,3 +67,34 @@ func (r *ProposalRepo) GetProposalById(idProposal int32) (entities.Proposal, err
 	}
 	return p, nil
 }
+
+func (r *ProposalRepo) GetProposalsByRideId(idRide int32) ([]entities.Proposal, error) {
+    query := `
+        SELECT idproposal, price, comment, iddriver, idride, idproposalstatus, idcar 
+        FROM proposals 
+        WHERE idride = ?
+    `
+    rows, err := r.db.Query(query, idRide)
+    if err != nil {
+        return nil, fmt.Errorf("error al obtener propuestas: %w", err)
+    }
+    defer rows.Close()
+
+    var proposals []entities.Proposal
+    for rows.Next() {
+        var p entities.Proposal
+        if err := rows.Scan(
+            &p.IdProposal,
+            &p.Price,
+            &p.Comment,
+            &p.IdDriver,
+            &p.IdRide,
+            &p.IdStatus,
+			&p.IdCar,
+        ); err != nil {
+            return nil, fmt.Errorf("error al escanear propuesta: %w", err)
+        }
+        proposals = append(proposals, p)
+    }
+    return proposals, nil
+}

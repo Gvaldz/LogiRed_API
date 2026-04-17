@@ -19,12 +19,7 @@ func NewGetCarByIdController(get *application.GetCarById) *GetCarByIdController 
 }
 
 func (ctrl *GetCarByIdController) GetById(c *gin.Context) {
-	userIDInterface, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
-		return
-	}
-	idDriver := userIDInterface.(int32)
+
 
 	idStr := c.Param("id")
 	idCar, err := strconv.ParseInt(idStr, 10, 32)
@@ -33,7 +28,7 @@ func (ctrl *GetCarByIdController) GetById(c *gin.Context) {
 		return
 	}
 
-	car, err := ctrl.getCarById.Execute(int32(idCar), idDriver)
+	car, err := ctrl.getCarById.Execute(int32(idCar))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

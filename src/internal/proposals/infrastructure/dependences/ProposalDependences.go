@@ -37,17 +37,20 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 	createProposalUseCase := application.NewCreateProposal(proposalRepo, rideRepo, d.Notifier)
 	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, rideRepo, d.Notifier)
 	getProposalByIdUseCase := application.NewGetProposalById(proposalRepo)
+	getProposalsByRideUseCase := application.NewGetProposalsByRide(proposalRepo)
 	deleteProposalUseCase := application.NewDeleteProposal(proposalRepo)
 
 	createProposalController := controllers.NewCreateProposalController(createProposalUseCase)
 	acceptProposalController := controllers.NewAcceptProposalController(acceptProposalUseCase)
 	deleteProposalController := controllers.NewDeleteProposalController(deleteProposalUseCase)
 	getProposalByIdController := controllers.NewGetProposalyIdController(getProposalByIdUseCase)
+	getProposalsByRideController := controllers.NewGetProposalsByRideController(getProposalsByRideUseCase)
 
 	return routes.NewProposalRoutes(
 		createProposalController,
 		acceptProposalController,
 		getProposalByIdController,
+		getProposalsByRideController,
 		deleteProposalController,
 		d.AuthMiddleware,
 	)

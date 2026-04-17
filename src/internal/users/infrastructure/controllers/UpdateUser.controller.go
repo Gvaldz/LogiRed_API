@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	core "logired/src/core"
 	driver "logired/src/internal/drivers/application"
 	"logired/src/internal/users/application"
 	"logired/src/internal/users/domain/entities"
@@ -63,24 +64,32 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Error al obtener la imagen: " + err.Error()})
 			return
 		}
+
 		if file != nil {
-			defer file.Close()
-			ext := strings.ToLower(filepath.Ext(header.Filename))
-			if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no permitido. Use jpg, jpeg, png o gif"})
-				return
-			}
-			newFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-			if err := os.MkdirAll("./uploads", os.ModePerm); err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear directorio"})
-				return
-			}
-			if err := ctx.SaveUploadedFile(header, filepath.Join("./uploads", newFilename)); err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la imagen: " + err.Error()})
-				return
-			}
-			user.ImageURL = fmt.Sprintf("https://liveshop.myddns.me/uploads/%s", newFilename)
+		defer file.Close()
+		ext := strings.ToLower(filepath.Ext(header.Filename))
+		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no permitido. Use jpg, jpeg, png o gif"})
+			return
 		}
+		newFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+		if err := os.MkdirAll("./uploads", os.ModePerm); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear directorio"})
+			return
+		}
+		savedPath := filepath.Join("./uploads", newFilename)
+		if err := ctx.SaveUploadedFile(header, savedPath); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la imagen: " + err.Error()})
+			return
+		}
+		if err := core.FixImageOrientation(savedPath); err != nil {
+			fmt.Printf("advertencia: no se pudo corregir orientación: %v\n", err)
+		}
+		if err := os.Chmod(savedPath, 0664); err != nil {
+			fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
+		}
+		user.ImageURL = fmt.Sprintf("https://logiredapi.redirectme.net/uploads/%s", newFilename)
+	}
 
 		user.Name        = ctx.Request.FormValue("name")
 		user.Lastname    = ctx.Request.FormValue("lastname")

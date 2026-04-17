@@ -10,7 +10,7 @@ import (
 
     "logired/src/internal/users/application"
     userEntities "logired/src/internal/users/domain/entities"
-
+    core "logired/src/core"
     "github.com/gin-gonic/gin"
     "github.com/google/uuid"
 )
@@ -71,6 +71,7 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Error al obtener imagen: " + err.Error()})
         return
     }
+
     if file != nil {
         defer file.Close()
         ext := strings.ToLower(filepath.Ext(header.Filename))
@@ -83,11 +84,19 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear directorio"})
             return
         }
-        if err := c.SaveUploadedFile(header, filepath.Join("./uploads", newFilename)); err != nil {
+        savedPath := filepath.Join("./uploads", newFilename)
+        if err := c.SaveUploadedFile(header, savedPath); err != nil {
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar imagen"})
             return
         }
-        imageURL = fmt.Sprintf("https://liveshop.myddns.me/uploads/%s", newFilename)
+        if err := core.FixImageOrientation(savedPath); err != nil {
+            fmt.Printf("advertencia: no se pudo corregir orientación: %v\n", err)
+        }
+
+        if err := os.Chmod(savedPath, 0644); err != nil {
+            fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
+        }
+        imageURL = fmt.Sprintf("https://logiredapi.redirectme.net/uploads/%s", newFilename)
     }
 
     user := userEntities.User{

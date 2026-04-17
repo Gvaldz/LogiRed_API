@@ -83,10 +83,10 @@ func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
 	return cars, nil
 }
 
-func (r *CarRepo) GetCarById(idCar int32, idDriver int32) (entities.Car, error) {
+func (r *CarRepo) GetCarById(idCar int32) (entities.Car, error) {
 	var car entities.Car
-	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE idcar = ? AND iduser = ?"
-	err := r.db.QueryRow(query, idCar, idDriver).Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.PlatesImage, &car.SpacesImage)
+	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE idcar = ?"
+	err := r.db.QueryRow(query, idCar).Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.PlatesImage, &car.SpacesImage)
 	if err != nil {
 		return car, fmt.Errorf("car no encontrado o acceso denegado: %w", err)
 	}

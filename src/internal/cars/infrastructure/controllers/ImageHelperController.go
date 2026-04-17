@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"logired/src/core"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -32,9 +33,19 @@ func saveCarImage(c *gin.Context, field string) (string, error) {
 		return "", fmt.Errorf("error al crear directorio: %w", err)
 	}
 
-	if err := c.SaveUploadedFile(header, filepath.Join(uploadDir, newFilename)); err != nil {
+	savedPath := filepath.Join(uploadDir, newFilename)
+
+	if err := c.SaveUploadedFile(header, savedPath); err != nil {
 		return "", fmt.Errorf("error al guardar %s: %w", field, err)
 	}
 
-	return fmt.Sprintf("https://liveshop.myddns.me/uploads/cars/%s", newFilename), nil
+	if err := core.FixImageOrientation(savedPath); err != nil {
+		fmt.Printf("advertencia: no se pudo corregir orientación de %s: %v\n", newFilename, err)
+	}
+
+	if err := os.Chmod(savedPath, 0644); err != nil {
+		fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
+
+	}
+	return fmt.Sprintf("https://logiredapi.redirectme.net/uploads/cars/%s", newFilename), nil
 }
