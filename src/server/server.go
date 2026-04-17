@@ -1,15 +1,17 @@
 package server
 
 import (
-	loginRouters	 "logired/src/internal/services/auth/infrastructure"
-	userRouters 	 "logired/src/internal/users/infrastructure"
-	carsRoutes 		 "logired/src/internal/cars/infrastructure/routes"
-	ridesRoutes  	 "logired/src/internal/rides/infrastructure/routes"
-	proposalRoutes 	 "logired/src/internal/proposals/infrastructure/routes"
-	reviewRoutes 	 "logired/src/internal/reviews/infrastructure/routes"
-	driversRoutes 	 "logired/src/internal/drivers/infrastructure/routes"
-	devicesRoutes 	 "logired/src/internal/devices/infrastructure/routes"
-	trackingRoutes 	 "logired/src/internal/tracking/infrastructure/routes"
+	carsRoutes "logired/src/internal/cars/infrastructure/routes"
+	devicesRoutes "logired/src/internal/devices/infrastructure/routes"
+	driversRoutes "logired/src/internal/drivers/infrastructure/routes"
+	paymentRoutes "logired/src/internal/payments/infrastructure/routes"
+	proposalRoutes "logired/src/internal/proposals/infrastructure/routes"
+	reviewRoutes "logired/src/internal/reviews/infrastructure/routes"
+	ridesRoutes "logired/src/internal/rides/infrastructure/routes"
+	loginRouters "logired/src/internal/services/auth/infrastructure"
+	trackingRoutes "logired/src/internal/tracking/infrastructure/routes"
+	userRouters "logired/src/internal/users/infrastructure"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +26,7 @@ func Run(
 	reviewRoutes *reviewRoutes.ReviewRoutes,
 	driversRoutes *driversRoutes.DriverRoutes,
 	trackingRoutes *trackingRoutes.TrackingRoutes,
+	paymentRoutes *paymentRoutes.PaymentRoutes,
 ) {
 	r := gin.Default()
 
@@ -43,6 +46,7 @@ func Run(
 	reviewRoutes.AttachRoutes(r)
 	driversRoutes.AttachRoutes(r)
 	trackingRoutes.AttachRoutes(r)
+	paymentRoutes.AttachRoutes(r)
 
 	r.Run(":8080")
 }

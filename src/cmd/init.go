@@ -3,24 +3,24 @@ package cmd
 import (
 	"log"
 	"logired/src/core"
+	carsDeps "logired/src/internal/cars/infrastructure/dependences"
+	devicesDeps "logired/src/internal/devices/infrastructure/dependences"
+	deviceRepo "logired/src/internal/devices/infrastructure/repositories"
+	driversDeps "logired/src/internal/drivers/infrastructure/dependences"
+	driverRepo "logired/src/internal/drivers/infrastructure/repositories"
+	paymentDeps "logired/src/internal/payments/infrastructure/dependences"
+	proposalDeps "logired/src/internal/proposals/infrastructure/dependences"
+	reviewDeps "logired/src/internal/reviews/infrastructure/dependences"
+	ridesDeps "logired/src/internal/rides/infrastructure/dependences"
+	loginDeps "logired/src/internal/services/auth/infrastructure"
+	notifications "logired/src/internal/services/notifications"
+	trackingDeps "logired/src/internal/tracking/infrastructure/dependences"
+	usersDeps "logired/src/internal/users/infrastructure"
 	"logired/src/server"
 	"logired/src/server/middleware"
-	driverRepo   "logired/src/internal/drivers/infrastructure/repositories"
-	deviceRepo   "logired/src/internal/devices/infrastructure/repositories"
-	loginDeps    "logired/src/internal/services/auth/infrastructure"
-	usersDeps    "logired/src/internal/users/infrastructure"
-	carsDeps     "logired/src/internal/cars/infrastructure/dependences"
-	ridesDeps    "logired/src/internal/rides/infrastructure/dependences"
-	proposalDeps "logired/src/internal/proposals/infrastructure/dependences"
-	reviewDeps   "logired/src/internal/reviews/infrastructure/dependences"
-	driversDeps  "logired/src/internal/drivers/infrastructure/dependences"
-	devicesDeps  "logired/src/internal/devices/infrastructure/dependences"
-    trackingDeps "logired/src/internal/tracking/infrastructure/dependences"
-	notifications "logired/src/internal/services/notifications"
 )
 
 func Init() {
-	// ── Cargar configuración ───────────────────────────────────────
 	cfg := core.LoadConfig()
 
 	db, err := core.ConnectDB()
@@ -28,29 +28,26 @@ func Init() {
 		log.Fatal("Error al conectar a la base de datos:", err)
 	}
 
-	// ── Servicios core ─────────────────────────────────────────────
-	hasher       := core.NewBcryptHasher(cfg.BcryptCost)
+	hasher := core.NewBcryptHasher(cfg.BcryptCost)
 	tokenService := core.NewJWTService()
-	fcmService   := core.NewFCMService(cfg.FCMProjectID, cfg.FCMCredentialsFile)
+	fcmService := core.NewFCMService(cfg.FCMProjectID, cfg.FCMCredentialsFile)
 
-	// ── Repositorios ───────────────────────────────────────────────
-	userRepo   := usersDeps.NewUserRepository(db)
-	authRepo   := loginDeps.NewAuthRepository(db)
+	userRepo := usersDeps.NewUserRepository(db)
+	authRepo := loginDeps.NewAuthRepository(db)
 	driverRepo := driverRepo.NewDriverRepo(db)
 	deviceRepo := deviceRepo.NewDeviceRepo(db)
 
-	// ── Servicios ──────────────────────────────────────────────────
-	notifier      := notifications.NewNotificationService(fcmService, deviceRepo)
+	notifier := notifications.NewNotificationService(fcmService, deviceRepo)
 	authMiddleware := middleware.AuthMiddleware(tokenService, userRepo)
 
-	// ── Dependencias y rutas ───────────────────────────────────────
-	devicesRoutes  := devicesDeps.NewDeviceDependencies(db, authMiddleware).GetRoutes()
-	carsRoutes     := carsDeps.NewCarDependencies(db, authMiddleware).GetRoutes()
-	ridesRoutes    := ridesDeps.NewRideDependencies(db, authMiddleware, notifier).GetRoutes()
+	devicesRoutes := devicesDeps.NewDeviceDependencies(db, authMiddleware).GetRoutes()
+	carsRoutes := carsDeps.NewCarDependencies(db, authMiddleware).GetRoutes()
+	ridesRoutes := ridesDeps.NewRideDependencies(db, authMiddleware, notifier).GetRoutes()
 	proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, notifier).GetRoutes()
-	reviewRoutes   := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
-	driversRoutes  := driversDeps.NewDriverDependencies(db, authMiddleware).GetRoutes()
-	trackingRoutes := trackingDeps.NewTrackingDependencies(db, tokenService).GetRoutes() // ← NUEVA
+	reviewRoutes := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
+	driversRoutes := driversDeps.NewDriverDependencies(db, authMiddleware).GetRoutes()
+	trackingRoutes := trackingDeps.NewTrackingDependencies(db, tokenService).GetRoutes()
+	paymentRoutes := paymentDeps.NewPaymentDependencies(db, authMiddleware, cfg.StripeSecretKey).GetRoutes()
 
 	userRoutes := usersDeps.NewUserDependencies(
 		db, hasher, tokenService, authRepo, userRepo, driverRepo,
@@ -67,6 +64,7 @@ func Init() {
 		proposalRoutes,
 		reviewRoutes,
 		driversRoutes,
-		trackingRoutes, 
+		trackingRoutes,
+		paymentRoutes,
 	)
 }

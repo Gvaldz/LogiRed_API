@@ -18,6 +18,7 @@ type Config struct {
 	BcryptCost         int
 	FCMProjectID       string
 	FCMCredentialsFile string
+	StripeSecretKey    string
 }
 
 func LoadConfig() *Config {
@@ -40,6 +41,7 @@ func LoadConfig() *Config {
 		BcryptCost:         bcryptCost,
 		FCMProjectID:       getEnv("FCM_PROJECT_ID", ""),
 		FCMCredentialsFile: getEnv("FCM_CREDENTIALS_FILE", ""),
+		StripeSecretKey:    getEnv("STRIPE_SECRET_KEY", ""),
 	}
 }
 
