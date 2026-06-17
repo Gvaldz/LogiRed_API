@@ -15,6 +15,16 @@ func NewGetRideByCityController(get *application.GetDriversByCity) *GetDriversBy
     return &GetDriversByCityController{getDriversByCity: get}
 }
 
+// GetByCity godoc
+// @Summary      Obtener conductores por ciudad
+// @Description  Devuelve una lista de conductores que trabajan en una ciudad (búsqueda por LIKE)
+// @Tags         drivers
+// @Produce      json
+// @Param        city path string true "Nombre de la ciudad (p.ej. 'Tuxtla')"
+// @Success      200 {object} map[string]interface{} "lista de conductores"
+// @Failure      400 {object} map[string]string "ciudad no especificada"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /drivers/city/{city} [get]
 func (ctrl *GetDriversByCityController) GetByCity(c *gin.Context) {
     city := c.Param("city")
     if city == "" {

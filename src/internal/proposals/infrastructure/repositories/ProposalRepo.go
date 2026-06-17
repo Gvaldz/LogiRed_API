@@ -17,7 +17,7 @@ func NewProposalRepo(db *sql.DB) *ProposalRepo {
 
 func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
 	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus, idcar) 
-	          VALUES (?, ?, ?, ?, ?, ?)`
+	          VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := r.db.Exec(query, proposal.Price, proposal.Comment, proposal.IdDriver, proposal.IdRide, proposal.IdStatus, proposal.IdCar)
 	if err != nil {
 		return fmt.Errorf("error al crear propuesta: %w", err)
@@ -27,7 +27,7 @@ func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
 }
 
 func (r *ProposalRepo) AcceptProposal(idProposal int32, idStatus int32) error {
-    query := "UPDATE proposals SET idproposalstatus = ? WHERE idproposal = ?"
+    query := "UPDATE proposals SET idproposalstatus = $1 WHERE idproposal = $2"
     result, err := r.db.Exec(query, idStatus, idProposal)
     if err != nil {
         return fmt.Errorf("error al actualizar propuesta: %w", err)
@@ -40,7 +40,7 @@ func (r *ProposalRepo) AcceptProposal(idProposal int32, idStatus int32) error {
 }
 
 func (r *ProposalRepo) DeleteProposal(idProposal int32, idDriver int32) error {
-	query := `DELETE FROM proposals WHERE idproposal = ? AND iddriver = ?`
+	query := `DELETE FROM proposals WHERE idproposal = $1 AND iddriver = $2`
 	result, err := r.db.Exec(query, idProposal, idDriver)
 	if err != nil {
 		return fmt.Errorf("error al eliminar propuesta: %w", err)
@@ -58,7 +58,7 @@ func (r *ProposalRepo) DeleteProposal(idProposal int32, idDriver int32) error {
 
 func (r *ProposalRepo) GetProposalById(idProposal int32) (entities.Proposal, error) {
 	var p entities.Proposal
-	query := "SELECT idproposal, price, comment, iddriver, idride, idproposalstatus, idcar FROM proposals WHERE idproposal = ?"
+	query := "SELECT idproposal, price, comment, iddriver, idride, idproposalstatus, idcar FROM proposals WHERE idproposal = $1"
 	err := r.db.QueryRow(query, idProposal).Scan(
 		&p.IdProposal, &p.Price, &p.Comment, &p.IdDriver, &p.IdRide, &p.IdStatus, &p.IdCar,
 	)
@@ -72,7 +72,7 @@ func (r *ProposalRepo) GetProposalsByRideId(idRide int32) ([]entities.Proposal, 
     query := `
         SELECT idproposal, price, comment, iddriver, idride, idproposalstatus, idcar 
         FROM proposals 
-        WHERE idride = ?
+        WHERE idride = $1
     `
     rows, err := r.db.Query(query, idRide)
     if err != nil {

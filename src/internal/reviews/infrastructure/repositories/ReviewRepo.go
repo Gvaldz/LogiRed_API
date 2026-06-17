@@ -17,7 +17,7 @@ func NewReviewRepo(db *sql.DB) *ReviewRepo {
 
 func (r *ReviewRepo) CreateReview(review entities.Review) error {
 	query := `INSERT INTO reviews (review, rating, iddriver, idpassanger) 
-	          VALUES (?, ?, ?, ?)`
+	          VALUES ($1, $2, $3, $4)`
 	_, err := r.db.Exec(query, review.Review, review.Rating, review.IdDriver, review.IdPassanger)
 	if err != nil {
 		return fmt.Errorf("error al crear reseña: %w", err)
@@ -28,7 +28,7 @@ func (r *ReviewRepo) CreateReview(review entities.Review) error {
 
 func (r *ReviewRepo) GetReviewsByDriverId(idDriver int32) ([]entities.Review, error) {
 	query := `SELECT idreview, review, rating, iddriver, idpassanger 
-	          FROM reviews WHERE iddriver = ?`
+	          FROM reviews WHERE iddriver = $1`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener reseñas por conductor: %w", err)
@@ -48,7 +48,7 @@ func (r *ReviewRepo) GetReviewsByDriverId(idDriver int32) ([]entities.Review, er
 
 func (r *ReviewRepo) GetReviewsByDriverIdPublic(idDriver int32) ([]entities.Review, error) {
 	query := `SELECT idreview, review, rating, iddriver, idpassanger 
-	          FROM reviews WHERE iddriver = ?`
+	          FROM reviews WHERE iddriver = $1`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener reseñas por conductor: %w", err)
@@ -68,7 +68,7 @@ func (r *ReviewRepo) GetReviewsByDriverIdPublic(idDriver int32) ([]entities.Revi
 
 func (r *ReviewRepo) GetReviewsByPassangerId(idPassanger int32) ([]entities.Review, error) {
 	query := `SELECT idreview, review, rating, iddriver, idpassanger 
-	          FROM reviews WHERE idpassanger = ?`
+	          FROM reviews WHERE idpassanger = $1`
 	rows, err := r.db.Query(query, idPassanger)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener reseñas por pasajero: %w", err)
@@ -88,8 +88,8 @@ func (r *ReviewRepo) GetReviewsByPassangerId(idPassanger int32) ([]entities.Revi
 
 func (r *ReviewRepo) UpdateReview(review entities.Review) error {
 	query := `UPDATE reviews 
-	          SET review = ?, rating = ? 
-	          WHERE idreview = ? AND idpassanger = ?`
+	          SET review = $1, rating = $2 
+	          WHERE idreview = $3 AND idpassanger = $4`
 	result, err := r.db.Exec(query, review.Review, review.Rating, review.IdReview, review.IdPassanger)
 	if err != nil {
 		return fmt.Errorf("error al actualizar reseña: %w", err)

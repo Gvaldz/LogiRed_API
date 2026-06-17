@@ -17,7 +17,19 @@ func NewDeleteUserController(delete *application.DeleteUser) *DeleteUserControll
 		deleteUser: delete,
 	}
 }
-
+// Delete godoc
+// @Summary      Eliminar un usuario
+// @Description  Elimina la cuenta (solo admin o el propio usuario)
+// @Tags         users
+// @Produce      json
+// @Param        id path int true "ID del usuario"
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      403 {object} map[string]string "no autorizado"
+// @Failure      404 {object} map[string]string "usuario no encontrado"
+// @Router       /users/{id} [delete]
 func (h *DeleteUserController) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 

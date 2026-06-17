@@ -19,7 +19,6 @@ const (
     UserTypeCliente   = 1
     UserTypeConductor = 2
 )
-
 type CreateUserController struct {
     createUser     *application.CreateUser      
     registerDriver *application.RegisterDriver 
@@ -34,7 +33,25 @@ func NewCreateUserController(
         registerDriver: registerDriver,
     }
 }
-
+// Create godoc
+// @Summary      Registrar un nuevo usuario
+// @Description  Crea una cuenta (cliente o conductor) con imagen opcional
+// @Tags         users
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        name         formData string true  "Nombre"
+// @Param        lastname     formData string true  "Apellido"
+// @Param        email        formData string true  "Correo electrónico"
+// @Param        numberphone  formData string true  "Teléfono"
+// @Param        birthdate    formData string true  "Fecha de nacimiento (YYYY-MM-DD)"
+// @Param        password     formData string true  "Contraseña"
+// @Param        user_type    formData int    true  "1=cliente, 2=conductor"
+// @Param        citywork     formData string false "Ciudad de trabajo (solo conductores)"
+// @Param        image        formData file   false "Foto de perfil (jpg, png, gif)"
+// @Success      201 {object} map[string]interface{} "usuario creado"
+// @Failure      400 {object} map[string]string "error en los datos"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /users [post]
 func (ctrl *CreateUserController) Create(c *gin.Context) {
     if !strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type debe ser multipart/form-data"})
@@ -96,7 +113,7 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
         if err := os.Chmod(savedPath, 0644); err != nil {
             fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
         }
-        imageURL = fmt.Sprintf("https://logiredapi.redirectme.net/uploads/%s", newFilename)
+        imageURL = fmt.Sprintf("https://logired-api.redirectme.net/uploads/%s", newFilename)
     }
 
     user := userEntities.User{

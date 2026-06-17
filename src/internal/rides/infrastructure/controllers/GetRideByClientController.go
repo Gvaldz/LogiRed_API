@@ -15,6 +15,16 @@ func NewGetRidesByClientController(get *application.GetRidesByClient) *GetRidesB
 	return &GetRidesByClientController{getRidesByClient: get}
 }
 
+// GetByClient godoc
+// @Summary      Obtener viajes del cliente autenticado
+// @Description  Devuelve todos los viajes solicitados por el cliente
+// @Tags         rides
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "lista de viajes"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/client [get]
 func (ctrl *GetRidesByClientController) GetByClient(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

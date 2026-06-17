@@ -30,7 +30,27 @@ func NewUpdateUserController(
 		updateDriverUC: updateDriverUC, 
 	}
 }
-
+// UpdateUser godoc
+// @Summary      Actualizar perfil de usuario (con imagen opcional)
+// @Description  Actualiza los datos del usuario autenticado (solo el propio usuario)
+// @Tags         users
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id path int true "ID del usuario"
+// @Param        name        formData string false "Nombre"
+// @Param        lastname    formData string false "Apellido"
+// @Param        email       formData string false "Email"
+// @Param        numberphone formData string false "Teléfono"
+// @Param        birthdate   formData string false "Fecha de nacimiento"
+// @Param        citywork    formData string false "Ciudad de trabajo (solo conductores)"
+// @Param        image       formData file   false "Nueva foto de perfil"
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "error en los datos"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      403 {object} map[string]string "no autorizado"
+// @Failure      404 {object} map[string]string "usuario no encontrado"
+// @Router       /users/{id} [put]
 func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 	userIDInterface, exists := ctx.Get("userID")
 	if !exists {
@@ -88,7 +108,7 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 		if err := os.Chmod(savedPath, 0664); err != nil {
 			fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
 		}
-		user.ImageURL = fmt.Sprintf("https://logiredapi.redirectme.net/uploads/%s", newFilename)
+		user.ImageURL = fmt.Sprintf("https://logired-api.redirectme.net/uploads/%s", newFilename)
 	}
 
 		user.Name        = ctx.Request.FormValue("name")

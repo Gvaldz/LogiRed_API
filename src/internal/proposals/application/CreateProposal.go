@@ -1,10 +1,10 @@
 package application
 
 import (
+	notifications "logired/src/core/services/notifications"
 	"logired/src/internal/proposals/domain"
 	"logired/src/internal/proposals/domain/entities"
 	rideDomain "logired/src/internal/rides/domain"
-	notifications "logired/src/internal/services/notifications"
 )
 
 type CreateProposal struct {

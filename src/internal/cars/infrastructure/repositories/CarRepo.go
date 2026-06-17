@@ -17,7 +17,7 @@ func NewCarRepo(db *sql.DB) *CarRepo {
 }
 
 func (r *CarRepo) CreateCar(car entities.Car) error {
-	query := "INSERT INTO cars (iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO cars (iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 	_, err := r.db.Exec(query, car.IdDriver, car.CarRegistration, car.Brand, car.Model, car.Color, car.MaxCapacity, car.FrontViewImage, car.BackViewImage, car.PlatesImage, car.SpacesImage)
 	if err != nil {
 		return fmt.Errorf("error al crear car: %w", err)
@@ -28,16 +28,53 @@ func (r *CarRepo) CreateCar(car entities.Car) error {
 func (r *CarRepo) UpdateCar(car entities.Car) error {
 	setClauses := []string{}
 	args := []interface{}{}
+	argCounter := 1
 
-	if car.CarRegistration != "" { setClauses = append(setClauses, "car_registration = ?"); args = append(args, car.CarRegistration) }
-	if car.Brand != ""           { setClauses = append(setClauses, "brand = ?");            args = append(args, car.Brand) }
-	if car.Model != ""           { setClauses = append(setClauses, "model = ?");            args = append(args, car.Model) }
-	if car.Color != ""           { setClauses = append(setClauses, "color = ?");            args = append(args, car.Color) }
-	if car.MaxCapacity != 0      { setClauses = append(setClauses, "max_capacity = ?");     args = append(args, car.MaxCapacity) }
-	if car.FrontViewImage != ""  { setClauses = append(setClauses, "frontview_image = ?");  args = append(args, car.FrontViewImage) }
-	if car.BackViewImage != ""   { setClauses = append(setClauses, "backview_image = ?");   args = append(args, car.BackViewImage) }
-	if car.PlatesImage != ""     { setClauses = append(setClauses, "plates_image = ?");     args = append(args, car.PlatesImage) }
-	if car.SpacesImage != ""     { setClauses = append(setClauses, "space_image = ?");      args = append(args, car.SpacesImage) }
+	if car.CarRegistration != "" {
+		setClauses = append(setClauses, fmt.Sprintf("car_registration = $%d", argCounter))
+		args = append(args, car.CarRegistration)
+		argCounter++
+	}
+	if car.Brand != "" {
+		setClauses = append(setClauses, fmt.Sprintf("brand = $%d", argCounter))
+		args = append(args, car.Brand)
+		argCounter++
+	}
+	if car.Model != "" {
+		setClauses = append(setClauses, fmt.Sprintf("model = $%d", argCounter))
+		args = append(args, car.Model)
+		argCounter++
+	}
+	if car.Color != "" {
+		setClauses = append(setClauses, fmt.Sprintf("color = $%d", argCounter))
+		args = append(args, car.Color)
+		argCounter++
+	}
+	if car.MaxCapacity != 0 {
+		setClauses = append(setClauses, fmt.Sprintf("max_capacity = $%d", argCounter))
+		args = append(args, car.MaxCapacity)
+		argCounter++
+	}
+	if car.FrontViewImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("frontview_image = $%d", argCounter))
+		args = append(args, car.FrontViewImage)
+		argCounter++
+	}
+	if car.BackViewImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("backview_image = $%d", argCounter))
+		args = append(args, car.BackViewImage)
+		argCounter++
+	}
+	if car.PlatesImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("plates_image = $%d", argCounter))
+		args = append(args, car.PlatesImage)
+		argCounter++
+	}
+	if car.SpacesImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("space_image = $%d", argCounter))
+		args = append(args, car.SpacesImage)
+		argCounter++
+	}
 
 	if len(setClauses) == 0 {
 		return fmt.Errorf("no hay campos para actualizar")
@@ -45,8 +82,9 @@ func (r *CarRepo) UpdateCar(car entities.Car) error {
 
 	args = append(args, car.IdCar, car.IdDriver)
 	query := fmt.Sprintf(
-		"UPDATE cars SET %s WHERE idcar = ? AND iduser = ?",
+		"UPDATE cars SET %s WHERE idcar = $%d AND iduser = $%d",
 		strings.Join(setClauses, ", "),
+		argCounter, argCounter+1,
 	)
 
 	result, err := r.db.Exec(query, args...)
@@ -65,7 +103,7 @@ func (r *CarRepo) UpdateCar(car entities.Car) error {
 }
 
 func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
-	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE iduser = ?"
+	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE iduser = $1"
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener cars: %w", err)
@@ -85,7 +123,7 @@ func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
 
 func (r *CarRepo) GetCarById(idCar int32) (entities.Car, error) {
 	var car entities.Car
-	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE idcar = ?"
+	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE idcar = $1"
 	err := r.db.QueryRow(query, idCar).Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.PlatesImage, &car.SpacesImage)
 	if err != nil {
 		return car, fmt.Errorf("car no encontrado o acceso denegado: %w", err)
@@ -94,7 +132,7 @@ func (r *CarRepo) GetCarById(idCar int32) (entities.Car, error) {
 }
 
 func (r *CarRepo) DeleteCar(idCar int32, idDriver int32) error {
-	query := "DELETE FROM cars WHERE idcar = ? AND iduser = ?"
+	query := "DELETE FROM cars WHERE idcar = $1 AND iduser = $2"
 	result, err := r.db.Exec(query, idCar, idDriver)
 	if err != nil {
 		return fmt.Errorf("error al eliminar car: %w", err)

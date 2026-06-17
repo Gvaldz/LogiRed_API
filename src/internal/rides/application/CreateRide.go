@@ -2,10 +2,10 @@ package application
 
 import (
 	"log"
+	notifications "logired/src/core/services/notifications"
 	driverDomain "logired/src/internal/drivers/domain"
 	"logired/src/internal/rides/domain"
 	"logired/src/internal/rides/domain/entities"
-	notifications "logired/src/internal/services/notifications"
 )
 
 type CreateRide struct {

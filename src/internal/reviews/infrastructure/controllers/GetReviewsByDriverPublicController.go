@@ -16,6 +16,16 @@ func NewGetReviewsByDriverPublicController(get *application.GetReviewsByDriver) 
 	return &GetReviewsByDriverPublicController{getReviewsByDriver: get}
 }
 
+// Handle godoc
+// @Summary      Obtener reseñas de un conductor por ID (público)
+// @Description  Devuelve las reseñas de un conductor específico (sin autenticación)
+// @Tags         reviews
+// @Produce      json
+// @Param        id path int true "ID del conductor"
+// @Success      200 {object} map[string]interface{} "lista de reseñas"
+// @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /reviews/driver/{id} [get]
 
 func (ctrl *GetReviewsByDriverPublicController) Handle(c *gin.Context) {
 	idParam := c.Param("id")

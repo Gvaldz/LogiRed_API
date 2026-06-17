@@ -16,7 +16,15 @@ func NewGetCarsByDriverController(get *application.GetCarsByDriver) *GetCarsByDr
 		getCarsByDriver: get,
 	}
 }
-
+// GetByDriver godoc
+// @Summary      Obtener los vehículos del conductor autenticado
+// @Tags         cars
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "lista de carros"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /cars [get]
 func (ctrl *GetCarsByDriverController) GetByDriver(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

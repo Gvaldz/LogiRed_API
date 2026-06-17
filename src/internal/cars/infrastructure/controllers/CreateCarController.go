@@ -18,6 +18,27 @@ func NewCreateCarController(create *application.CreateCar) *CreateCarController 
 	return &CreateCarController{createCar: create}
 }
 
+// Create godoc
+// @Summary      Crear un nuevo vehículo
+// @Description  Un conductor registra su carro con imágenes
+// @Tags         cars
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        car_registration  formData  string  true   "Placa"
+// @Param        brand             formData  string  true   "Marca"
+// @Param        model             formData  string  true   "Modelo"
+// @Param        color             formData  string  true   "Color"
+// @Param        max_capacity      formData  integer true   "Capacidad máxima (kg)"
+// @Param        frontview_image   formData  file    false  "Imagen frontal"
+// @Param        backview_image    formData  file    false  "Imagen trasera"
+// @Param        plates_image      formData  file    false  "Imagen de placas"
+// @Param        space_image       formData  file    false  "Imagen del espacio"
+// @Security     ApiKeyAuth
+// @Success      201 {object} map[string]interface{} "mensaje y carro creado"
+// @Failure      400 {object} map[string]string "error en los datos"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /cars [post]
 func (ctrl *CreateCarController) Create(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

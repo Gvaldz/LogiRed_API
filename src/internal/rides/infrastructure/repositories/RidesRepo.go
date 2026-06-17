@@ -1,4 +1,3 @@
-// src/internal/rides/infrastructure/repositories/ride_repo.go
 package repositories
 
 import (
@@ -39,7 +38,7 @@ func (r *RideRepo) CreateRide(ride entities.Ride) error {
 			aproxweight, 
 			description, 
 			idridestatus) 
-	        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
 	_, err := r.db.Exec(query,
 		ride.IdClient,
 		ride.OriginCity,
@@ -80,7 +79,7 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 			aproxweight, 
 			description, 
 			idridestatus
-	        FROM rides WHERE idclient = ?`
+	        FROM rides WHERE idclient = $1`
 	rows, err := r.db.Query(query, idClient)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener viajes por cliente: %w", err)
@@ -136,7 +135,7 @@ func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 			aproxweight, 
 			description, 
 			idridestatus
-	        FROM rides WHERE idride = ?`
+	        FROM rides WHERE idride = $1`
 	err := r.db.QueryRow(query, idRide).Scan(
 			&ride.IdRide,
 			&ride.IdClient,
@@ -184,7 +183,7 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 			description, 
 			idridestatus
 			FROM rides 
-			WHERE iddriver = ?
+			WHERE iddriver = $1
 	`
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
@@ -240,7 +239,7 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
 			description, 
 			idridestatus 
             FROM rides 
-            WHERE origincity LIKE ? AND idridestatus = 6 `
+            WHERE origincity LIKE $1 AND idridestatus = 6 `
 	rows, err := r.db.Query(query, "%"+city+"%")
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener viajes por ciudad: %w", err)
@@ -278,8 +277,8 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
 
 func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
 	query := `UPDATE rides 
-	          SET idridestatus = ?
-	          WHERE idride = ?`
+	          SET idridestatus = $1
+	          WHERE idride = $2`
 	result, err := r.db.Exec(query, idstatus, idride)
 	if err != nil {
 		return fmt.Errorf("error al actualizar estado del viaje: %w", err)
@@ -296,7 +295,7 @@ func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
 }
 
 func (r *RideRepo) AssignDriver(idRide int32, idDriver int32) error {
-	query := "UPDATE rides SET iddriver = ?, idridestatus = 1 WHERE idride = ?"
+	query := "UPDATE rides SET iddriver = $1, idridestatus = 1 WHERE idride = $2"
 	result, err := r.db.Exec(query, idDriver, idRide)
 	if err != nil {
 		return fmt.Errorf("error al asignar conductor: %w", err)
@@ -332,7 +331,7 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
 			description, 
 			idridestatus 
             FROM rides 
-            WHERE idclient = ? AND idridestatus IN (4, 5)
+            WHERE idclient = $1 AND idridestatus IN (4, 5)
             ORDER BY date DESC
         `
         args = append(args, userID)
@@ -356,7 +355,7 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
 			description, 
 			idridestatus 
             FROM rides 
-            WHERE iddriver = ? AND idridestatus IN (4, 5)
+            WHERE iddriver = $1 AND idridestatus IN (4, 5)
             ORDER BY date DESC
         `
         args = append(args, userID)
@@ -428,7 +427,7 @@ func (r *RideRepo) GetRidesByStatus(userID int32, userType int32, idstatus int32
 			description, 
 			idridestatus 
             FROM rides 
-            WHERE idclient = ? AND idridestatus = ?
+            WHERE idclient = $1 AND idridestatus = $2
             ORDER BY date DESC
         `
         args = append(args, userID, idstatus) 
@@ -452,7 +451,7 @@ func (r *RideRepo) GetRidesByStatus(userID int32, userType int32, idstatus int32
 			description, 
 			idridestatus 
             FROM rides 
-            WHERE iddriver = ? AND idridestatus = ?
+            WHERE iddriver = $1 AND idridestatus = $2
             ORDER BY date DESC
         `
         args = append(args, userID, idstatus) 

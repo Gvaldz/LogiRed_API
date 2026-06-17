@@ -1,7 +1,7 @@
 package infrastructure
 
 import (
-	"logired/src/internal/services/auth/infrastructure/controllers"
+	"logired/src/core/services/auth/infrastructure/controllers"
 
 	"github.com/gin-gonic/gin"
 )

@@ -16,7 +16,18 @@ func NewUpdatePasswordController(updatePasswordUC *application.UpdatePassword) *
 		updatePasswordUC: updatePasswordUC,
 	}
 }
-
+// UpdatePassword godoc
+// @Summary      Actualizar contraseña del usuario autenticado
+// @Description  Cambia la contraseña verificando la anterior
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        body body object true "Contraseñas" Example({"oldPassword":"vieja","newPassword":"nueva123"})
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "datos inválidos"
+// @Failure      401 {object} map[string]string "no autenticado o contraseña incorrecta"
+// @Router       /users/update-password [put]
 func (c *UpdatePasswordController) UpdatePassword(ctx *gin.Context) {
     userIDInterface, exists := ctx.Get("userID")
     if !exists {

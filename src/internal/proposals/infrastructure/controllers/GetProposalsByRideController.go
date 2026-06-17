@@ -9,6 +9,7 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+// GetProposalsByRideController maneja la obtención de propuestas por viaje
 type GetProposalsByRideController struct {
     uc *application.GetProposalsByRide
 }
@@ -17,6 +18,15 @@ func NewGetProposalsByRideController(uc *application.GetProposalsByRide) *GetPro
     return &GetProposalsByRideController{uc: uc}
 }
 
+// GetByRide godoc
+// @Summary      Obtener todas las propuestas de un viaje
+// @Tags         proposals
+// @Produce      json
+// @Param        idride path int true "ID del viaje"
+// @Success      200 {object} map[string]interface{} "lista de propuestas"
+// @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/{idride}/proposals [get]
 func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
     idRide, err := strconv.ParseInt(c.Param("idride"), 10, 32)
     if err != nil {
@@ -42,4 +52,10 @@ func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
         "total":     len(proposals),
         "proposals": proposals,
     })
+}
+
+// GetProposalsByRideResponse estructura la respuesta con total y lista de propuestas
+type GetProposalsByRideResponse struct {
+    Total     int                  `json:"total"`
+    Proposals []entities.Proposal  `json:"proposals"`
 }

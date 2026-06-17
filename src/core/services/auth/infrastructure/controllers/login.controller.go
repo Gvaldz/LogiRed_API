@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"logired/src/internal/services/auth/application"
+	"logired/src/core/services/auth/application"
 	"logired/src/internal/users/domain/entities"
 	"net/http"
 
@@ -16,6 +16,17 @@ func NewLoginController(loginUC *application.Login) *LoginController {
 	return &LoginController{loginUC: loginUC}
 }
 
+// Login godoc
+// @Summary      Iniciar sesión
+// @Description  Autentica a un usuario y devuelve un token JWT
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body entities.User true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
+// @Success      200 {object} map[string]interface{} "token y expiración"
+// @Failure      400 {object} map[string]string "petición inválida"
+// @Failure      401 {object} map[string]string "credenciales incorrectas"
+// @Router       /auth/login [post]
 func (c *LoginController) Login(ctx *gin.Context) {
 	var credentials entities.User
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {

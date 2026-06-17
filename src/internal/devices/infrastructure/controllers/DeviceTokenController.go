@@ -15,6 +15,19 @@ func NewDeviceTokenController(uc *application.SaveDeviceToken) *DeviceTokenContr
 	return &DeviceTokenController{saveToken: uc}
 }
 
+// Register godoc
+// @Summary      Registrar dispositivo para notificaciones
+// @Description  Asocia un token FCM y nombre de dispositivo al usuario autenticado
+// @Tags         devices
+// @Accept       json
+// @Produce      json
+// @Param        body body map[string]interface{} true "Datos del dispositivo" Example({"fcm_token":"abc123","device_name":"iPhone"})
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "error en la solicitud"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /devices/token [put]
 func (ctrl *DeviceTokenController) Register(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {

@@ -16,6 +16,16 @@ func NewGetRidesHistoryController(uc *application.GetRidesHistory) *GetRidesHist
     return &GetRidesHistoryController{getRidesHistory: uc}
 }
 
+// GetHistory godoc
+// @Summary      Obtener historial de viajes (completados o cancelados)
+// @Description  Devuelve viajes con estado 4 o 5 (historial) para el usuario autenticado (cliente o conductor)
+// @Tags         rides
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "lista de viajes históricos"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/history [get]
 func (ctrl *GetRidesHistoryController) GetHistory(c *gin.Context) {
     userIDInterface, exists := c.Get("userID")
     if !exists {

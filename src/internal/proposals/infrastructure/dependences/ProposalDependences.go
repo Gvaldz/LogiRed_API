@@ -2,12 +2,12 @@ package dependencies
 
 import (
 	"database/sql"
+	notifications "logired/src/core/services/notifications"
 	"logired/src/internal/proposals/application"
 	"logired/src/internal/proposals/infrastructure/controllers"
 	"logired/src/internal/proposals/infrastructure/repositories"
 	"logired/src/internal/proposals/infrastructure/routes"
 	rideRepositories "logired/src/internal/rides/infrastructure/repositories"
-	notifications "logired/src/internal/services/notifications"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +32,7 @@ func NewProposalDependencies(
 
 func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 	proposalRepo := repositories.NewProposalRepo(d.DB)
-	rideRepo     := rideRepositories.NewRideRepo(d.DB)
+	rideRepo := rideRepositories.NewRideRepo(d.DB)
 
 	createProposalUseCase := application.NewCreateProposal(proposalRepo, rideRepo, d.Notifier)
 	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, rideRepo, d.Notifier)

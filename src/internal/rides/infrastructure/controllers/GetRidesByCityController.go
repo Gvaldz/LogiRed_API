@@ -15,6 +15,16 @@ func NewGetRideByCityController(get *application.GetRidesByCity) *GetRideByCityC
     return &GetRideByCityController{getRideByCity: get}
 }
 
+// GetByCity godoc
+// @Summary      Obtener viajes disponibles por ciudad
+// @Description  Devuelve viajes activos (estado 6) en la ciudad especificada
+// @Tags         rides
+// @Produce      json
+// @Param        city path string true "Nombre de la ciudad"
+// @Success      200 {object} map[string]interface{} "lista de viajes"
+// @Failure      400 {object} map[string]string "ciudad no especificada"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/city/{city} [get]
 func (ctrl *GetRideByCityController) GetByCity(c *gin.Context) {
     city := c.Param("city")
     if city == "" {

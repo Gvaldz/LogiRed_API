@@ -2,7 +2,7 @@ package core
 
 import (
 	"errors"
-	"logired/src/internal/services/auth/domain"
+	"logired/src/core/services/auth/domain"
 	"os"
 	"time"
 
@@ -25,15 +25,15 @@ func (s *JWTService) GenerateToken(userID int32, email string, usertype int, cit
 	expiresAt := time.Now().Add(100 * 365 * 24 * time.Hour).Unix()
 
 	claims := jwt.MapClaims{
-		"user_id": 	 userID,
-		"email":   	 email,
-		"exp":    	 expiresAt,
-		"usertype":  usertype,
+		"user_id":  userID,
+		"email":    email,
+		"exp":      expiresAt,
+		"usertype": usertype,
 	}
 
-	    if citywork != "" {
-        claims["citywork"] = citywork
-    }
+	if citywork != "" {
+		claims["citywork"] = citywork
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(s.secretKey)

@@ -16,11 +16,10 @@ func NewDeviceRepo(db *sql.DB) *DeviceRepo {
 func (r *DeviceRepo) SaveToken(userID int32, token, deviceName string) error {
 	query := `
 		INSERT INTO user_devices (iduser, fcm_token, device_name)
-		VALUES (?, ?, ?)
-		ON DUPLICATE KEY UPDATE
-			iduser      = VALUES(iduser),
-			device_name = VALUES(device_name),
-			updated_at  = CURRENT_TIMESTAMP
+		VALUES ($1, $2, $3)
+		ON CONFLICT (iduser) DO UPDATE SET
+			device_name = EXCLUDED.device_name,
+			updated_at = CURRENT_TIMESTAMP
 	`
 	_, err := r.db.Exec(query, userID, token, deviceName)
 	if err != nil {
@@ -30,7 +29,7 @@ func (r *DeviceRepo) SaveToken(userID int32, token, deviceName string) error {
 }
 
 func (r *DeviceRepo) GetTokensByUser(userID int32) ([]string, error) {
-	query := "SELECT fcm_token FROM user_devices WHERE iduser = ?"
+	query := "SELECT fcm_token FROM user_devices WHERE iduser = $1"
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener tokens: %w", err)
@@ -49,7 +48,7 @@ func (r *DeviceRepo) GetTokensByUser(userID int32) ([]string, error) {
 }
 
 func (r *DeviceRepo) DeleteToken(token string) error {
-	_, err := r.db.Exec("DELETE FROM user_devices WHERE fcm_token = ?", token)
+	_, err := r.db.Exec("DELETE FROM user_devices WHERE fcm_token = $1", token)
 	if err != nil {
 		return fmt.Errorf("error al eliminar token: %w", err)
 	}

@@ -3,6 +3,8 @@ package cmd
 import (
 	"log"
 	"logired/src/core"
+	loginDeps "logired/src/core/services/auth/infrastructure"
+	notifications "logired/src/core/services/notifications"
 	carsDeps "logired/src/internal/cars/infrastructure/dependences"
 	devicesDeps "logired/src/internal/devices/infrastructure/dependences"
 	deviceRepo "logired/src/internal/devices/infrastructure/repositories"
@@ -12,8 +14,6 @@ import (
 	proposalDeps "logired/src/internal/proposals/infrastructure/dependences"
 	reviewDeps "logired/src/internal/reviews/infrastructure/dependences"
 	ridesDeps "logired/src/internal/rides/infrastructure/dependences"
-	loginDeps "logired/src/internal/services/auth/infrastructure"
-	notifications "logired/src/internal/services/notifications"
 	trackingDeps "logired/src/internal/tracking/infrastructure/dependences"
 	usersDeps "logired/src/internal/users/infrastructure"
 	"logired/src/server"

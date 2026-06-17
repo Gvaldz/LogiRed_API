@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	tokenService "logired/src/internal/services/auth/domain"
+	tokenService "logired/src/core/services/auth/domain"
 	users_domain "logired/src/internal/users/domain"
 )
 
@@ -31,7 +31,7 @@ func AuthMiddleware(tokenService tokenService.TokenService, userRepo users_domai
 		}
 
 		user, err := userRepo.GetUserByID(userID)
-		
+
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al verificar: " + err.Error()})
 			return

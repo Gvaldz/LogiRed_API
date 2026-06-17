@@ -3,8 +3,8 @@ package infrastructure
 import (
 	"database/sql"
 	"logired/src/core"
-	"logired/src/internal/services/auth/application"
-	"logired/src/internal/services/auth/infrastructure/controllers"
+	"logired/src/core/services/auth/application"
+	"logired/src/core/services/auth/infrastructure/controllers"
 	users_domain "logired/src/internal/users/domain"
 )
 

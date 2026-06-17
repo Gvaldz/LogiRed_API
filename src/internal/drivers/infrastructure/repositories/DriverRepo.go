@@ -17,7 +17,7 @@ func NewDriverRepo(db *sql.DB) *DriverRepo {
 }
 
 func (r *DriverRepo) Delete(userID int32) error {
-	query := `DELETE FROM drivers WHERE iduser = ?`
+	query := `DELETE FROM drivers WHERE iduser = $1`
 	result, err := r.db.Exec(query, userID)
 	if err != nil {
 		return fmt.Errorf("error al eliminar conductor: %w", err)
@@ -34,7 +34,7 @@ func (r *DriverRepo) Delete(userID int32) error {
 }
 
 func (r *DriverRepo) Exists(userID int32) (bool, error) {
-	query := `SELECT COUNT(*) FROM drivers WHERE iduser = ?`
+	query := `SELECT COUNT(*) FROM drivers WHERE iduser = $1`
 	var count int
 	err := r.db.QueryRow(query, userID).Scan(&count)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *DriverRepo) Exists(userID int32) (bool, error) {
 }
 
 func (r *DriverRepo) CreateTx(tx *sql.Tx, driver entities.Driver) error {
-	query := "INSERT INTO drivers (iduser, rating, citywork) VALUES (?, ?, ?)"
+	query := "INSERT INTO drivers (iduser, rating, citywork) VALUES ($1, $2, $3)"
 	_, err := tx.Exec(query, driver.IdUser, driver.Rating, driver.Citywork)
 	if err != nil {
 		return fmt.Errorf("error al crear conductor: %w", err)
@@ -53,7 +53,7 @@ func (r *DriverRepo) CreateTx(tx *sql.Tx, driver entities.Driver) error {
 }
 
 func (r *DriverRepo) UpdateCitywork(idUser int32, citywork string) error {
-    query := "UPDATE drivers SET citywork = ? WHERE iduser = ?"
+    query := "UPDATE drivers SET citywork = $1 WHERE iduser = $2"
     _, err := r.db.Exec(query, citywork, idUser)
     return err
 }
@@ -63,7 +63,7 @@ func (r *DriverRepo) GetDriversByCity(city string) ([]domain.DriverDetail, error
         SELECT d.iduser, d.rating, u.name, u.lastname, u.email
         FROM drivers d
         INNER JOIN users u ON d.iduser = u.iduser
-        WHERE d.citywork LIKE ?
+        WHERE d.citywork LIKE $1
     `
     rows, err := r.db.Query(query, "%"+city+"%")
     if err != nil {

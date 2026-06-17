@@ -19,27 +19,23 @@ func NewUserRepository(DB *sql.DB) users.UserRepository {
 
 func (r *UserRepository) CreateUser(u user.User) (user.User, error) {
 
-	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING iduser"
 
-	result, err := r.DB.Exec(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone,u.Email, u.Password, u.UserType, u.ImageURL)
+	var id int32
+	err := r.DB.QueryRow(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone, u.Email, u.Password, u.UserType, u.ImageURL).Scan(&id)
 	if err != nil {
 		return user.User{}, fmt.Errorf("error al crear usuario: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return user.User{}, fmt.Errorf("error al obtener ID: %w", err)
-	}
-
 	return user.User{
-		IdUser:   	int32(id),
-		Name:     		u.Name,
-		Lastname: 		u.Lastname,
-		Email:    		u.Email,
-		UserType: 		u.UserType,
-		NumberPhone: 	u.NumberPhone,
-		Birthdate: 		u.Birthdate,
-		ImageURL: 		u.ImageURL,
+		IdUser:     id,
+		Name:       u.Name,
+		Lastname:   u.Lastname,
+		Email:      u.Email,
+		UserType:   u.UserType,
+		NumberPhone: u.NumberPhone,
+		Birthdate:  u.Birthdate,
+		ImageURL:   u.ImageURL,
 	}, nil
 }
 
@@ -69,7 +65,7 @@ func (r *UserRepository) GetUserByID(iduser int32) (user.User, error) {
 	}
 
 	var u user.User
-	query := "SELECT iduser, name, lastname, birthdate, numberphone, email, usertype, image_url FROM users WHERE iduser = ?"
+	query := "SELECT iduser, name, lastname, birthdate, numberphone, email, usertype, image_url FROM users WHERE iduser = $1"
 
 	err := r.DB.QueryRow(query, iduser).Scan(&u.IdUser, &u.Name, &u.Lastname, &u.Birthdate, &u.NumberPhone, &u.Email, &u.UserType, &u.ImageURL)
 
@@ -81,13 +77,13 @@ func (r *UserRepository) GetUserByID(iduser int32) (user.User, error) {
 
 func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
 	var u user.User
-	query := "SELECT iduser, name, lastname, email, password, usertype FROM users WHERE email = ?"
+	query := "SELECT iduser, name, lastname, email, password, usertype FROM users WHERE email = $1"
 
 	err := r.DB.QueryRow(query, email).Scan(
 		&u.IdUser,
 		&u.Name,
 		&u.Lastname,
-		&u.Password,
+		&u.Email,      // CORREGIDO
 		&u.Password,
 		&u.UserType,
 	)
@@ -103,20 +99,45 @@ func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
 func (r *UserRepository) UpdateUser(id int32, u user.User) error {
     setClauses := []string{}
     args := []interface{}{}
+    argCounter := 1
 
-    if u.Name != ""        { setClauses = append(setClauses, "name = ?");       args = append(args, u.Name) }
-    if u.Lastname != ""    { setClauses = append(setClauses, "lastname = ?");    args = append(args, u.Lastname) }
-    if u.Email != ""       { setClauses = append(setClauses, "email = ?");       args = append(args, u.Email) }
-    if u.NumberPhone != "" { setClauses = append(setClauses, "numberphone = ?"); args = append(args, u.NumberPhone) }
-    if u.Birthdate != ""   { setClauses = append(setClauses, "birthdate = ?");   args = append(args, u.Birthdate) }
-    if u.ImageURL != ""    { setClauses = append(setClauses, "image_url = ?");   args = append(args, u.ImageURL) }
+    if u.Name != "" {
+        setClauses = append(setClauses, fmt.Sprintf("name = $%d", argCounter))
+        args = append(args, u.Name)
+        argCounter++
+    }
+    if u.Lastname != "" {
+        setClauses = append(setClauses, fmt.Sprintf("lastname = $%d", argCounter))
+        args = append(args, u.Lastname)
+        argCounter++
+    }
+    if u.Email != "" {
+        setClauses = append(setClauses, fmt.Sprintf("email = $%d", argCounter))
+        args = append(args, u.Email)
+        argCounter++
+    }
+    if u.NumberPhone != "" {
+        setClauses = append(setClauses, fmt.Sprintf("numberphone = $%d", argCounter))
+        args = append(args, u.NumberPhone)
+        argCounter++
+    }
+    if u.Birthdate != "" {
+        setClauses = append(setClauses, fmt.Sprintf("birthdate = $%d", argCounter))
+        args = append(args, u.Birthdate)
+        argCounter++
+    }
+    if u.ImageURL != "" {
+        setClauses = append(setClauses, fmt.Sprintf("image_url = $%d", argCounter))
+        args = append(args, u.ImageURL)
+        argCounter++
+    }
 
     if len(setClauses) == 0 {
         return errors.New("no hay campos para actualizar")
     }
 
     var exists int
-    err := r.DB.QueryRow("SELECT COUNT(*) FROM users WHERE iduser = ?", id).Scan(&exists)
+    err := r.DB.QueryRow("SELECT COUNT(*) FROM users WHERE iduser = $1", id).Scan(&exists)
     if err != nil {
         return fmt.Errorf("error al verificar usuario: %w", err)
     }
@@ -125,7 +146,7 @@ func (r *UserRepository) UpdateUser(id int32, u user.User) error {
     }
 
     args = append(args, id)
-    query := fmt.Sprintf("UPDATE users SET %s WHERE iduser = ?", strings.Join(setClauses, ", "))
+    query := fmt.Sprintf("UPDATE users SET %s WHERE iduser = $%d", strings.Join(setClauses, ", "), argCounter)
 
     result, err := r.DB.Exec(query, args...)
     if err != nil {
@@ -139,7 +160,7 @@ func (r *UserRepository) UpdateUser(id int32, u user.User) error {
 }
 
 func (r *UserRepository) RessetPassword(email string, newHashedPassword string) error {
-    query := "UPDATE users SET password = ? WHERE email = ?"
+    query := "UPDATE users SET password = $1 WHERE email = $2"
     
     result, err := r.DB.Exec(query, newHashedPassword, email)
     if err != nil {
@@ -159,7 +180,7 @@ func (r *UserRepository) RessetPassword(email string, newHashedPassword string) 
 }
 
 func (r *UserRepository) UpdatePassword(id int32, newHashedPassword string) error {
-	query := "UPDATE users SET password = ? WHERE iduser = ?"
+	query := "UPDATE users SET password = $1 WHERE iduser = $2"
 	result, err := r.DB.Exec(query, newHashedPassword, id)
 	if err != nil {
 		return fmt.Errorf("error al actualizar contraseña: %w", err)
@@ -178,7 +199,7 @@ func (r *UserRepository) UpdatePassword(id int32, newHashedPassword string) erro
 }
 
 func (r *UserRepository) DeleteUser(id int32) error {
-	query := "DELETE FROM users WHERE iduser = ?"
+	query := "DELETE FROM users WHERE iduser = $1"
 	result, err := r.DB.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("error al eliminar usuario: %w", err)
@@ -197,20 +218,16 @@ func (r *UserRepository) DeleteUser(id int32) error {
 }
 
 func (r *UserRepository) CreateUserTx(tx *sql.Tx, u user.User) (user.User, error) {
-	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING iduser"
 
-	result, err := tx.Exec(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone, u.Email, u.Password, u.UserType, u.ImageURL)
+	var id int32
+	err := tx.QueryRow(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone, u.Email, u.Password, u.UserType, u.ImageURL).Scan(&id)
 	if err != nil {
 		return user.User{}, fmt.Errorf("error al crear usuario: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return user.User{}, fmt.Errorf("error al obtener ID: %w", err)
-	}
-
 	return user.User{
-		IdUser:      int32(id),
+		IdUser:      id,
 		Name:        u.Name,
 		Lastname:    u.Lastname,
 		Email:       u.Email,
@@ -233,7 +250,7 @@ func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) 
             d.citywork, d.rating
         FROM users u
         LEFT JOIN drivers d ON u.iduser = d.iduser
-        WHERE u.iduser = ?
+        WHERE u.iduser = $1
     `
 
     var profile user.UserProfile
@@ -265,4 +282,3 @@ func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) 
 
     return profile, nil
 }
-

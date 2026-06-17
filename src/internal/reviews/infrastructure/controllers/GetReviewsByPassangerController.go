@@ -15,6 +15,17 @@ func NewGetReviewsByPassangerController(get *application.GetReviewsByPassanger) 
 	return &GetReviewsByPassangerController{getReviewsByPassanger: get}
 }
 
+// GetByPassanger godoc
+// @Summary      Obtener reseñas del pasajero autenticado
+// @Description  Devuelve todas las reseñas escritas por el pasajero actual
+// @Tags         reviews
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "lista de reseñas"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /reviews/passenger/me [get]
+
 func (ctrl *GetReviewsByPassangerController) GetByPassanger(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

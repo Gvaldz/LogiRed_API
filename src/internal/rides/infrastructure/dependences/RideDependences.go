@@ -2,12 +2,12 @@ package dependencies
 
 import (
 	"database/sql"
+	notifications "logired/src/core/services/notifications"
+	driverRepositories "logired/src/internal/drivers/infrastructure/repositories"
 	"logired/src/internal/rides/application"
 	"logired/src/internal/rides/infrastructure/controllers"
 	"logired/src/internal/rides/infrastructure/repositories"
 	"logired/src/internal/rides/infrastructure/routes"
-	driverRepositories "logired/src/internal/drivers/infrastructure/repositories"
-	notifications "logired/src/internal/services/notifications"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,26 +31,26 @@ func NewRideDependencies(
 }
 
 func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
-	rideRepo   := repositories.NewRideRepo(d.DB)
+	rideRepo := repositories.NewRideRepo(d.DB)
 	driverRepo := driverRepositories.NewDriverRepo(d.DB)
 
-	createRideUseCase             := application.NewCreateRide(rideRepo, driverRepo, d.Notifier)
-	getRidesByClientUseCase       := application.NewGetRidesByClient(rideRepo)
-	getRideByIdUseCase            := application.NewGetRideById(rideRepo)
-	getRidesByDriverUseCase       := application.NewGetRidesByDriver(rideRepo)
-	getRidesByCityUseCase         := application.NewGetRidesByCity(rideRepo)
-	getRidesHistoryUseCase        := application.NewGetRidesHistory(rideRepo)
-	getRidesByStatusUseCase    	  := application.NewGetRidesByStatus(rideRepo)
-	updateRideStatusUseCase    	  := application.NewUpdateRideStatus(rideRepo, d.Notifier)
+	createRideUseCase := application.NewCreateRide(rideRepo, driverRepo, d.Notifier)
+	getRidesByClientUseCase := application.NewGetRidesByClient(rideRepo)
+	getRideByIdUseCase := application.NewGetRideById(rideRepo)
+	getRidesByDriverUseCase := application.NewGetRidesByDriver(rideRepo)
+	getRidesByCityUseCase := application.NewGetRidesByCity(rideRepo)
+	getRidesHistoryUseCase := application.NewGetRidesHistory(rideRepo)
+	getRidesByStatusUseCase := application.NewGetRidesByStatus(rideRepo)
+	updateRideStatusUseCase := application.NewUpdateRideStatus(rideRepo, d.Notifier)
 
-	createRideController          := controllers.NewCreateRideController(createRideUseCase)
-	getRidesByClientController    := controllers.NewGetRidesByClientController(getRidesByClientUseCase)
-	getRideByIdController         := controllers.NewGetRideByIdController(getRideByIdUseCase)
-	getRidesByDriverController    := controllers.NewGetRidesByDriverController(getRidesByDriverUseCase)
-	getRidesByCityController      := controllers.NewGetRideByCityController(getRidesByCityUseCase)
-	getRidesByStatusController	  := controllers.NewGetRidesByStatusController(getRidesByStatusUseCase)
-	getRidesHistoryController     := controllers.NewGetRidesHistoryController(getRidesHistoryUseCase)
-	updateRideStatusController    := controllers.NewUpdateRideStatusController(updateRideStatusUseCase)
+	createRideController := controllers.NewCreateRideController(createRideUseCase)
+	getRidesByClientController := controllers.NewGetRidesByClientController(getRidesByClientUseCase)
+	getRideByIdController := controllers.NewGetRideByIdController(getRideByIdUseCase)
+	getRidesByDriverController := controllers.NewGetRidesByDriverController(getRidesByDriverUseCase)
+	getRidesByCityController := controllers.NewGetRideByCityController(getRidesByCityUseCase)
+	getRidesByStatusController := controllers.NewGetRidesByStatusController(getRidesByStatusUseCase)
+	getRidesHistoryController := controllers.NewGetRidesHistoryController(getRidesHistoryUseCase)
+	updateRideStatusController := controllers.NewUpdateRideStatusController(updateRideStatusUseCase)
 
 	return routes.NewRideRoutes(
 		createRideController,

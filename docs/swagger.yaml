@@ -1,0 +1,1296 @@
+basePath: /
+definitions:
+  entities.DriverInfo:
+    properties:
+      citywork:
+        type: string
+      rating:
+        type: number
+    type: object
+  entities.User:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      numberphone:
+        type: string
+      password:
+        type: string
+      user_type:
+        type: integer
+    type: object
+  entities.UserProfile:
+    properties:
+      birthdate:
+        type: string
+      driver_info:
+        $ref: '#/definitions/entities.DriverInfo'
+      email:
+        type: string
+      iduser:
+        type: integer
+      image_url:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      number_phone:
+        type: string
+      user_type:
+        type: integer
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API para la plataforma LogiRed de transporte de paquetes
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: LogiRed API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica a un usuario y devuelve un token JWT
+      parameters:
+      - description: Credenciales
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/entities.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token y expiración
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: petición inválida
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: credenciales incorrectas
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar sesión
+      tags:
+      - auth
+  /cars:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de carros
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener los vehículos del conductor autenticado
+      tags:
+      - cars
+    post:
+      consumes:
+      - multipart/form-data
+      description: Un conductor registra su carro con imágenes
+      parameters:
+      - description: Placa
+        in: formData
+        name: car_registration
+        required: true
+        type: string
+      - description: Marca
+        in: formData
+        name: brand
+        required: true
+        type: string
+      - description: Modelo
+        in: formData
+        name: model
+        required: true
+        type: string
+      - description: Color
+        in: formData
+        name: color
+        required: true
+        type: string
+      - description: Capacidad máxima (kg)
+        in: formData
+        name: max_capacity
+        required: true
+        type: integer
+      - description: Imagen frontal
+        in: formData
+        name: frontview_image
+        type: file
+      - description: Imagen trasera
+        in: formData
+        name: backview_image
+        type: file
+      - description: Imagen de placas
+        in: formData
+        name: plates_image
+        type: file
+      - description: Imagen del espacio
+        in: formData
+        name: space_image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: mensaje y carro creado
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Crear un nuevo vehículo
+      tags:
+      - cars
+  /cars/{id}:
+    delete:
+      description: Solo el conductor propietario puede eliminar su carro
+      parameters:
+      - description: ID del carro
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: carro no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Eliminar un vehículo
+      tags:
+      - cars
+    get:
+      parameters:
+      - description: ID del carro
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: datos del carro
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: carro no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener un vehículo por ID
+      tags:
+      - cars
+    put:
+      consumes:
+      - multipart/form-data
+      description: El conductor propietario puede actualizar los datos de su carro
+        (incluye imágenes)
+      parameters:
+      - description: ID del carro
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Placa
+        in: formData
+        name: car_registration
+        type: string
+      - description: Marca
+        in: formData
+        name: brand
+        type: string
+      - description: Modelo
+        in: formData
+        name: model
+        type: string
+      - description: Color
+        in: formData
+        name: color
+        type: string
+      - description: Capacidad máxima
+        in: formData
+        name: max_capacity
+        type: integer
+      - description: Imagen frontal
+        in: formData
+        name: frontview_image
+        type: file
+      - description: Imagen trasera
+        in: formData
+        name: backview_image
+        type: file
+      - description: Imagen de placas
+        in: formData
+        name: plates_image
+        type: file
+      - description: Imagen del espacio
+        in: formData
+        name: space_image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje y carro actualizado
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: carro no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Actualizar un vehículo
+      tags:
+      - cars
+  /devices/token:
+    put:
+      consumes:
+      - application/json
+      description: Asocia un token FCM y nombre de dispositivo al usuario autenticado
+      parameters:
+      - description: Datos del dispositivo
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error en la solicitud
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Registrar dispositivo para notificaciones
+      tags:
+      - devices
+  /drivers/city/{city}:
+    get:
+      description: Devuelve una lista de conductores que trabajan en una ciudad (búsqueda
+        por LIKE)
+      parameters:
+      - description: Nombre de la ciudad (p.ej. 'Tuxtla')
+        in: path
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de conductores
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ciudad no especificada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener conductores por ciudad
+      tags:
+      - drivers
+  /proposals:
+    post:
+      consumes:
+      - application/json
+      description: Un conductor crea una propuesta para un viaje
+      parameters:
+      - description: Datos de la propuesta
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: mensaje y propuesta creada
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Crear una nueva propuesta
+      tags:
+      - proposals
+  /proposals/{id}:
+    delete:
+      description: Solo el conductor propietario puede eliminar su propuesta
+      parameters:
+      - description: ID de la propuesta
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: propuesta no encontrada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Eliminar una propuesta
+      tags:
+      - proposals
+    get:
+      parameters:
+      - description: ID de la propuesta
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: datos de la propuesta
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: propuesta no encontrada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener una propuesta por ID
+      tags:
+      - proposals
+  /proposals/{id}/accept:
+    put:
+      consumes:
+      - application/json
+      description: Cambia el estado de una propuesta (1 = aceptada, 3 = rechazada)
+      parameters:
+      - description: ID de la propuesta
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nuevo estado
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error en la solicitud
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Aceptar o rechazar una propuesta
+      tags:
+      - proposals
+  /rides:
+    post:
+      consumes:
+      - application/json
+      description: Un cliente crea un viaje para transporte de paquetes
+      parameters:
+      - description: Datos del viaje
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: mensaje y viaje creado
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Crear un nuevo viaje
+      tags:
+      - rides
+  /rides/{id}:
+    get:
+      description: Devuelve los detalles de un viaje específico
+      parameters:
+      - description: ID del viaje
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: datos del viaje
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: viaje no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener un viaje por ID
+      tags:
+      - rides
+  /rides/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Cambia el estado de un viaje (solo el cliente o conductor autorizado)
+      parameters:
+      - description: ID del viaje
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nuevo estado
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error en la solicitud
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: viaje no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Actualizar estado de un viaje
+      tags:
+      - rides
+  /rides/{idride}/proposals:
+    get:
+      parameters:
+      - description: ID del viaje
+        in: path
+        name: idride
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de propuestas
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener todas las propuestas de un viaje
+      tags:
+      - proposals
+  /rides/city/{city}:
+    get:
+      description: Devuelve viajes activos (estado 6) en la ciudad especificada
+      parameters:
+      - description: Nombre de la ciudad
+        in: path
+        name: city
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de viajes
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ciudad no especificada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener viajes disponibles por ciudad
+      tags:
+      - rides
+  /rides/client:
+    get:
+      description: Devuelve todos los viajes solicitados por el cliente
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de viajes
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener viajes del cliente autenticado
+      tags:
+      - rides
+  /rides/driver/me:
+    get:
+      description: Devuelve todos los viajes que el conductor ha aceptado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de viajes
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener viajes asignados al conductor autenticado
+      tags:
+      - rides
+  /rides/history:
+    get:
+      description: Devuelve viajes con estado 4 o 5 (historial) para el usuario autenticado
+        (cliente o conductor)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de viajes históricos
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener historial de viajes (completados o cancelados)
+      tags:
+      - rides
+  /rides/status:
+    get:
+      description: Devuelve los viajes del usuario autenticado (cliente o conductor)
+        según el estado indicado (1-6)
+      parameters:
+      - description: 'Estado del viaje (1: asignado, 2: en camino, 3: recogido, 4:
+          completado, 5: cancelado, 6: disponible)'
+        in: query
+        name: idstatus
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de viajes
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: idstatus requerido o inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener viajes por estado
+      tags:
+      - rides
+  /users:
+    get:
+      description: Devuelve lista de usuarios (solo para administradores)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de usuarios
+          schema:
+            items:
+              $ref: '#/definitions/entities.User'
+            type: array
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: no autorizado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener todos los usuarios (solo admin)
+      tags:
+      - users
+    post:
+      consumes:
+      - multipart/form-data
+      description: Crea una cuenta (cliente o conductor) con imagen opcional
+      parameters:
+      - description: Nombre
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Apellido
+        in: formData
+        name: lastname
+        required: true
+        type: string
+      - description: Correo electrónico
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Teléfono
+        in: formData
+        name: numberphone
+        required: true
+        type: string
+      - description: Fecha de nacimiento (YYYY-MM-DD)
+        in: formData
+        name: birthdate
+        required: true
+        type: string
+      - description: Contraseña
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: 1=cliente, 2=conductor
+        in: formData
+        name: user_type
+        required: true
+        type: integer
+      - description: Ciudad de trabajo (solo conductores)
+        in: formData
+        name: citywork
+        type: string
+      - description: Foto de perfil (jpg, png, gif)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: usuario creado
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Registrar un nuevo usuario
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Elimina la cuenta (solo admin o el propio usuario)
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: no autorizado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Eliminar un usuario
+      tags:
+      - users
+    get:
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: datos del usuario
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener usuario por ID (versión simplificada)
+      tags:
+      - users
+    put:
+      consumes:
+      - multipart/form-data
+      description: Actualiza los datos del usuario autenticado (solo el propio usuario)
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nombre
+        in: formData
+        name: name
+        type: string
+      - description: Apellido
+        in: formData
+        name: lastname
+        type: string
+      - description: Email
+        in: formData
+        name: email
+        type: string
+      - description: Teléfono
+        in: formData
+        name: numberphone
+        type: string
+      - description: Fecha de nacimiento
+        in: formData
+        name: birthdate
+        type: string
+      - description: Ciudad de trabajo (solo conductores)
+        in: formData
+        name: citywork
+        type: string
+      - description: Nueva foto de perfil
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: no autorizado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Actualizar perfil de usuario (con imagen opcional)
+      tags:
+      - users
+  /users/password-reset:
+    put:
+      consumes:
+      - application/json
+      description: Actualiza la contraseña de un usuario dado su email
+      parameters:
+      - description: Datos
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: datos inválidos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Restablecer contraseña (por email)
+      tags:
+      - users
+  /users/profile/{id}:
+    get:
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: perfil completo
+          schema:
+            $ref: '#/definitions/entities.UserProfile'
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener perfil completo de un usuario (con datos de conductor si aplica)
+      tags:
+      - users
+  /users/update-password:
+    put:
+      consumes:
+      - application/json
+      description: Cambia la contraseña verificando la anterior
+      parameters:
+      - description: Contraseñas
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: datos inválidos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado o contraseña incorrecta
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Actualizar contraseña del usuario autenticado
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: Escribe "Bearer <token>" para autenticarte
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -16,6 +16,21 @@ func NewUpdateRideStatusController(update *application.UpdateRideStatus) *Update
 	return &UpdateRideStatusController{UpdateRideStatus: update}
 }
 
+// Update godoc
+// @Summary      Actualizar estado de un viaje
+// @Description  Cambia el estado de un viaje (solo el cliente o conductor autorizado)
+// @Tags         rides
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "ID del viaje"
+// @Param        body body map[string]interface{} true "Nuevo estado" Example({"status":2})
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "error en la solicitud"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      404 {object} map[string]string "viaje no encontrado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/{id}/status [put]
 func (ctrl *UpdateRideStatusController) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	rideID, err := strconv.ParseInt(idParam, 10, 32)
@@ -30,7 +45,7 @@ func (ctrl *UpdateRideStatusController) Update(c *gin.Context) {
 		return
 	}
 	userID := userIDInterface.(int32)
-	_ = userID 
+	_ = userID
 	var req struct {
 		Status int32 `json:"status"`
 	}

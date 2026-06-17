@@ -1,8 +1,8 @@
 package application
 
 import (
+	notifications "logired/src/core/services/notifications"
 	"logired/src/internal/rides/domain"
-	notifications "logired/src/internal/services/notifications"
 )
 
 const (

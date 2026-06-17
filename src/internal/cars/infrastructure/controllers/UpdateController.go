@@ -17,7 +17,29 @@ type UpdateCarController struct {
 func NewUpdateCarController(update *application.UpdateCar) *UpdateCarController {
 	return &UpdateCarController{updateCar: update}
 }
-
+// Update godoc
+// @Summary      Actualizar un vehículo
+// @Description  El conductor propietario puede actualizar los datos de su carro (incluye imágenes)
+// @Tags         cars
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id path int true "ID del carro"
+// @Param        car_registration formData string false "Placa"
+// @Param        brand formData string false "Marca"
+// @Param        model formData string false "Modelo"
+// @Param        color formData string false "Color"
+// @Param        max_capacity formData integer false "Capacidad máxima"
+// @Param        frontview_image formData file false "Imagen frontal"
+// @Param        backview_image formData file false "Imagen trasera"
+// @Param        plates_image formData file false "Imagen de placas"
+// @Param        space_image formData file false "Imagen del espacio"
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "mensaje y carro actualizado"
+// @Failure      400 {object} map[string]string "error en los datos"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      404 {object} map[string]string "carro no encontrado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /cars/{id} [put]
 func (ctrl *UpdateCarController) Update(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+
 	"github.com/joho/godotenv"
-	_ "github.com/go-sql-driver/mysql")
+	_ "github.com/lib/pq" 
+)
 
 func ConnectDB() (*sql.DB, error) {
 	err := godotenv.Load()
@@ -16,11 +18,20 @@ func ConnectDB() (*sql.DB, error) {
 	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASSWORD")
-	dbSchema := os.Getenv("DB_NAME")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "5432"
+	}
+	dbSSLMode := os.Getenv("DB_SSLMODE")
+	if dbSSLMode == "" {
+		dbSSLMode = "disable"
+	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", dbUser, dbPass, dbHost, dbSchema)
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser, dbPass, dbHost, dbPort, dbName, dbSSLMode)
 
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("error al abrir la base de datos: %w", err)
 	}
@@ -34,3 +45,4 @@ func ConnectDB() (*sql.DB, error) {
 
 	return db, nil
 }
+

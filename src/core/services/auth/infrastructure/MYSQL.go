@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"database/sql"
 	"fmt"
-	"logired/src/internal/services/auth/domain"
+	"logired/src/core/services/auth/domain"
 	user "logired/src/internal/users/domain/entities"
 )
 
@@ -54,11 +54,11 @@ func (r *AuthRepository) FindUserByID(userID int32) (user.User, error) {
 }
 
 func (r *AuthRepository) FindDriverCityWorkByUserID(userID int32) (string, error) {
-    var citywork string
-    query := "SELECT citywork FROM drivers WHERE iduser = ?"
-    err := r.DB.QueryRow(query, userID).Scan(&citywork)
-    if err != nil {
-        return "", err
-    }
-    return citywork, nil
+	var citywork string
+	query := "SELECT citywork FROM drivers WHERE iduser = ?"
+	err := r.DB.QueryRow(query, userID).Scan(&citywork)
+	if err != nil {
+		return "", err
+	}
+	return citywork, nil
 }

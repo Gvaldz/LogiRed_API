@@ -18,6 +18,19 @@ func NewDeleteCarController(delete *application.DeleteCar) *DeleteCarController 
 	}
 }
 
+// Delete godoc
+// @Summary      Eliminar un vehículo
+// @Description  Solo el conductor propietario puede eliminar su carro
+// @Tags         cars
+// @Produce      json
+// @Param        id path int true "ID del carro"
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      404 {object} map[string]string "carro no encontrado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /cars/{id} [delete]
 func (ctrl *DeleteCarController) Delete(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

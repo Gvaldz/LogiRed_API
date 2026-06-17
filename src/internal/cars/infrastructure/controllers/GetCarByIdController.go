@@ -18,6 +18,15 @@ func NewGetCarByIdController(get *application.GetCarById) *GetCarByIdController 
 	}
 }
 
+// GetById godoc
+// @Summary      Obtener un vehículo por ID
+// @Tags         cars
+// @Produce      json
+// @Param        id path int true "ID del carro"
+// @Success      200 {object} map[string]interface{} "datos del carro"
+// @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      404 {object} map[string]string "carro no encontrado"
+// @Router       /cars/{id} [get]
 func (ctrl *GetCarByIdController) GetById(c *gin.Context) {
 
 

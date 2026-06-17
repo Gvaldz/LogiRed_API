@@ -16,6 +16,20 @@ func NewCreateReviewController(create *application.CreateReview) *CreateReviewCo
 	return &CreateReviewController{createReview: create}
 }
 
+// Create godoc
+// @Summary      Crear una reseña
+// @Description  Un pasajero crea una reseña para un conductor
+// @Tags         reviews
+// @Accept       json
+// @Produce      json
+// @Param        body body map[string]interface{} true "Datos de la reseña" Example({"review":"Excelente","rating":5,"iduser":14})
+// @Security     ApiKeyAuth
+// @Success      201 {object} map[string]interface{} "mensaje y reseña creada"
+// @Failure      400 {object} map[string]string "error en los datos"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /reviews [post]
+
 func (ctrl *CreateReviewController) Create(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

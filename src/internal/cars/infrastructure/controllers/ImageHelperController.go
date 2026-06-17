@@ -47,5 +47,5 @@ func saveCarImage(c *gin.Context, field string) (string, error) {
 		fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
 
 	}
-	return fmt.Sprintf("https://logiredapi.redirectme.net/uploads/cars/%s", newFilename), nil
+	return fmt.Sprintf("https://logired-api.redirectme.net/uploads/cars/%s", newFilename), nil
 }

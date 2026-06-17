@@ -16,7 +16,16 @@ func NewGetAllUsersController(getAllUsers *application.GetAllUsers) *GetAllUsers
 		GetAllUsers: getAllUsers,
 	}
 }
-
+// GetAll godoc
+// @Summary      Obtener todos los usuarios (solo admin)
+// @Description  Devuelve lista de usuarios (solo para administradores)
+// @Tags         users
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {array} entities.User "lista de usuarios"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      403 {object} map[string]string "no autorizado"
+// @Router       /users [get]
 func (h *GetAllUsersController) GetAll(c *gin.Context) {
 	doctors, err := h.GetAllUsers.Execute()
 	if err != nil {

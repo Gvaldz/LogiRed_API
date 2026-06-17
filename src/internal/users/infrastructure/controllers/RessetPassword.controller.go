@@ -16,7 +16,17 @@ func NewRessetPasswordController(ressetPasswordUC *application.RessetPassword) *
 		ressetPasswordUC: ressetPasswordUC,
 	}
 }
-
+// RessetPassword godoc
+// @Summary      Restablecer contraseña (por email)
+// @Description  Actualiza la contraseña de un usuario dado su email
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        body body object true "Datos" Example({"email":"correo@example.com","newPassword":"nueva123"})
+// @Success      200 {object} map[string]string "mensaje de éxito"
+// @Failure      400 {object} map[string]string "datos inválidos"
+// @Failure      401 {object} map[string]string "error"
+// @Router       /users/password-reset [put]
 func (c *RessetPasswordController) RessetPassword(ctx *gin.Context) {
     var request struct {
         Email       string `json:"email" binding:"required,email"`

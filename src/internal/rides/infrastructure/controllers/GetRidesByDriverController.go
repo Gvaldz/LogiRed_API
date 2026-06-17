@@ -15,6 +15,16 @@ func NewGetRidesByDriverController(get *application.GetRidesByDriver) *GetRidesB
 	return &GetRidesByDriverController{getRidesByDriver: get}
 }
 
+// GetByDriver godoc
+// @Summary      Obtener viajes asignados al conductor autenticado
+// @Description  Devuelve todos los viajes que el conductor ha aceptado
+// @Tags         rides
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} map[string]interface{} "lista de viajes"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      500 {object} map[string]string "error interno"
+// @Router       /rides/driver/me [get]
 func (ctrl *GetRidesByDriverController) GetByDriver(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {
