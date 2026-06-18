@@ -1,5 +1,7 @@
 package controllers
 
+
+/*
 import (
     "logired/src/internal/drivers/application"
     "net/http"
@@ -40,3 +42,4 @@ func (ctrl *GetDriversByCityController) GetByCity(c *gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{"drivers": drivers})
 }
+    */

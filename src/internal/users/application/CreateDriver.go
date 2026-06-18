@@ -48,7 +48,6 @@ func (uc *RegisterDriver) Execute(input userEntities.RegisterDriverInput) (userE
 
 	driver := driverEntities.Driver{
 		IdUser:   createdUser.IdUser,
-		Citywork: input.Citywork,
 		Rating:   0,
 	}
 	if err := uc.driverRepo.CreateTx(tx, driver); err != nil {

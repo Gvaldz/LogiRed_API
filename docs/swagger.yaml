@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  controllers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
   entities.DriverInfo:
     properties:
       citywork:
@@ -70,7 +80,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/entities.User'
+          $ref: '#/definitions/controllers.LoginRequest'
       produces:
       - application/json
       responses:
@@ -404,39 +414,6 @@ paths:
       summary: Registrar dispositivo para notificaciones
       tags:
       - devices
-  /drivers/city/{city}:
-    get:
-      description: Devuelve una lista de conductores que trabajan en una ciudad (búsqueda
-        por LIKE)
-      parameters:
-      - description: Nombre de la ciudad (p.ej. 'Tuxtla')
-        in: path
-        name: city
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: lista de conductores
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: ciudad no especificada
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: error interno
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Obtener conductores por ciudad
-      tags:
-      - drivers
   /proposals:
     post:
       consumes:
@@ -999,10 +976,6 @@ paths:
         name: user_type
         required: true
         type: integer
-      - description: Ciudad de trabajo (solo conductores)
-        in: formData
-        name: citywork
-        type: string
       - description: Foto de perfil (jpg, png, gif)
         in: formData
         name: image
@@ -1136,10 +1109,6 @@ paths:
       - description: Fecha de nacimiento
         in: formData
         name: birthdate
-        type: string
-      - description: Ciudad de trabajo (solo conductores)
-        in: formData
-        name: citywork
         type: string
       - description: Nueva foto de perfil
         in: formData

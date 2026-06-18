@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"logired/src/internal/drivers/domain"
 	"logired/src/internal/drivers/domain/entities"
+	"logired/src/internal/drivers/domain"
 )
 
 type DriverRepo struct {
@@ -44,15 +44,39 @@ func (r *DriverRepo) Exists(userID int32) (bool, error) {
 }
 
 func (r *DriverRepo) CreateTx(tx *sql.Tx, driver entities.Driver) error {
-	query := "INSERT INTO drivers (iduser, rating, citywork) VALUES ($1, $2, $3)"
-	_, err := tx.Exec(query, driver.IdUser, driver.Rating, driver.Citywork)
+	query := "INSERT INTO drivers (iduser, rating) VALUES ($1, $2)"
+	_, err := tx.Exec(query, driver.IdUser, driver.Rating)
 	if err != nil {
 		return fmt.Errorf("error al crear conductor: %w", err)
 	}
 	return nil
 }
 
-func (r *DriverRepo) UpdateCitywork(idUser int32, citywork string) error {
+func (r *DriverRepo) GetApprovedDrivers() ([]domain.DriverDetail, error) {
+    query := `
+        SELECT d.iduser, d.rating, u.name, u.lastname, u.email
+        FROM drivers d
+        INNER JOIN users u ON d.iduser = u.iduser
+        WHERE d.approved = true
+    `
+    rows, err := r.db.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("error al obtener conductores aprobados: %w", err)
+    }
+    defer rows.Close()
+
+    var drivers []domain.DriverDetail
+    for rows.Next() {
+        var d domain.DriverDetail
+        if err := rows.Scan(&d.IdUser, &d.Rating, &d.Name, &d.Lastname, &d.Email); err != nil {
+            return nil, fmt.Errorf("error al escanear conductor: %w", err)
+        }
+        drivers = append(drivers, d)
+    }
+    return drivers, nil
+}
+
+/*func (r *DriverRepo) UpdateCitywork(idUser int32, citywork string) error {
     query := "UPDATE drivers SET citywork = $1 WHERE iduser = $2"
     _, err := r.db.Exec(query, citywork, idUser)
     return err
@@ -80,4 +104,4 @@ func (r *DriverRepo) GetDriversByCity(city string) ([]domain.DriverDetail, error
         drivers = append(drivers, d)
     }
     return drivers, nil
-}
+} */

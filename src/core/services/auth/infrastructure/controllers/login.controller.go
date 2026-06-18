@@ -8,6 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// LoginRequest es la estructura que Swagger mostrará
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type LoginController struct {
 	loginUC *application.Login
 }
@@ -22,19 +28,26 @@ func NewLoginController(loginUC *application.Login) *LoginController {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body entities.User true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
+// @Param        body body LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
 // @Success      200 {object} map[string]interface{} "token y expiración"
 // @Failure      400 {object} map[string]string "petición inválida"
 // @Failure      401 {object} map[string]string "credenciales incorrectas"
 // @Router       /auth/login [post]
 func (c *LoginController) Login(ctx *gin.Context) {
-	var credentials entities.User
+	// Usamos LoginRequest en lugar de entities.User
+	var credentials LoginRequest
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "petición inválida"})
 		return
 	}
 
-	token, err := c.loginUC.Execute(credentials)
+	// Construimos el objeto User que espera el caso de uso
+	user := entities.User{
+		Email:    credentials.Email,
+		Password: credentials.Password,
+	}
+
+	token, err := c.loginUC.Execute(user)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

@@ -8,14 +8,19 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	storageService "logired/src/core/services/storage"
 )
 
 type CreateCarController struct {
 	createCar *application.CreateCar
+	storage   storageService.StorageService 
 }
 
-func NewCreateCarController(create *application.CreateCar) *CreateCarController {
-	return &CreateCarController{createCar: create}
+func NewCreateCarController(create *application.CreateCar, storage storageService.StorageService) *CreateCarController {
+	return &CreateCarController{
+		createCar: create,
+		storage:   storage, 
+	}
 }
 
 // Create godoc
@@ -74,16 +79,17 @@ func (ctrl *CreateCarController) Create(c *gin.Context) {
 		return
 	}
 
-	frontView, err := saveCarImage(c, "frontview_image")
+	// Se pasa ctrl.storage como tercer parámetro
+	frontView, err := saveCarImage(c, "frontview_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
-	backView, err := saveCarImage(c, "backview_image")
+	backView, err := saveCarImage(c, "backview_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
-	plates, err := saveCarImage(c, "plates_image")
+	plates, err := saveCarImage(c, "plates_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
-	spaces, err := saveCarImage(c, "space_image")
+	spaces, err := saveCarImage(c, "space_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
 	car := entities.Car{

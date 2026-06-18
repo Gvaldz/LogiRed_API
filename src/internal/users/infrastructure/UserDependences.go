@@ -3,39 +3,42 @@ package infrastructure
 import (
 	"database/sql"
 	"logired/src/core"
-	entities_auth "logired/src/core/services/auth/domain"
-	driverApp "logired/src/internal/drivers/application"
-	drivers "logired/src/internal/drivers/domain"
+	storageService 		"logired/src/core/services/storage"
+	entities_users 		"logired/src/internal/users/domain"
+	entities_auth 		"logired/src/core/services/auth/domain"
+	middleware 			"logired/src/server/middleware"
+	drivers 			"logired/src/internal/drivers/domain"
 	"logired/src/internal/users/application"
-	entities_users "logired/src/internal/users/domain"
 	"logired/src/internal/users/infrastructure/controllers"
-	middleware "logired/src/server/middleware"
 )
 
 type UserDependencies struct {
-	DB           *sql.DB
-	Hasher       *core.BcryptHasher
-	UserRepo     entities_users.UserRepository
-	DriverRepo   drivers.IDriver
-	AuthRepo     entities_auth.AuthRepository
-	TokenService *core.JWTService
+	DB           	*sql.DB
+	Hasher       	*core.BcryptHasher
+	UserRepo     	entities_users.UserRepository
+	DriverRepo   	drivers.IDriver
+	AuthRepo     	entities_auth.AuthRepository
+	TokenService 	*core.JWTService
+	StorageService 	storageService.StorageService
 }
 
 func NewUserDependencies(
-	db *sql.DB,
-	hasher *core.BcryptHasher,
-	tokenService *core.JWTService,
-	authRepo entities_auth.AuthRepository,
-	userRepo entities_users.UserRepository,
-	driverRepo drivers.IDriver,
+	db 				*sql.DB,
+	hasher 			*core.BcryptHasher,
+	tokenService 	*core.JWTService,
+	authRepo 		entities_auth.AuthRepository,
+	userRepo 		entities_users.UserRepository,
+	driverRepo 		drivers.IDriver,
+	storageService 	storageService.StorageService,
 ) *UserDependencies {
 	return &UserDependencies{
-		DB:           db,
-		Hasher:       hasher,
-		TokenService: tokenService,
-		AuthRepo:     authRepo,
-		UserRepo:     userRepo,
-		DriverRepo:   driverRepo,
+		DB:           	db,
+		Hasher:       	hasher,
+		TokenService: 	tokenService,
+		AuthRepo:     	authRepo,
+		UserRepo:     	userRepo,
+		DriverRepo:   	driverRepo,
+		StorageService: storageService,
 	}
 }
 
@@ -45,17 +48,16 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
 	getUserUseCase := application.NewGetUserByID(d.UserRepo)
 	getUserProfileUseCase := application.NewGetUserProfile(d.UserRepo)
 	updateUserUseCase := application.NewUpdateUser(d.UserRepo)
-	updateDriverProfileUseCase := driverApp.NewUpdateDriverProfile(d.DriverRepo)
 	updatePasswordUseCase := application.NewUpdatePassword(d.UserRepo, d.AuthRepo, d.Hasher)
 	ressetPasswordUseCase := application.NewRessetPassword(d.UserRepo, d.AuthRepo, d.Hasher)
 	deleteUserUseCase := application.NewDeleteUser(d.UserRepo)
 	createDriverUseCase := application.NewRegisterDriver(d.UserRepo, d.DriverRepo, d.Hasher)
 
-	createUserController := controllers.NewCreateUserController(createUserUseCase, createDriverUseCase)
+	createUserController := controllers.NewCreateUserController(createUserUseCase, createDriverUseCase, d.StorageService)
 	getUsersController := controllers.NewGetAllUsersController(getAllUserUseCase)
 	getUserController := controllers.NewGetByUserIDController(getUserUseCase)
-	getUserProfileController := controllers.NewGetUserProfileController(getUserProfileUseCase)
-	updateUserController := controllers.NewUpdateUserController(updateUserUseCase, updateDriverProfileUseCase)
+	getUserProfileController := controllers.NewGetUserProfileController(getUserProfileUseCase,)
+	updateUserController := controllers.NewUpdateUserController(updateUserUseCase, d.StorageService)
 	updatePasswordController := controllers.NewUpdatePasswordController(updatePasswordUseCase)
 	ressetPasswordController := controllers.NewRessetPasswordController(ressetPasswordUseCase)
 	deleteUserController := controllers.NewDeleteUserController(deleteUserUseCase)

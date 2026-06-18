@@ -1,5 +1,6 @@
 package dependencies
 
+/*
 import (
 	"database/sql"
 	"logired/src/internal/drivers/application"
@@ -35,3 +36,5 @@ func (d *DriverDependencies) GetRoutes() *routes.DriverRoutes {
 		d.AuthMiddleware,
 	)
 }
+
+*/

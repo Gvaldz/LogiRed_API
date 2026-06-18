@@ -2,17 +2,16 @@ package controllers
 
 import (
 	"fmt"
-	"logired/src/core"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	storageService "logired/src/core/services/storage"
 )
 
-func saveCarImage(c *gin.Context, field string) (string, error) {
+func saveCarImage(c *gin.Context, field string, storage storageService.StorageService) (string, error) {
 	file, header, err := c.Request.FormFile(field)
 	if err == http.ErrMissingFile {
 		return "", nil 
@@ -27,25 +26,12 @@ func saveCarImage(c *gin.Context, field string) (string, error) {
 		return "", fmt.Errorf("formato no permitido en %s, use jpg, jpeg o png", field)
 	}
 
-	newFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-	uploadDir := "./uploads/cars"
-	if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
-		return "", fmt.Errorf("error al crear directorio: %w", err)
+	newFilename := fmt.Sprintf("cars/%s%s", uuid.New().String(), ext)
+
+	url, err := storage.Upload(file, newFilename)
+	if err != nil {
+		return "", fmt.Errorf("error al subir %s a Firebase: %w", field, err)
 	}
 
-	savedPath := filepath.Join(uploadDir, newFilename)
-
-	if err := c.SaveUploadedFile(header, savedPath); err != nil {
-		return "", fmt.Errorf("error al guardar %s: %w", field, err)
-	}
-
-	if err := core.FixImageOrientation(savedPath); err != nil {
-		fmt.Printf("advertencia: no se pudo corregir orientación de %s: %v\n", newFilename, err)
-	}
-
-	if err := os.Chmod(savedPath, 0644); err != nil {
-		fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
-
-	}
-	return fmt.Sprintf("https://logired-api.redirectme.net/uploads/cars/%s", newFilename), nil
+	return url, nil
 }

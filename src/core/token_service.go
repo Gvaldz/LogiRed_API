@@ -21,30 +21,30 @@ func NewJWTService() *JWTService {
 	return &JWTService{secretKey: key}
 }
 
-func (s *JWTService) GenerateToken(userID int32, email string, usertype int, citywork string) (domain.Token, error) {
-	expiresAt := time.Now().Add(100 * 365 * 24 * time.Hour).Unix()
+func (s *JWTService) GenerateToken(userID int32, email string, usertype int, approved bool) (domain.Token, error) {
+    expiresAt := time.Now().Add(100 * 365 * 24 * time.Hour).Unix()
 
-	claims := jwt.MapClaims{
-		"user_id":  userID,
-		"email":    email,
-		"exp":      expiresAt,
-		"usertype": usertype,
-	}
+    claims := jwt.MapClaims{
+        "user_id":  userID,
+        "email":    email,
+        "exp":      expiresAt,
+        "usertype": usertype,
+    }
 
-	if citywork != "" {
-		claims["citywork"] = citywork
-	}
+    if usertype == 2 {
+        claims["approved"] = approved
+    }
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.secretKey)
-	if err != nil {
-		return domain.Token{}, err
-	}
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString(s.secretKey)
+    if err != nil {
+        return domain.Token{}, err
+    }
 
-	return domain.Token{
-		Token:     tokenString,
-		ExpiresAt: expiresAt,
-	}, nil
+    return domain.Token{
+        Token:     tokenString,
+        ExpiresAt: expiresAt,
+    }, nil
 }
 
 func (s *JWTService) ValidateToken(tokenString string) (int32, error) {

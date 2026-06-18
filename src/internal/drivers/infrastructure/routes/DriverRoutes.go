@@ -1,5 +1,6 @@
 package routes
 
+/*
 import (
 	"logired/src/internal/drivers/infrastructure/controllers"
 
@@ -27,3 +28,5 @@ func (r *DriverRoutes) AttachRoutes(router *gin.Engine) {
 
 	driversGroup.GET("/city/:city", r.getByCityController.GetByCity)
 }
+
+*/

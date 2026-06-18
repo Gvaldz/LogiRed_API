@@ -3,31 +3,27 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
-	core "logired/src/core"
-	driver "logired/src/internal/drivers/application"
 	"logired/src/internal/users/application"
 	"logired/src/internal/users/domain/entities"
+	storageService "logired/src/core/services/storage"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type UpdateUserController struct {
 	updateUserUC   *application.UpdateUser
-	updateDriverUC *driver.UpdateDriverProfile
+	storage        storageService.StorageService 
 }
 
 func NewUpdateUserController(
 	updateUserUC *application.UpdateUser,
-	updateDriverUC *driver.UpdateDriverProfile,
+	storage storageService.StorageService, 
 ) *UpdateUserController {
 	return &UpdateUserController{
 		updateUserUC:   updateUserUC,
-		updateDriverUC: updateDriverUC, 
+		storage:        storage, 
 	}
 }
 // UpdateUser godoc
@@ -42,7 +38,6 @@ func NewUpdateUserController(
 // @Param        email       formData string false "Email"
 // @Param        numberphone formData string false "Teléfono"
 // @Param        birthdate   formData string false "Fecha de nacimiento"
-// @Param        citywork    formData string false "Ciudad de trabajo (solo conductores)"
 // @Param        image       formData file   false "Nueva foto de perfil"
 // @Security     ApiKeyAuth
 // @Success      200 {object} map[string]string "mensaje de éxito"
@@ -64,14 +59,13 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
 		return
 	}
-		if tokenUserID != idInt {
+	if tokenUserID != idInt {
 		ctx.JSON(http.StatusForbidden, gin.H{"error": "No tienes permiso para editar este perfil"})
 		return
 	}
 
 	contentType := ctx.GetHeader("Content-Type")
 	var user entities.User
-	var citywork string
 
 	if strings.HasPrefix(contentType, "multipart/form-data") {
 		if err := ctx.Request.ParseMultipartForm(15 << 20); err != nil {
@@ -79,44 +73,19 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 			return
 		}
 
-		file, header, err := ctx.Request.FormFile("image")
-		if err != nil && err != http.ErrMissingFile {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Error al obtener la imagen: " + err.Error()})
+		// Llamada adaptada a Firebase utilizando la nueva lógica
+		imageURL, err := saveUserImage(ctx, c.storage)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		if file != nil {
-		defer file.Close()
-		ext := strings.ToLower(filepath.Ext(header.Filename))
-		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no permitido. Use jpg, jpeg, png o gif"})
-			return
-		}
-		newFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-		if err := os.MkdirAll("./uploads", os.ModePerm); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear directorio"})
-			return
-		}
-		savedPath := filepath.Join("./uploads", newFilename)
-		if err := ctx.SaveUploadedFile(header, savedPath); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la imagen: " + err.Error()})
-			return
-		}
-		if err := core.FixImageOrientation(savedPath); err != nil {
-			fmt.Printf("advertencia: no se pudo corregir orientación: %v\n", err)
-		}
-		if err := os.Chmod(savedPath, 0664); err != nil {
-			fmt.Printf("advertencia: no se pudo cambiar permisos: %v\n", err)
-		}
-		user.ImageURL = fmt.Sprintf("https://logired-api.redirectme.net/uploads/%s", newFilename)
-	}
+		user.ImageURL = imageURL
 
 		user.Name        = ctx.Request.FormValue("name")
 		user.Lastname    = ctx.Request.FormValue("lastname")
 		user.Email       = ctx.Request.FormValue("email")
 		user.NumberPhone = ctx.Request.FormValue("numberphone")
 		user.Birthdate   = ctx.Request.FormValue("birthdate")
-		citywork         = ctx.Request.FormValue("citywork") 
 
 	} else {
 		if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -132,17 +101,6 @@ func (c *UpdateUserController) UpdateUser(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	if citywork != "" {
-		if err := c.updateDriverUC.Execute(idInt, citywork); err != nil {
-			if strings.Contains(err.Error(), "no encontrado") {
-				ctx.JSON(http.StatusNotFound, gin.H{"error": "Perfil de conductor no encontrado"})
-				return
-			}
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar conductor: " + err.Error()})
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Usuario actualizado correctamente"})

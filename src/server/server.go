@@ -6,7 +6,6 @@ import (
 	loginRouters "logired/src/core/services/auth/infrastructure"
 	carsRoutes "logired/src/internal/cars/infrastructure/routes"
 	devicesRoutes "logired/src/internal/devices/infrastructure/routes"
-	driversRoutes "logired/src/internal/drivers/infrastructure/routes"
 	paymentRoutes "logired/src/internal/payments/infrastructure/routes"
 	proposalRoutes "logired/src/internal/proposals/infrastructure/routes"
 	reviewRoutes "logired/src/internal/reviews/infrastructure/routes"
@@ -26,16 +25,15 @@ import (
 )
 
 func Run(
-	authRoutes *loginRouters.AuthRoutes,
-	userRoutes *userRouters.UserRoutes,
-	devicesRoutes *devicesRoutes.DeviceRoutes,
-	carsRoutes *carsRoutes.CarRoutes,
-	ridesRoutes *ridesRoutes.RideRoutes,
-	proposalRoutes *proposalRoutes.ProposalRoutes,
-	reviewRoutes *reviewRoutes.ReviewRoutes,
-	driversRoutes *driversRoutes.DriverRoutes,
-	trackingRoutes *trackingRoutes.TrackingRoutes,
-	paymentRoutes *paymentRoutes.PaymentRoutes,
+	authRoutes 			*loginRouters.AuthRoutes,
+	userRoutes 			*userRouters.UserRoutes,
+	devicesRoutes 		*devicesRoutes.DeviceRoutes,
+	carsRoutes 			*carsRoutes.CarRoutes,
+	ridesRoutes 		*ridesRoutes.RideRoutes,
+	proposalRoutes 		*proposalRoutes.ProposalRoutes,
+	reviewRoutes 		*reviewRoutes.ReviewRoutes,
+	trackingRoutes 		*trackingRoutes.TrackingRoutes,
+	paymentRoutes 		*paymentRoutes.PaymentRoutes,
 ) {
 
 	r := gin.Default()
@@ -66,7 +64,6 @@ func Run(
 	ridesRoutes.AttachRoutes(r)
 	proposalRoutes.AttachRoutes(r)
 	reviewRoutes.AttachRoutes(r)
-	driversRoutes.AttachRoutes(r)
 	trackingRoutes.AttachRoutes(r)
 	paymentRoutes.AttachRoutes(r)
 

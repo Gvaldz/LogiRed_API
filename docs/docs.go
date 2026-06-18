@@ -39,7 +39,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.User"
+                            "$ref": "#/definitions/controllers.LoginRequest"
                         }
                     }
                 ],
@@ -525,54 +525,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "no autenticado",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "error interno",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/drivers/city/{city}": {
-            "get": {
-                "description": "Devuelve una lista de conductores que trabajan en una ciudad (búsqueda por LIKE)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "drivers"
-                ],
-                "summary": "Obtener conductores por ciudad",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Nombre de la ciudad (p.ej. 'Tuxtla')",
-                        "name": "city",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "lista de conductores",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "ciudad no especificada",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1454,12 +1406,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Ciudad de trabajo (solo conductores)",
-                        "name": "citywork",
-                        "in": "formData"
-                    },
-                    {
                         "type": "file",
                         "description": "Foto de perfil (jpg, png, gif)",
                         "name": "image",
@@ -1758,12 +1704,6 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "string",
-                        "description": "Ciudad de trabajo (solo conductores)",
-                        "name": "citywork",
-                        "in": "formData"
-                    },
-                    {
                         "type": "file",
                         "description": "Nueva foto de perfil",
                         "name": "image",
@@ -1892,6 +1832,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controllers.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "entities.DriverInfo": {
             "type": "object",
             "properties": {

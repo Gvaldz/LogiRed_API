@@ -1,5 +1,7 @@
+
 package application
 
+/*
 import (
 	"logired/src/internal/drivers/domain"
 )
@@ -15,3 +17,5 @@ func NewGetDriversByCity(repo domain.IDriver) *GetDriversByCity {
 func (uc *GetDriversByCity) Execute(city string) ([]domain.DriverDetail, error) {
 	return uc.repo.GetDriversByCity(city)
 }
+
+*/

@@ -8,5 +8,6 @@ type AuthRepository interface {
 	FindUserByEmail(email string) (user.User, error)
 	FindUserByID(id int32) (user.User, error)
 	UpdateLastLogin(userID int32) error
-	FindDriverCityWorkByUserID(userID int32) (string, error)
+	FindDriverApproved(userID int32) (bool, error)
+
 }

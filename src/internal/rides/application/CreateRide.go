@@ -23,32 +23,28 @@ func NewCreateRide(
 }
 
 func (uc *CreateRide) Execute(ride entities.Ride) error {
-	if err := uc.repo.CreateRide(ride); err != nil {
-		return err
-	}
+    if err := uc.repo.CreateRide(ride); err != nil {
+        return err
+    }
 
-	go func() {
-		if ride.OriginCity == "" {
-			return
-		}
+    go func() {
+        drivers, err := uc.driverRepo.GetApprovedDrivers()
+        if err != nil {
+            log.Printf("[FCM] error al obtener conductores aprobados: %v", err)
+            return
+        }
 
-		drivers, err := uc.driverRepo.GetDriversByCity(ride.OriginCity)
-		if err != nil {
-			log.Printf("[FCM] error al obtener conductores de %s: %v", ride.OriginCity, err)
-			return
-		}
+        if len(drivers) == 0 {
+            log.Printf("[FCM] no hay conductores aprobados")
+            return
+        }
 
-		if len(drivers) == 0 {
-			log.Printf("[FCM] no hay conductores en: %s", ride.OriginCity)
-			return
-		}
+        for _, driver := range drivers {
+            uc.notifier.NuevoViaje(driver.IdUser, ride.IdRide)
+        }
 
-		for _, driver := range drivers {
-			uc.notifier.NuevoViaje(driver.IdUser, ride.IdRide)
-		}
+        log.Printf("[FCM] notificados %d conductores aprobados", len(drivers))
+    }()
 
-		log.Printf("[FCM] notificados %d conductores en %s", len(drivers), ride.OriginCity)
-	}()
-
-	return nil
+    return nil
 }
