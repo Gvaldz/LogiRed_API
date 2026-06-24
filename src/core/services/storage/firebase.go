@@ -2,8 +2,10 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"mime/multipart"
+
 	"cloud.google.com/go/storage"
 	"firebase.google.com/go/v4"
 	"google.golang.org/api/option"
@@ -30,8 +32,22 @@ func NewFirebaseStorage(credentialsFile, bucketName string) (StorageService, err
 }
 
 func (fs *firebaseStorage) Upload(file multipart.File, destination string) (string, error) {
-	wc := fs.bucket.Object(destination).NewWriter(context.Background())
-	if _, err := io.Copy(wc, file); err != nil { return "", err }
-	if err := wc.Close(); err != nil { return "", err }
-	return "https://storage.googleapis.com/TU_BUCKET/" + destination, nil
+    ctx := context.Background()
+    
+    obj := fs.bucket.Object(destination)
+    wc := obj.NewWriter(ctx)
+
+    // 2. Copiamos el archivo
+    if _, err := io.Copy(wc, file); err != nil { 
+        return "", fmt.Errorf("error al copiar archivo: %w", err) 
+    }
+    if err := wc.Close(); err != nil { 
+        return "", fmt.Errorf("error al cerrar el writer: %w", err) 
+    }
+
+    if err := obj.ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+        return "", fmt.Errorf("error al hacer público el archivo: %w", err)
+    }
+
+    return "https://storage.googleapis.com/" + fs.bucket.BucketName() + "/" + destination, nil
 }

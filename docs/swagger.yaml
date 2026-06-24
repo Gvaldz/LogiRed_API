@@ -1,6 +1,92 @@
 basePath: /
 definitions:
-  controllers.LoginRequest:
+  controllers.AcceptProposalRequest:
+    properties:
+      idstatus:
+        example: 1
+        type: integer
+    required:
+    - idstatus
+    type: object
+  controllers.CreateProposalRequest:
+    properties:
+      comment:
+        example: Puedo llevar
+        type: string
+      id_ride:
+        example: 1
+        type: integer
+      idcar:
+        example: 3
+        type: integer
+      price:
+        example: 150.5
+        type: number
+    required:
+    - id_ride
+    - idcar
+    - price
+    type: object
+  dto.CarResponse:
+    properties:
+      backview_image:
+        type: string
+      brand:
+        type: string
+      car_registration:
+        type: string
+      color:
+        type: string
+      frontview_image:
+        type: string
+      idcar:
+        type: integer
+      iduser:
+        type: integer
+      max_capacity:
+        type: integer
+      model:
+        type: string
+      plates_image:
+        type: string
+      space_image:
+        type: string
+    type: object
+  dto.CreateRideRequest:
+    properties:
+      approx_weight:
+        type: number
+      date:
+        type: string
+      description:
+        type: string
+      destination_address:
+        type: string
+      destination_lat:
+        type: number
+      destination_lng:
+        type: number
+      distance_km:
+        type: number
+      hour:
+        type: string
+      origin_address:
+        type: string
+      origin_city:
+        type: string
+      origin_lat:
+        type: number
+      origin_lng:
+        type: number
+    type: object
+  dto.CreateRideResponse:
+    properties:
+      message:
+        type: string
+      ride:
+        $ref: '#/definitions/dto.RideResponse'
+    type: object
+  dto.LoginRequest:
     properties:
       email:
         type: string
@@ -9,6 +95,46 @@ definitions:
     required:
     - email
     - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      expires_at:
+        type: integer
+    type: object
+  dto.RideResponse:
+    properties:
+      aproxweight:
+        type: number
+      date:
+        type: string
+      description:
+        type: string
+      destination_address:
+        type: string
+      destination_lat:
+        type: number
+      destination_lng:
+        type: number
+      distance_km:
+        type: number
+      hour:
+        type: string
+      idclient:
+        type: integer
+      iddriver:
+        type: integer
+      idride:
+        type: integer
+      idridestatus:
+        type: integer
+      origin_address:
+        type: string
+      origin_lat:
+        type: number
+      origin_lng:
+        type: number
+      origincity:
+        type: string
     type: object
   entities.DriverInfo:
     properties:
@@ -59,10 +185,10 @@ definitions:
       user_type:
         type: integer
     type: object
-host: localhost:8081
+host: api-logired.shop
 info:
   contact: {}
-  description: API para la plataforma LogiRed de transporte de paquetes
+  description: API para la plataforma móvl LogiRed
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -80,15 +206,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/controllers.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: token y expiración
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.LoginResponse'
         "400":
           description: petición inválida
           schema:
@@ -134,7 +259,7 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Un conductor registra su carro con imágenes
+      description: Un conductor registra su carro
       parameters:
       - description: Placa
         in: formData
@@ -156,7 +281,7 @@ paths:
         name: color
         required: true
         type: string
-      - description: Capacidad máxima (kg)
+      - description: Capacidad máxima
         in: formData
         name: max_capacity
         required: true
@@ -181,24 +306,23 @@ paths:
       - application/json
       responses:
         "201":
-          description: mensaje y carro creado
+          description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.CarResponse'
         "400":
-          description: error en los datos
+          description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
         "401":
-          description: no autenticado
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: error interno
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -418,44 +542,30 @@ paths:
     post:
       consumes:
       - application/json
-      description: Un conductor crea una propuesta para un viaje
       parameters:
       - description: Datos de la propuesta
         in: body
         name: body
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/controllers.CreateProposalRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: mensaje y propuesta creada
+          description: Created
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: error en los datos
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: no autenticado
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: error interno
+          description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Crear una nueva propuesta
+      summary: Crear una propuesta
       tags:
       - proposals
   /proposals/{id}:
@@ -539,7 +649,6 @@ paths:
     put:
       consumes:
       - application/json
-      description: Cambia el estado de una propuesta (1 = aceptada, 3 = rechazada)
       parameters:
       - description: ID de la propuesta
         in: path
@@ -551,31 +660,18 @@ paths:
         name: body
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/controllers.AcceptProposalRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: mensaje de éxito
+          description: OK
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: error en la solicitud
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: no autenticado
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: error interno
+          description: Bad Request
           schema:
             additionalProperties:
               type: string
@@ -596,30 +692,28 @@ paths:
         name: body
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/dto.CreateRideRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: mensaje y viaje creado
+          description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/dto.CreateRideResponse'
         "400":
-          description: error en los datos
+          description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
         "401":
-          description: no autenticado
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: error interno
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -867,11 +961,8 @@ paths:
       - rides
   /rides/status:
     get:
-      description: Devuelve los viajes del usuario autenticado (cliente o conductor)
-        según el estado indicado (1-6)
       parameters:
-      - description: 'Estado del viaje (1: asignado, 2: en camino, 3: recogido, 4:
-          completado, 5: cancelado, 6: disponible)'
+      - description: Estado (1-6)
         in: query
         name: idstatus
         required: true
@@ -880,24 +971,18 @@ paths:
       - application/json
       responses:
         "200":
-          description: lista de viajes
+          description: total, rides
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: idstatus requerido o inválido
+          description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
         "401":
-          description: no autenticado
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: error interno
+          description: Unauthorized
           schema:
             additionalProperties:
               type: string
@@ -939,8 +1024,15 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Crea una cuenta (cliente o conductor) con imagen opcional
+      description: Crea una cuenta. Si user_type=1 (Cliente), solo requiere datos
+        básicos. Si user_type=2 (Conductor), requiere además datos del vehículo y
+        2 documentos obligatorios (Identificación Oficial y Licencia).
       parameters:
+      - description: 'Tipo de usuario: 1=Cliente, 2=Conductor'
+        in: formData
+        name: user_type
+        required: true
+        type: integer
       - description: Nombre
         in: formData
         name: name
@@ -959,48 +1051,83 @@ paths:
       - description: Teléfono
         in: formData
         name: numberphone
-        required: true
         type: string
       - description: Fecha de nacimiento (YYYY-MM-DD)
         in: formData
         name: birthdate
-        required: true
         type: string
       - description: Contraseña
         in: formData
         name: password
         required: true
         type: string
-      - description: 1=cliente, 2=conductor
-        in: formData
-        name: user_type
-        required: true
-        type: integer
-      - description: Foto de perfil (jpg, png, gif)
+      - description: Foto de perfil (Opcional)
         in: formData
         name: image
+        type: file
+      - description: Placa del vehículo (Requerido para conductor)
+        in: formData
+        name: car_registration
+        type: string
+      - description: Marca del vehículo (Requerido para conductor)
+        in: formData
+        name: brand
+        type: string
+      - description: Modelo del vehículo (Requerido para conductor)
+        in: formData
+        name: model
+        type: string
+      - description: Color del vehículo (Requerido para conductor)
+        in: formData
+        name: color
+        type: string
+      - description: Capacidad máxima (Requerido para conductor)
+        in: formData
+        name: max_capacity
+        type: integer
+      - description: Imagen frontal del carro (Requerido para conductor)
+        in: formData
+        name: frontview_image
+        type: file
+      - description: Imagen trasera del carro (Requerido para conductor)
+        in: formData
+        name: backview_image
+        type: file
+      - description: Imagen de las placas (Requerido para conductor)
+        in: formData
+        name: plates_image
+        type: file
+      - description: Imagen del baúl/espacio (Opcional)
+        in: formData
+        name: space_image
+        type: file
+      - description: 'Documento: Identificación Oficial (Requerido para conductor)'
+        in: formData
+        name: document_identificacion
+        type: file
+      - description: 'Documento: Licencia de conducir (Requerido para conductor)'
+        in: formData
+        name: document_licencia
         type: file
       produces:
       - application/json
       responses:
         "201":
-          description: usuario creado
+          description: Usuario creado exitosamente
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: error en los datos
+          description: Error en los datos (Faltan campos, archivos incorrectos, etc.)
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
         "500":
-          description: error interno
+          description: Error interno del servidor (BD o Storage)
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
-      summary: Registrar un nuevo usuario
+      summary: Registrar un nuevo usuario (Cliente o Conductor)
       tags:
       - users
   /users/{id}:

@@ -7,10 +7,10 @@ import (
 
 // @title           LogiRed API
 // @version         1.0
-// @description     API para la plataforma LogiRed de transporte de paquetes
+// @description     API para la plataforma móvl LogiRed
 // @license.name    MIT
 // @license.url     https://opensource.org/licenses/MIT
-// @host            localhost:8081
+// @host            api-logired.shop
 // @BasePath        /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

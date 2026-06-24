@@ -1,124 +1,207 @@
 package controllers
 
 import (
-	"net/http"
-	"strconv"
-	"strings"
+    "fmt"
+    "net/http"
+    "strconv"
+    "strings"
+    "time"
 
-	"logired/src/internal/users/application"
-	userEntities "logired/src/internal/users/domain/entities"
-	storageService "logired/src/core/services/storage"
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
+    "logired/src/core/services/storage"
+    "logired/src/internal/users/application"
+    userEntities "logired/src/internal/users/domain/entities"
+    carEntities "logired/src/internal/cars/domain/entities"
+    documentEntities "logired/src/internal/documents/domain/entities"
 )
 
 const (
-	UserTypeCliente   = 1
-	UserTypeConductor = 2
+    UserTypeCliente   = 1
+    UserTypeConductor = 2
 )
 
 type CreateUserController struct {
-	createUser     *application.CreateUser      
-	registerDriver *application.RegisterDriver 
-	storage        storageService.StorageService 
+    createUser     *application.CreateUser      
+    registerDriver *application.RegisterDriver 
+    storage        storage.StorageService 
 }
 
 func NewCreateUserController(
-	createUser *application.CreateUser,
-	registerDriver *application.RegisterDriver,
-	storage storageService.StorageService, 
+    createUser *application.CreateUser,
+    registerDriver *application.RegisterDriver,
+    storage storage.StorageService, 
 ) *CreateUserController {
-	return &CreateUserController{
-		createUser:     createUser,
-		registerDriver: registerDriver,
-		storage:        storage, 
-	}
+    return &CreateUserController{
+        createUser:     createUser,
+        registerDriver: registerDriver,
+        storage:        storage, 
+    }
 }
+
+func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageService, folder string) (string, error) {
+    file, header, err := c.Request.FormFile(fieldName)
+    if err != nil {
+        return "", fmt.Errorf("error obteniendo el archivo %s: %w", fieldName, err)
+    }
+    defer file.Close()
+
+    timestamp := time.Now().Unix()
+    destination := fmt.Sprintf("%s/%d_%s", folder, timestamp, header.Filename)
+
+    url, err := storage.Upload(file, destination)
+    if err != nil {
+        return "", fmt.Errorf("error subiendo %s: %w", fieldName, err)
+    }
+
+    return url, nil
+}
+
 // Create godoc
-// @Summary      Registrar un nuevo usuario
-// @Description  Crea una cuenta (cliente o conductor) con imagen opcional
+// @Summary      Registrar un nuevo usuario (Cliente o Conductor)
+// @Description  Crea una cuenta. Si user_type=1 (Cliente), solo requiere datos básicos. Si user_type=2 (Conductor), requiere además datos del vehículo y 2 documentos obligatorios (Identificación Oficial y Licencia).
 // @Tags         users
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        name         formData string true  "Nombre"
-// @Param        lastname     formData string true  "Apellido"
-// @Param        email        formData string true  "Correo electrónico"
-// @Param        numberphone  formData string true  "Teléfono"
-// @Param        birthdate    formData string true  "Fecha de nacimiento (YYYY-MM-DD)"
-// @Param        password     formData string true  "Contraseña"
-// @Param        user_type    formData int    true  "1=cliente, 2=conductor"
-// @Param        image        formData file   false "Foto de perfil (jpg, png, gif)"
-// @Success      201 {object} map[string]interface{} "usuario creado"
-// @Failure      400 {object} map[string]string "error en los datos"
-// @Failure      500 {object} map[string]string "error interno"
+//
+// @Param        user_type               formData int    true  "Tipo de usuario: 1=Cliente, 2=Conductor"
+// @Param        name                    formData string true  "Nombre"
+// @Param        lastname                formData string true  "Apellido"
+// @Param        email                   formData string true  "Correo electrónico"
+// @Param        numberphone             formData string false "Teléfono"
+// @Param        birthdate               formData string false "Fecha de nacimiento (YYYY-MM-DD)"
+// @Param        password                formData string true  "Contraseña"
+// @Param        image                   formData file   false "Foto de perfil (Opcional)"
+//
+// @Param        car_registration        formData string false "Placa del vehículo (Requerido para conductor)"
+// @Param        brand                   formData string false "Marca del vehículo (Requerido para conductor)"
+// @Param        model                   formData string false "Modelo del vehículo (Requerido para conductor)"
+// @Param        color                   formData string false "Color del vehículo (Requerido para conductor)"
+// @Param        max_capacity            formData int    false "Capacidad máxima (Requerido para conductor)"
+//
+// @Param        frontview_image         formData file   false "Imagen frontal del carro (Requerido para conductor)"
+// @Param        backview_image          formData file   false "Imagen trasera del carro (Requerido para conductor)"
+// @Param        plates_image            formData file   false "Imagen de las placas (Requerido para conductor)"
+// @Param        space_image             formData file   false "Imagen del baúl/espacio (Opcional)"
+//
+// @Param        document_identificacion formData file   false "Documento: Identificación Oficial (Requerido para conductor)"
+// @Param        document_licencia       formData file   false "Documento: Licencia de conducir (Requerido para conductor)"
+//
+// @Success      201 {object} map[string]interface{} "Usuario creado exitosamente"
+// @Failure      400 {object} map[string]interface{} "Error en los datos (Faltan campos, archivos incorrectos, etc.)"
+// @Failure      500 {object} map[string]interface{} "Error interno del servidor (BD o Storage)"
 // @Router       /users [post]
 func (ctrl *CreateUserController) Create(c *gin.Context) {
-	if !strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type debe ser multipart/form-data"})
-		return
-	}
+    if !strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type debe ser multipart/form-data"})
+        return
+    }
 
-	if err := c.Request.ParseMultipartForm(15 << 20); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al parsear formulario: " + err.Error()})
-		return
-	}
+    if err := c.Request.ParseMultipartForm(30 << 20); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Error al parsear formulario: " + err.Error()})
+        return
+    }
 
-	name        := c.Request.FormValue("name")
-	lastname    := c.Request.FormValue("lastname")
-	email       := c.Request.FormValue("email")
-	phone       := c.Request.FormValue("numberphone")
-	birthdate   := c.Request.FormValue("birthdate")
-	password    := c.Request.FormValue("password")
-	userTypeStr := c.Request.FormValue("user_type")
+    userTypeStr := c.Request.FormValue("user_type")
+    userType, err := strconv.Atoi(userTypeStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Tipo de usuario inválido"})
+        return
+    }
 
-	if name == "" || lastname == "" || email == "" || phone == "" || birthdate == "" || password == "" || userTypeStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Faltan campos obligatorios"})
-		return
-	}
+    name := c.Request.FormValue("name")
+    lastname := c.Request.FormValue("lastname")
+    email := c.Request.FormValue("email")
+    phone := c.Request.FormValue("numberphone")
+    birthdate := c.Request.FormValue("birthdate")
+    password := c.Request.FormValue("password")
 
-	userType, err := strconv.Atoi(userTypeStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Tipo de usuario inválido"})
-		return
-	}
+    if name == "" || lastname == "" || email == "" || password == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Faltan campos obligatorios del usuario"})
+        return
+    }
 
-	// Llamada adaptada a Firebase
-	imageURL, err := saveUserImage(c, ctrl.storage)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    imageURL, _ := uploadHelper(c, "image", ctrl.storage, "profiles")
 
-	user := userEntities.User{
-		Name:        name,
-		Lastname:    lastname,
-		Email:       email,
-		NumberPhone: phone,
-		Birthdate:   birthdate,
-		Password:    password,
-		UserType:    userType,
-		ImageURL:    imageURL,
-	}
+    user := userEntities.User{
+        Name: name, Lastname: lastname, Email: email, NumberPhone: phone,
+        Birthdate: birthdate, Password: password, UserType: userType, ImageURL: imageURL,
+    }
 
-	switch userType {
-	case UserTypeCliente:
-		created, err := ctrl.createUser.Execute(user)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusCreated, gin.H{"message": "Cliente registrado correctamente", "user": created})
+    switch userType {
+    case UserTypeCliente:
+        created, err := ctrl.createUser.Execute(user)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        c.JSON(http.StatusCreated, gin.H{"message": "Cliente registrado", "user": created})
 
-	case UserTypeConductor:
-		created, err := ctrl.registerDriver.Execute(userEntities.RegisterDriverInput{
-			User:     user,
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusCreated, gin.H{"message": "Conductor registrado correctamente", "user": created})
+    case UserTypeConductor:
+        carRegistration := c.Request.FormValue("car_registration")
+        brand := c.Request.FormValue("brand")
+        model := c.Request.FormValue("model")
+        color := c.Request.FormValue("color")
+        maxCapacityStr := c.Request.FormValue("max_capacity")
 
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Tipo de usuario no reconocido"})
-	}
+        if carRegistration == "" || brand == "" || maxCapacityStr == "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Faltan campos obligatorios del carro"})
+            return
+        }
+        maxCapacity, _ := strconv.ParseInt(maxCapacityStr, 10, 32)
+
+        frontView, err := uploadHelper(c, "frontview_image", ctrl.storage, "cars")
+        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+        
+        backView, err := uploadHelper(c, "backview_image", ctrl.storage, "cars")
+        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+        
+        plates, err := uploadHelper(c, "plates_image", ctrl.storage, "cars")
+        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+        
+        spaces, _ := uploadHelper(c, "space_image", ctrl.storage, "cars") 
+
+        car := carEntities.Car{
+            CarRegistration: carRegistration, Brand: brand, Model: model, Color: color,
+            MaxCapacity: int32(maxCapacity), FrontViewImage: frontView, BackViewImage: backView,
+            PlatesImage: plates, SpacesImage: spaces,
+        }
+
+        var documents []documentEntities.Document
+
+        docIdentificacionURL, err := uploadHelper(c, "document_identificacion", ctrl.storage, "documents")
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Falta el documento: Identificación oficial (document_identificacion)"})
+            return
+        }
+        documents = append(documents, documentEntities.Document{
+            IdDocumentType: 1, 
+            URL:            docIdentificacionURL,
+        })
+
+        docLicenciaURL, err := uploadHelper(c, "document_licencia", ctrl.storage, "documents")
+        if err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Falta el documento: Licencia de conducir (document_licencia)"})
+            return
+        }
+        documents = append(documents, documentEntities.Document{
+            IdDocumentType: 2, 
+            URL:            docLicenciaURL,
+        })
+
+        created, err := ctrl.registerDriver.Execute(application.RegisterDriverInput{
+            User:      user,
+            Car:       car,
+            Documents: documents,
+        })
+        if err != nil {
+     
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusCreated, gin.H{"message": "Conductor, carro y documentos registrados exitosamente", "user": created})
+
+    default:
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Tipo de usuario no reconocido"})
+    }
 }

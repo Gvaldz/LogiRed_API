@@ -39,16 +39,15 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "token y expiración",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.LoginResponse"
                         }
                     },
                     "400": {
@@ -120,7 +119,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Un conductor registra su carro con imágenes",
+                "description": "Un conductor registra su carro",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -162,7 +161,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Capacidad máxima (kg)",
+                        "description": "Capacidad máxima",
                         "name": "max_capacity",
                         "in": "formData",
                         "required": true
@@ -194,14 +193,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "mensaje y carro creado",
+                        "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.CarResponse"
                         }
                     },
                     "400": {
-                        "description": "error en los datos",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -210,7 +208,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "no autenticado",
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -219,7 +217,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "error interno",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -551,7 +549,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Un conductor crea una propuesta para un viaje",
                 "consumes": [
                     "application/json"
                 ],
@@ -561,7 +558,7 @@ const docTemplate = `{
                 "tags": [
                     "proposals"
                 ],
-                "summary": "Crear una nueva propuesta",
+                "summary": "Crear una propuesta",
                 "parameters": [
                     {
                         "description": "Datos de la propuesta",
@@ -569,39 +566,20 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/controllers.CreateProposalRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "mensaje y propuesta creada",
+                        "description": "Created",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "error en los datos",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "no autenticado",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "error interno",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -737,7 +715,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Cambia el estado de una propuesta (1 = aceptada, 3 = rechazada)",
                 "consumes": [
                     "application/json"
                 ],
@@ -762,14 +739,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/controllers.AcceptProposalRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "mensaje de éxito",
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -778,25 +754,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error en la solicitud",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "no autenticado",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "error interno",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -832,21 +790,19 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.CreateRideRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "mensaje y viaje creado",
+                        "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.CreateRideResponse"
                         }
                     },
                     "400": {
-                        "description": "error en los datos",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -855,7 +811,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "no autenticado",
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -864,7 +820,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "error interno",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1062,7 +1018,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Devuelve los viajes del usuario autenticado (cliente o conductor) según el estado indicado (1-6)",
                 "produces": [
                     "application/json"
                 ],
@@ -1073,7 +1028,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Estado del viaje (1: asignado, 2: en camino, 3: recogido, 4: completado, 5: cancelado, 6: disponible)",
+                        "description": "Estado (1-6)",
                         "name": "idstatus",
                         "in": "query",
                         "required": true
@@ -1081,14 +1036,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "lista de viajes",
+                        "description": "total, rides",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "idstatus requerido o inválido",
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1097,16 +1052,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "no autenticado",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "error interno",
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1344,7 +1290,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Crea una cuenta (cliente o conductor) con imagen opcional",
+                "description": "Crea una cuenta. Si user_type=1 (Cliente), solo requiere datos básicos. Si user_type=2 (Conductor), requiere además datos del vehículo y 2 documentos obligatorios (Identificación Oficial y Licencia).",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -1354,8 +1300,15 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Registrar un nuevo usuario",
+                "summary": "Registrar un nuevo usuario (Cliente o Conductor)",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tipo de usuario: 1=Cliente, 2=Conductor",
+                        "name": "user_type",
+                        "in": "formData",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Nombre",
@@ -1381,15 +1334,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Teléfono",
                         "name": "numberphone",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
                         "description": "Fecha de nacimiento (YYYY-MM-DD)",
                         "name": "birthdate",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -1399,43 +1350,98 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "file",
+                        "description": "Foto de perfil (Opcional)",
+                        "name": "image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Placa del vehículo (Requerido para conductor)",
+                        "name": "car_registration",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Marca del vehículo (Requerido para conductor)",
+                        "name": "brand",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Modelo del vehículo (Requerido para conductor)",
+                        "name": "model",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Color del vehículo (Requerido para conductor)",
+                        "name": "color",
+                        "in": "formData"
+                    },
+                    {
                         "type": "integer",
-                        "description": "1=cliente, 2=conductor",
-                        "name": "user_type",
-                        "in": "formData",
-                        "required": true
+                        "description": "Capacidad máxima (Requerido para conductor)",
+                        "name": "max_capacity",
+                        "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Foto de perfil (jpg, png, gif)",
-                        "name": "image",
+                        "description": "Imagen frontal del carro (Requerido para conductor)",
+                        "name": "frontview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen trasera del carro (Requerido para conductor)",
+                        "name": "backview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen de las placas (Requerido para conductor)",
+                        "name": "plates_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen del baúl/espacio (Opcional)",
+                        "name": "space_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Documento: Identificación Oficial (Requerido para conductor)",
+                        "name": "document_identificacion",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Documento: Licencia de conducir (Requerido para conductor)",
+                        "name": "document_licencia",
                         "in": "formData"
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "usuario creado",
+                        "description": "Usuario creado exitosamente",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "error en los datos",
+                        "description": "Error en los datos (Faltan campos, archivos incorrectos, etc.)",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "additionalProperties": true
                         }
                     },
                     "500": {
-                        "description": "error interno",
+                        "description": "Error interno del servidor (BD o Storage)",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -1832,7 +1838,135 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controllers.LoginRequest": {
+        "controllers.AcceptProposalRequest": {
+            "type": "object",
+            "required": [
+                "idstatus"
+            ],
+            "properties": {
+                "idstatus": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "controllers.CreateProposalRequest": {
+            "type": "object",
+            "required": [
+                "id_ride",
+                "idcar",
+                "price"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string",
+                    "example": "Puedo llevar"
+                },
+                "id_ride": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "idcar": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "price": {
+                    "type": "number",
+                    "example": 150.5
+                }
+            }
+        },
+        "dto.CarResponse": {
+            "type": "object",
+            "properties": {
+                "backview_image": {
+                    "type": "string"
+                },
+                "brand": {
+                    "type": "string"
+                },
+                "car_registration": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "frontview_image": {
+                    "type": "string"
+                },
+                "idcar": {
+                    "type": "integer"
+                },
+                "iduser": {
+                    "type": "integer"
+                },
+                "max_capacity": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "plates_image": {
+                    "type": "string"
+                },
+                "space_image": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateRideRequest": {
+            "type": "object",
+            "properties": {
+                "approx_weight": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "destination_address": {
+                    "type": "string"
+                },
+                "destination_lat": {
+                    "type": "number"
+                },
+                "destination_lng": {
+                    "type": "number"
+                },
+                "distance_km": {
+                    "type": "number"
+                },
+                "hour": {
+                    "type": "string"
+                },
+                "origin_address": {
+                    "type": "string"
+                },
+                "origin_city": {
+                    "type": "string"
+                },
+                "origin_lat": {
+                    "type": "number"
+                },
+                "origin_lng": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.CreateRideResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "ride": {
+                    "$ref": "#/definitions/dto.RideResponse"
+                }
+            }
+        },
+        "dto.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1843,6 +1977,67 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RideResponse": {
+            "type": "object",
+            "properties": {
+                "aproxweight": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "destination_address": {
+                    "type": "string"
+                },
+                "destination_lat": {
+                    "type": "number"
+                },
+                "destination_lng": {
+                    "type": "number"
+                },
+                "distance_km": {
+                    "type": "number"
+                },
+                "hour": {
+                    "type": "string"
+                },
+                "idclient": {
+                    "type": "integer"
+                },
+                "iddriver": {
+                    "type": "integer"
+                },
+                "idride": {
+                    "type": "integer"
+                },
+                "idridestatus": {
+                    "type": "integer"
+                },
+                "origin_address": {
+                    "type": "string"
+                },
+                "origin_lat": {
+                    "type": "number"
+                },
+                "origin_lng": {
+                    "type": "number"
+                },
+                "origincity": {
                     "type": "string"
                 }
             }
@@ -1936,11 +2131,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8081",
+	Host:             "api-logired.shop",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "LogiRed API",
-	Description:      "API para la plataforma LogiRed de transporte de paquetes",
+	Description:      "API para la plataforma móvl LogiRed",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

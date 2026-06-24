@@ -8,4 +8,5 @@ type ICar interface {
 	GetCarsByDriverId(idDriver int32) ([]entities.Car, error)
 	GetCarById(idCar int32) (entities.Car, error)
 	DeleteCar(idCar int32, idDriver int32) error
+	CreateCarTx(tx interface{}, car entities.Car) error
 }

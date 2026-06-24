@@ -19,15 +19,13 @@ func NewGetRidesByStatusController(uc *application.GetRidesByStatus) *GetRidesBy
 
 // GetByStatus godoc
 // @Summary      Obtener viajes por estado
-// @Description  Devuelve los viajes del usuario autenticado (cliente o conductor) según el estado indicado (1-6)
 // @Tags         rides
 // @Produce      json
-// @Param        idstatus query int true "Estado del viaje (1: asignado, 2: en camino, 3: recogido, 4: completado, 5: cancelado, 6: disponible)"
+// @Param        idstatus query int true "Estado (1-6)"
 // @Security     ApiKeyAuth
-// @Success      200 {object} map[string]interface{} "lista de viajes"
-// @Failure      400 {object} map[string]string "idstatus requerido o inválido"
-// @Failure      401 {object} map[string]string "no autenticado"
-// @Failure      500 {object} map[string]string "error interno"
+// @Success      200 {object} map[string]interface{} "total, rides"
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
 // @Router       /rides/status [get]
 func (ctrl *GetRidesByStatusController) GetByStatus(c *gin.Context) {
     userIDInterface, exists := c.Get("userID")

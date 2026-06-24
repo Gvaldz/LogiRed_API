@@ -19,17 +19,14 @@ func NewAcceptProposalController(accept *application.AcceptProposal) *AcceptProp
 
 // Accept godoc
 // @Summary      Aceptar o rechazar una propuesta
-// @Description  Cambia el estado de una propuesta (1 = aceptada, 3 = rechazada)
 // @Tags         proposals
 // @Accept       json
 // @Produce      json
 // @Param        id path int true "ID de la propuesta"
-// @Param        body body map[string]interface{} true "Nuevo estado" Example({"idstatus": 1})
+// @Param        body body AcceptProposalRequest true "Nuevo estado"
 // @Security     ApiKeyAuth
-// @Success      200 {object} map[string]string "mensaje de éxito"
-// @Failure      400 {object} map[string]string "error en la solicitud"
-// @Failure      401 {object} map[string]string "no autenticado"
-// @Failure      500 {object} map[string]string "error interno"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
 // @Router       /proposals/{id}/accept [put]
 func (ctrl *AcceptProposalController) Accept(c *gin.Context) {
 	idProposal, err := strconv.ParseInt(c.Param("id"), 10, 32)
@@ -62,9 +59,4 @@ func (ctrl *AcceptProposalController) Accept(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": message})
-}
-
-// AcceptProposalRequest representa la solicitud para aceptar/rechazar una propuesta
-type AcceptProposalRequest struct {
-	IdStatus int32 `json:"idstatus" example:"1" enums:"1,3"` // 1=aceptada, 3=rechazada
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"logired/src/internal/cars/domain/entities"
 	"strings"
+	"errors"
 )
 
 type CarRepo struct {
@@ -142,5 +143,38 @@ func (r *CarRepo) DeleteCar(idCar int32, idDriver int32) error {
 		return fmt.Errorf("car no encontrado o no tienes permiso para eliminarlo")
 	}
 	log.Println("[CarRepo] - car eliminado correctamente")
+	return nil
+}
+
+
+func (repo *CarRepo) CreateCarTx(tx interface{}, car entities.Car) error {
+	sqlTx, ok := tx.(*sql.Tx)
+	if !ok {
+		return errors.New("error crítico: la transacción provista no es del tipo *sql.Tx")
+	}
+
+	query := `
+		INSERT INTO cars (
+			iduser, car_registration, brand, model, color, 
+			max_capacity, frontview_image, backview_image, plates_image, space_image
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+
+	_, err := sqlTx.Exec(query,
+		car.IdDriver,
+		car.CarRegistration,
+		car.Brand,
+		car.Model,
+		car.Color,
+		car.MaxCapacity,
+		car.FrontViewImage,
+		car.BackViewImage,
+		car.PlatesImage,
+		car.SpacesImage,
+	)
+
+	if err != nil {
+		return fmt.Errorf("error al guardar el vehículo en la transacción: %w", err)
+	}
+
 	return nil
 }

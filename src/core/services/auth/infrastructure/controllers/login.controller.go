@@ -28,8 +28,8 @@ func NewLoginController(loginUC *application.Login) *LoginController {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
-// @Success      200 {object} map[string]interface{} "token y expiración"
+// @Param        body body dto.LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
+// @Success      200 {object} dto.LoginResponse
 // @Failure      400 {object} map[string]string "petición inválida"
 // @Failure      401 {object} map[string]string "credenciales incorrectas"
 // @Router       /auth/login [post]

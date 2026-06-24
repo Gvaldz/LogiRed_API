@@ -1,4 +1,3 @@
-// src/server/middleware/strict_rate_limiter.go
 package middleware
 
 import (
