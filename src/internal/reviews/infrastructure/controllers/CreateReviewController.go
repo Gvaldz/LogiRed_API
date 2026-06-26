@@ -23,7 +23,7 @@ func NewCreateReviewController(create *application.CreateReview) *CreateReviewCo
 // @Accept       json
 // @Produce      json
 // @Param        body body map[string]interface{} true "Datos de la reseña" Example({"review":"Excelente","rating":5,"iduser":14})
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      201 {object} map[string]interface{} "mensaje y reseña creada"
 // @Failure      400 {object} map[string]string "error en los datos"
 // @Failure      401 {object} map[string]string "no autenticado"

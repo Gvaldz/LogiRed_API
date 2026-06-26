@@ -5,6 +5,7 @@ import (
     "net/http"
     "strconv"
     "strings"
+    "sync"
     "time"
 
     "github.com/gin-gonic/gin"
@@ -48,12 +49,21 @@ func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageServi
     timestamp := time.Now().Unix()
     destination := fmt.Sprintf("%s/%d_%s", folder, timestamp, header.Filename)
 
-    url, err := storage.Upload(file, destination)
-    if err != nil {
-        return "", fmt.Errorf("error subiendo %s: %w", fieldName, err)
+    var url string
+    const maxRetries = 3
+    for attempt := 1; attempt <= maxRetries; attempt++ {
+        url, err = storage.Upload(file, destination)
+        if err == nil {
+            return url, nil
+        }
+
+        if attempt < maxRetries {
+            time.Sleep(time.Duration(attempt*100) * time.Millisecond)
+            file.Seek(0, 0)
+        }
     }
 
-    return url, nil
+    return "", fmt.Errorf("error subiendo %s después de %d intentos: %w", fieldName, maxRetries, err)
 }
 
 // Create godoc
@@ -80,11 +90,15 @@ func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageServi
 //
 // @Param        frontview_image         formData file   false "Imagen frontal del carro (Requerido para conductor)"
 // @Param        backview_image          formData file   false "Imagen trasera del carro (Requerido para conductor)"
+// @Param        leftview_image          formData file   false "Imagen lado izquierdo (Requerido para conductor)"
+// @Param        rightview_image         formData file   false "Imagen lado derecho (Requerido para conductor)"
+// @Param        space_image             formData file   false "Imagen del espacio de carga (Requerido para conductor)"
 // @Param        plates_image            formData file   false "Imagen de las placas (Requerido para conductor)"
-// @Param        space_image             formData file   false "Imagen del baúl/espacio (Opcional)"
 //
-// @Param        document_identificacion formData file   false "Documento: Identificación Oficial (Requerido para conductor)"
-// @Param        document_licencia       formData file   false "Documento: Licencia de conducir (Requerido para conductor)"
+// @Param        document_identificacion_adelante formData file false "Identificación oficial (frente)"
+// @Param        document_identificacion_atras    formData file false "Identificación oficial (reverso)"
+// @Param        document_licencia                formData file false "Licencia de conducir"
+// @Param        document_comprobante_domicilio   formData file false "Comprobante de domicilio"
 //
 // @Success      201 {object} map[string]interface{} "Usuario creado exitosamente"
 // @Failure      400 {object} map[string]interface{} "Error en los datos (Faltan campos, archivos incorrectos, etc.)"
@@ -149,44 +163,67 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
         }
         maxCapacity, _ := strconv.ParseInt(maxCapacityStr, 10, 32)
 
-        frontView, err := uploadHelper(c, "frontview_image", ctrl.storage, "cars")
-        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
-        
-        backView, err := uploadHelper(c, "backview_image", ctrl.storage, "cars")
-        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
-        
-        plates, err := uploadHelper(c, "plates_image", ctrl.storage, "cars")
-        if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
-        
-        spaces, _ := uploadHelper(c, "space_image", ctrl.storage, "cars") 
+        var wg sync.WaitGroup
+        var mu sync.Mutex
+        results := make(map[string]string)
+        var errUpload error
+
+        uploadFiles := []struct {
+            field  string
+            folder string
+            name   string
+        }{
+            {"frontview_image", "cars", "frontView"},
+            {"backview_image", "cars", "backView"},
+            {"leftview_image", "cars", "leftView"},
+            {"rightview_image", "cars", "rightView"},
+            {"space_image", "cars", "spaces"},
+            {"plates_image", "cars", "plates"},
+            {"document_identificacion_adelante", "documents", "docIdAdelante"},
+            {"document_identificacion_atras", "documents", "docIdAtras"},
+            {"document_licencia", "documents", "docLicencia"},
+            {"document_comprobante_domicilio", "documents", "docComprobante"},
+        }
+
+        semaphore := make(chan struct{}, 3)
+        for _, f := range uploadFiles {
+            wg.Add(1)
+            go func(field, folder, name string) {
+                defer wg.Done()
+                semaphore <- struct{}{}
+                defer func() { <-semaphore }()
+
+                url, err := uploadHelper(c, field, ctrl.storage, folder)
+                mu.Lock()
+                defer mu.Unlock()
+                if err != nil && errUpload == nil {
+                    errUpload = fmt.Errorf("%s: %v", field, err)
+                } else {
+                    results[name] = url
+                }
+            }(f.field, f.folder, f.name)
+        }
+        wg.Wait()
+
+        if errUpload != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": errUpload.Error()})
+            return
+        }
 
         car := carEntities.Car{
             CarRegistration: carRegistration, Brand: brand, Model: model, Color: color,
-            MaxCapacity: int32(maxCapacity), FrontViewImage: frontView, BackViewImage: backView,
-            PlatesImage: plates, SpacesImage: spaces,
+            MaxCapacity: int32(maxCapacity), FrontViewImage: results["frontView"],
+            BackViewImage: results["backView"], LeftViewImage: results["leftView"],
+            RightViewImage: results["rightView"], PlatesImage: results["plates"],
+            SpacesImage: results["spaces"],
         }
 
-        var documents []documentEntities.Document
-
-        docIdentificacionURL, err := uploadHelper(c, "document_identificacion", ctrl.storage, "documents")
-        if err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Falta el documento: Identificación oficial (document_identificacion)"})
-            return
+        documents := []documentEntities.Document{
+            {IdDocumentType: 1, URL: results["docIdAdelante"]},
+            {IdDocumentType: 2, URL: results["docIdAtras"]},
+            {IdDocumentType: 3, URL: results["docLicencia"]},
+            {IdDocumentType: 4, URL: results["docComprobante"]},
         }
-        documents = append(documents, documentEntities.Document{
-            IdDocumentType: 1, 
-            URL:            docIdentificacionURL,
-        })
-
-        docLicenciaURL, err := uploadHelper(c, "document_licencia", ctrl.storage, "documents")
-        if err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Falta el documento: Licencia de conducir (document_licencia)"})
-            return
-        }
-        documents = append(documents, documentEntities.Document{
-            IdDocumentType: 2, 
-            URL:            docLicenciaURL,
-        })
 
         created, err := ctrl.registerDriver.Execute(application.RegisterDriverInput{
             User:      user,
@@ -199,7 +236,11 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
             return
         }
 
-        c.JSON(http.StatusCreated, gin.H{"message": "Conductor, carro y documentos registrados exitosamente", "user": created})
+        c.JSON(http.StatusCreated, gin.H{
+            "message":  "Conductor registrado. Pendiente de aprobación por un administrador.",
+            "approved": false,
+            "user":     created,
+        })
 
     default:
         c.JSON(http.StatusBadRequest, gin.H{"error": "Tipo de usuario no reconocido"})

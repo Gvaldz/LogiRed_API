@@ -23,7 +23,7 @@ func NewDeleteUserController(delete *application.DeleteUser) *DeleteUserControll
 // @Tags         users
 // @Produce      json
 // @Param        id path int true "ID del usuario"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "ID inválido"
 // @Failure      401 {object} map[string]string "no autenticado"

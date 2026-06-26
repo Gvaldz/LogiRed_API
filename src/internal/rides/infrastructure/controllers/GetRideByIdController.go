@@ -20,10 +20,12 @@ func NewGetRideByIdController(get *application.GetRideById) *GetRideByIdControll
 // @Summary      Obtener un viaje por ID
 // @Description  Devuelve los detalles de un viaje específico
 // @Tags         rides
+// @Security     Bearer
 // @Produce      json
 // @Param        id path int true "ID del viaje"
 // @Success      200 {object} map[string]interface{} "datos del viaje"
 // @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      404 {object} map[string]string "viaje no encontrado"
 // @Router       /rides/{id} [get]
 func (ctrl *GetRideByIdController) GetById(c *gin.Context) {

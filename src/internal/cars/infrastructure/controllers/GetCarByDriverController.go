@@ -20,7 +20,7 @@ func NewGetCarsByDriverController(get *application.GetCarsByDriver) *GetCarsByDr
 // @Summary      Obtener los vehículos del conductor autenticado
 // @Tags         cars
 // @Produce      json
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]interface{} "lista de carros"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"

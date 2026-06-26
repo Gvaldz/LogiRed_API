@@ -23,7 +23,7 @@ func NewUpdatePasswordController(updatePasswordUC *application.UpdatePassword) *
 // @Accept       json
 // @Produce      json
 // @Param        body body object true "Contraseñas" Example({"oldPassword":"vieja","newPassword":"nueva123"})
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "datos inválidos"
 // @Failure      401 {object} map[string]string "no autenticado o contraseña incorrecta"

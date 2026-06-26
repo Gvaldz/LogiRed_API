@@ -21,7 +21,7 @@ func NewGetRidesHistoryController(uc *application.GetRidesHistory) *GetRidesHist
 // @Description  Devuelve viajes con estado 4 o 5 (historial) para el usuario autenticado (cliente o conductor)
 // @Tags         rides
 // @Produce      json
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]interface{} "lista de viajes históricos"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"

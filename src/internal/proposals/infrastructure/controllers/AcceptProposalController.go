@@ -24,7 +24,7 @@ func NewAcceptProposalController(accept *application.AcceptProposal) *AcceptProp
 // @Produce      json
 // @Param        id path int true "ID de la propuesta"
 // @Param        body body AcceptProposalRequest true "Nuevo estado"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string
 // @Failure      400 {object} map[string]string
 // @Router       /proposals/{id}/accept [put]

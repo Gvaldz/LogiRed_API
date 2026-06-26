@@ -54,7 +54,6 @@ func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
     })
 }
 
-// GetProposalsByRideResponse estructura la respuesta con total y lista de propuestas
 type GetProposalsByRideResponse struct {
     Total     int                  `json:"total"`
     Proposals []entities.Proposal  `json:"proposals"`

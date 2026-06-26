@@ -15,24 +15,18 @@ func NewGetRideByCityController(get *application.GetRidesByCity) *GetRideByCityC
     return &GetRideByCityController{getRideByCity: get}
 }
 
-// GetByCity godoc
-// @Summary      Obtener viajes disponibles por ciudad
-// @Description  Devuelve viajes activos (estado 6) en la ciudad especificada
+// GetAvailable godoc
+// @Summary      Obtener todos los viajes disponibles
+// @Description  Devuelve todos los viajes activos (estado 6) disponibles para cualquier conductor. Requiere autenticación.
 // @Tags         rides
+// @Security     Bearer
 // @Produce      json
-// @Param        city path string true "Nombre de la ciudad"
-// @Success      200 {object} map[string]interface{} "lista de viajes"
-// @Failure      400 {object} map[string]string "ciudad no especificada"
+// @Success      200 {object} map[string]interface{} "lista de viajes disponibles"
+// @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"
-// @Router       /rides/city/{city} [get]
+// @Router       /rides/available [get]
 func (ctrl *GetRideByCityController) GetByCity(c *gin.Context) {
-    city := c.Param("city")
-    if city == "" {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "ciudad no especificada"})
-        return
-    }
-
-    rides, err := ctrl.getRideByCity.Execute(city)
+    rides, err := ctrl.getRideByCity.Execute("")
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return

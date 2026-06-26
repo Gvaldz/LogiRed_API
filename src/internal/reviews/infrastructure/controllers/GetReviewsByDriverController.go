@@ -20,7 +20,7 @@ func NewGetReviewsByDriverController(get *application.GetReviewsByDriver) *GetRe
 // @Description  Devuelve todas las reseñas del conductor actual (requiere autenticación)
 // @Tags         reviews
 // @Produce      json
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]interface{} "lista de reseñas"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"

@@ -23,7 +23,7 @@ func NewCreateProposalController(create *application.CreateProposal) *CreateProp
 // @Accept       json
 // @Produce      json
 // @Param        body body CreateProposalRequest true "Datos de la propuesta"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      201 {object} map[string]interface{}
 // @Failure      400 {object} map[string]string
 // @Router       /proposals [post]
@@ -46,7 +46,6 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 		IdDriver: driverID,
 		IdRide:   req.IdRide,
 		Comment:  req.Comment,
-		IdCar:    req.IdCar,
 		IdStatus: 2, 
 	}
 

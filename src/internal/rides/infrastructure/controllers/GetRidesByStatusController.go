@@ -22,7 +22,7 @@ func NewGetRidesByStatusController(uc *application.GetRidesByStatus) *GetRidesBy
 // @Tags         rides
 // @Produce      json
 // @Param        idstatus query int true "Estado (1-6)"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]interface{} "total, rides"
 // @Failure      400 {object} map[string]string
 // @Failure      401 {object} map[string]string

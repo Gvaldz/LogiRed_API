@@ -24,7 +24,7 @@ func NewUpdateRideStatusController(update *application.UpdateRideStatus) *Update
 // @Produce      json
 // @Param        id path int true "ID del viaje"
 // @Param        body body map[string]interface{} true "Nuevo estado" Example({"status":2})
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "error en la solicitud"
 // @Failure      401 {object} map[string]string "no autenticado"

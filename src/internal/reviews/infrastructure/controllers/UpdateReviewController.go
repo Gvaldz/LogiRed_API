@@ -25,7 +25,7 @@ func NewUpdateReviewController(update *application.UpdateReview) *UpdateReviewCo
 // @Produce      json
 // @Param        id path int true "ID de la reseña"
 // @Param        body body map[string]interface{} true "Datos a actualizar" Example({"review":"Buen servicio","rating":4})
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "error en la solicitud"
 // @Failure      401 {object} map[string]string "no autenticado"

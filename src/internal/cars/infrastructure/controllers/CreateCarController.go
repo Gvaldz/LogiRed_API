@@ -36,9 +36,11 @@ func NewCreateCarController(create *application.CreateCar, storage storageServic
 // @Param        max_capacity      formData  integer true   "Capacidad máxima"
 // @Param        frontview_image   formData  file    false  "Imagen frontal"
 // @Param        backview_image    formData  file    false  "Imagen trasera"
+// @Param        leftview_image    formData  file    false  "Imagen lado izquierdo"
+// @Param        rightview_image   formData  file    false  "Imagen lado derecho"
+// @Param        space_image       formData  file    false  "Imagen del espacio de carga"
 // @Param        plates_image      formData  file    false  "Imagen de placas"
-// @Param        space_image       formData  file    false  "Imagen del espacio"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      201 {object} dto.CarResponse
 // @Failure      400 {object} map[string]string
 // @Failure      401 {object} map[string]string
@@ -86,10 +88,16 @@ func (ctrl *CreateCarController) Create(c *gin.Context) {
 	backView, err := saveCarImage(c, "backview_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
-	plates, err := saveCarImage(c, "plates_image", ctrl.storage)
+	leftView, err := saveCarImage(c, "leftview_image", ctrl.storage)
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	rightView, err := saveCarImage(c, "rightview_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
 	spaces, err := saveCarImage(c, "space_image", ctrl.storage)
+	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
+
+	plates, err := saveCarImage(c, "plates_image", ctrl.storage)
 	if err != nil { c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()}); return }
 
 	car := entities.Car{
@@ -101,6 +109,8 @@ func (ctrl *CreateCarController) Create(c *gin.Context) {
 		MaxCapacity:     int32(maxCapacity),
 		FrontViewImage:  frontView,
 		BackViewImage:   backView,
+		LeftViewImage:   leftView,
+		RightViewImage:  rightView,
 		PlatesImage:     plates,
 		SpacesImage:     spaces,
 	}

@@ -23,7 +23,7 @@ func NewCreateRideController(create *application.CreateRide) *CreateRideControll
 // @Accept       json
 // @Produce      json
 // @Param        body body dto.CreateRideRequest true "Datos del viaje"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      201 {object} dto.CreateRideResponse
 // @Failure      400 {object} map[string]string
 // @Failure      401 {object} map[string]string

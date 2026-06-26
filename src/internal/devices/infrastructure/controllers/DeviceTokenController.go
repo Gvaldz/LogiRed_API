@@ -22,7 +22,7 @@ func NewDeviceTokenController(uc *application.SaveDeviceToken) *DeviceTokenContr
 // @Accept       json
 // @Produce      json
 // @Param        body body map[string]interface{} true "Datos del dispositivo" Example({"fcm_token":"abc123","device_name":"iPhone"})
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "error en la solicitud"
 // @Failure      401 {object} map[string]string "no autenticado"

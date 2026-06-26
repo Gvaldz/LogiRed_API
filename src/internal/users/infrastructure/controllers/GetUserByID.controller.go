@@ -19,10 +19,12 @@ func NewGetByUserIDController(getByUserID *application.GetUserByID) *GetByUserID
 // GetByUserID godoc
 // @Summary      Obtener usuario por ID (versión simplificada)
 // @Tags         users
+// @Security     Bearer
 // @Produce      json
 // @Param        id path int true "ID del usuario"
 // @Success      200 {object} map[string]interface{} "datos del usuario"
 // @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      404 {object} map[string]string "usuario no encontrado"
 // @Router       /users/{id} [get]
 func (h *GetByUserIDController) GetByUserID(c *gin.Context) {

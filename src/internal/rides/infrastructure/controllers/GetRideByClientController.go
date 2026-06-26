@@ -20,7 +20,7 @@ func NewGetRidesByClientController(get *application.GetRidesByClient) *GetRidesB
 // @Description  Devuelve todos los viajes solicitados por el cliente
 // @Tags         rides
 // @Produce      json
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]interface{} "lista de viajes"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"

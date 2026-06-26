@@ -39,7 +39,7 @@ func NewUpdateUserController(
 // @Param        numberphone formData string false "Teléfono"
 // @Param        birthdate   formData string false "Fecha de nacimiento"
 // @Param        image       formData file   false "Nueva foto de perfil"
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "error en los datos"
 // @Failure      401 {object} map[string]string "no autenticado"

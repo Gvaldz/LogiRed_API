@@ -21,7 +21,7 @@ func NewGetAllUsersController(getAllUsers *application.GetAllUsers) *GetAllUsers
 // @Description  Devuelve lista de usuarios (solo para administradores)
 // @Tags         users
 // @Produce      json
-// @Security     ApiKeyAuth
+// @Security     Bearer
 // @Success      200 {array} entities.User "lista de usuarios"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      403 {object} map[string]string "no autorizado"
