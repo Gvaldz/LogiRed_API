@@ -24,12 +24,12 @@ func NewLoginController(loginUC *application.Login) *LoginController {
 
 // Login godoc
 // @Summary      Iniciar sesión
-// @Description  Autentica a un usuario y devuelve un token JWT en el header Authorization. El cliente debe extraer el token del header y usarlo en futuras requests.
+// @Description  Autentica a un usuario y devuelve un token JWT que contiene usertype y approved (para conductores)
 // @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Param        body body LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
-// @Success      200 {object} map[string]interface{} "expires_at: timestamp de expiración del token. El token se envía en el header Authorization"
+// @Success      200 {object} map[string]interface{} "expires_at: timestamp del token"
 // @Failure      400 {object} map[string]string "petición inválida"
 // @Failure      401 {object} map[string]string "credenciales incorrectas"
 // @Router       /auth/login [post]
@@ -53,13 +53,11 @@ func (c *LoginController) Login(ctx *gin.Context) {
 		return
 	}
 
-	// El token se envía ÚNICAMENTE en el header Authorization
-	// El cliente debe extraer el token del header y usarlo en futuras requests
+	// El token contiene usertype y approved (para conductores)
+	// NO se devuelven en el body, se extraen del token
 	ctx.Header("Authorization", "Bearer "+result.Token.Token)
-	
-	// El body solo contiene expires_at
 	ctx.JSON(http.StatusOK, gin.H{
+		"token":      result.Token.Token,
 		"expires_at": result.Token.ExpiresAt,
-		"message":    "login exitoso. El token se encuentra en el header Authorization",
 	})
 }
