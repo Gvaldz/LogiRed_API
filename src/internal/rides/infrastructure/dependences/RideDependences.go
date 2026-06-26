@@ -13,20 +13,23 @@ import (
 )
 
 type RideDependencies struct {
-	DB             *sql.DB
-	AuthMiddleware gin.HandlerFunc
-	Notifier       *notifications.NotificationService
+	DB                          *sql.DB
+	AuthMiddleware              gin.HandlerFunc
+	DriverOnlyApprovedMiddleware gin.HandlerFunc
+	Notifier                    *notifications.NotificationService
 }
 
 func NewRideDependencies(
 	db *sql.DB,
 	authMiddleware gin.HandlerFunc,
+	driverOnlyApprovedMiddleware gin.HandlerFunc,
 	notifier *notifications.NotificationService,
 ) *RideDependencies {
 	return &RideDependencies{
-		DB:             db,
-		AuthMiddleware: authMiddleware,
-		Notifier:       notifier,
+		DB:                           db,
+		AuthMiddleware:               authMiddleware,
+		DriverOnlyApprovedMiddleware: driverOnlyApprovedMiddleware,
+		Notifier:                     notifier,
 	}
 }
 
@@ -62,5 +65,6 @@ func (d *RideDependencies) GetRoutes() *routes.RideRoutes {
 		getRidesByStatusController,
 		updateRideStatusController,
 		d.AuthMiddleware,
+		d.DriverOnlyApprovedMiddleware,
 	)
 }

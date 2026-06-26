@@ -49,14 +49,17 @@ func Init() {
 
     notifier := notifications.NewNotificationService(fcmService, deviceRepo)
     authMiddleware := middleware.AuthMiddleware(tokenService, userRepo)
+    driverApprovalMiddleware := middleware.RequireApprovedDriver(authRepo)
+    driverOnlyApprovedMiddleware := middleware.RequireOnlyApprovedDriver(authRepo)
+    protectedMiddleware := middleware.Chain(authMiddleware, driverApprovalMiddleware)
 
-    devicesRoutes := devicesDeps.NewDeviceDependencies(db, authMiddleware).GetRoutes()
-    carsRoutes := carsDeps.NewCarDependencies(db, authMiddleware, storageService).GetRoutes()
-    ridesRoutes := ridesDeps.NewRideDependencies(db, authMiddleware, notifier).GetRoutes()
-    proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, notifier).GetRoutes()
-    reviewRoutes := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
+    devicesRoutes := devicesDeps.NewDeviceDependencies(db, protectedMiddleware).GetRoutes()
+    carsRoutes := carsDeps.NewCarDependencies(db, protectedMiddleware, storageService).GetRoutes()
+    ridesRoutes := ridesDeps.NewRideDependencies(db, authMiddleware, driverOnlyApprovedMiddleware, notifier).GetRoutes()
+    proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, driverOnlyApprovedMiddleware, notifier).GetRoutes()
+    reviewRoutes := reviewDeps.NewReviewDependencies(db, protectedMiddleware).GetRoutes()
     trackingRoutes := trackingDeps.NewTrackingDependencies(db, tokenService).GetRoutes()
-    paymentRoutes := paymentDeps.NewPaymentDependencies(db, authMiddleware, cfg.StripeSecretKey).GetRoutes()
+    paymentRoutes := paymentDeps.NewPaymentDependencies(db, protectedMiddleware, cfg.StripeSecretKey).GetRoutes()
 
     userRoutes := usersDeps.NewUserDependencies(
         db, hasher, tokenService, authRepo, userRepo, driverRepo, carRepo, docRepo, storageService,

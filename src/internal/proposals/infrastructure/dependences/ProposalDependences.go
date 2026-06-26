@@ -13,20 +13,23 @@ import (
 )
 
 type ProposalDependencies struct {
-	DB             *sql.DB
-	AuthMiddleware gin.HandlerFunc
-	Notifier       *notifications.NotificationService
+	DB                           *sql.DB
+	AuthMiddleware               gin.HandlerFunc
+	DriverOnlyApprovedMiddleware gin.HandlerFunc
+	Notifier                     *notifications.NotificationService
 }
 
 func NewProposalDependencies(
 	db *sql.DB,
 	authMiddleware gin.HandlerFunc,
+	driverOnlyApprovedMiddleware gin.HandlerFunc,
 	notifier *notifications.NotificationService,
 ) *ProposalDependencies {
 	return &ProposalDependencies{
-		DB:             db,
-		AuthMiddleware: authMiddleware,
-		Notifier:       notifier,
+		DB:                           db,
+		AuthMiddleware:               authMiddleware,
+		DriverOnlyApprovedMiddleware: driverOnlyApprovedMiddleware,
+		Notifier:                     notifier,
 	}
 }
 
@@ -53,5 +56,6 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 		getProposalsByRideController,
 		deleteProposalController,
 		d.AuthMiddleware,
+		d.DriverOnlyApprovedMiddleware,
 	)
 }
