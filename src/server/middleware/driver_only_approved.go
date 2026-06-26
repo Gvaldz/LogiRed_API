@@ -5,13 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	authDomain "logired/src/core/services/auth/domain"
 	userEntities "logired/src/internal/users/domain/entities"
 )
 
-// RequireOnlyApprovedDriver - Middleware que RECHAZA a clientes y conductores no aprobados
-// Solo permite CONDUCTORES APROBADOS
-// Nota: El approved y usertype ya fueron extraídos del token por AuthMiddleware
-func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
+func RequireOnlyApprovedDriver(authRepo authDomain.AuthRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userInterface, exists := c.Get("user")
 		if !exists {
@@ -25,7 +23,6 @@ func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 			return
 		}
 
-		// Si NO es conductor, rechaza
 		if user.UserType != UserTypeConductor {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error":         "solo los conductores pueden acceder a este recurso",
@@ -34,22 +31,20 @@ func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 			return
 		}
 
-		// El approved ya fue extraído del token por AuthMiddleware
-		approved, exists := c.Get("approved")
-		if !exists {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al verificar aprobación"})
+		approved, err := authRepo.FindDriverApproved(user.IdUser)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al verificar aprobacion"})
 			return
 		}
 
-		if !approved.(bool) {
+		if !approved {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error":    "tu cuenta de conductor está pendiente de aprobación. Por favor, espera a que sea aprobada",
+				"error":    "tu cuenta de conductor esta pendiente de aprobacion",
 				"approved": false,
 			})
 			return
 		}
 
-		c.Set("approved", true)
 		c.Next()
 	}
 }
