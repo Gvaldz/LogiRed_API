@@ -24,12 +24,12 @@ func NewLoginController(loginUC *application.Login) *LoginController {
 
 // Login godoc
 // @Summary      Iniciar sesión
-// @Description  Autentica a un usuario y devuelve un token JWT
+// @Description  Autentica a un usuario y devuelve un token JWT que contiene usertype y approved (para conductores)
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body dto.LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
-// @Success      200 {object} dto.LoginResponse
+// @Param        body body LoginRequest true "Credenciales" Example({"email":"correo@example.com","password":"123456"})
+// @Success      200 {object} map[string]interface{} "expires_at: timestamp del token"
 // @Failure      400 {object} map[string]string "petición inválida"
 // @Failure      401 {object} map[string]string "credenciales incorrectas"
 // @Router       /auth/login [post]
@@ -47,14 +47,17 @@ func (c *LoginController) Login(ctx *gin.Context) {
 		Password: credentials.Password,
 	}
 
-	token, err := c.loginUC.Execute(user)
+	result, err := c.loginUC.Execute(user)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.Header("Authorization", "Bearer "+token.Token)
+	// El token contiene usertype y approved (para conductores)
+	// NO se devuelven en el body, se extraen del token
+	ctx.Header("Authorization", "Bearer "+result.Token.Token)
 	ctx.JSON(http.StatusOK, gin.H{
-		"expires_at": token.ExpiresAt,
+		"token":      result.Token.Token,
+		"expires_at": result.Token.ExpiresAt,
 	})
 }
