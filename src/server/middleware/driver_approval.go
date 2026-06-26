@@ -8,10 +8,9 @@ import (
 	userEntities "logired/src/internal/users/domain/entities"
 )
 
-// RequireOnlyApprovedDriver - Middleware que RECHAZA a clientes y conductores no aprobados
-// Solo permite CONDUCTORES APROBADOS
-// Nota: El approved y usertype ya fueron extraídos del token por AuthMiddleware
-func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
+const UserTypeConductor = 2
+
+func RequireApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userInterface, exists := c.Get("user")
 		if !exists {
@@ -20,17 +19,8 @@ func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 		}
 
 		user, ok := userInterface.(userEntities.User)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "error al procesar usuario"})
-			return
-		}
-
-		// Si NO es conductor, rechaza
-		if user.UserType != UserTypeConductor {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error":         "solo los conductores pueden acceder a este recurso",
-				"required_role": "driver",
-			})
+		if !ok || user.UserType != UserTypeConductor {
+			c.Next()
 			return
 		}
 
@@ -43,7 +33,7 @@ func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 
 		if !approved.(bool) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error":    "tu cuenta de conductor está pendiente de aprobación. Por favor, espera a que sea aprobada",
+				"error":    "tu cuenta de conductor está pendiente de aprobación",
 				"approved": false,
 			})
 			return
@@ -51,5 +41,16 @@ func RequireOnlyApprovedDriver(authRepo interface{}) gin.HandlerFunc {
 
 		c.Set("approved", true)
 		c.Next()
+	}
+}
+
+func Chain(handlers ...gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		for _, h := range handlers {
+			h(c)
+			if c.IsAborted() {
+				return
+			}
+		}
 	}
 }
