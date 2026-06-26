@@ -24,7 +24,9 @@ func AuthMiddleware(tokenService tokenService.TokenService, userRepo users_domai
 			return
 		}
 
-		userID, err := tokenService.ValidateToken(parts[1])
+		tokenString := parts[1]
+
+		userID, err := tokenService.ValidateToken(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
@@ -37,8 +39,25 @@ func AuthMiddleware(tokenService tokenService.TokenService, userRepo users_domai
 			return
 		}
 
+		// Extrae usertype del token
+		userType, err := tokenService.ExtractUserType(tokenString)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "error al extraer tipo de usuario del token"})
+			return
+		}
+
+		// Extrae approved del token
+		approved, err := tokenService.ExtractApproved(tokenString)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "error al extraer estado de aprobación del token"})
+			return
+		}
+
+		// Almacena en el contexto
 		c.Set("userID", userID)
 		c.Set("user", user)
+		c.Set("userType", userType)
+		c.Set("approved", approved)
 		c.Next()
 	}
 }

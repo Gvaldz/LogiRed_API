@@ -53,7 +53,7 @@ func (s *JWTService) ValidateToken(tokenString string) (int32, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		return s.secretKey, nil
-	}, jwt.WithoutClaimsValidation())
+	})
 
 	if err != nil {
 		return 0, err
@@ -65,4 +65,51 @@ func (s *JWTService) ValidateToken(tokenString string) (int32, error) {
 	}
 
 	return 0, errors.New("invalid token")
+}
+
+// ExtractUserType - Extrae el tipo de usuario del token
+func (s *JWTService) ExtractUserType(tokenString string) (int, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return s.secretKey, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if usertype, exists := claims["usertype"]; exists {
+			return int(usertype.(float64)), nil
+		}
+		return 0, errors.New("usertype not found in token")
+	}
+
+	return 0, errors.New("invalid token")
+}
+
+// ExtractApproved - Extrae el estado de aprobación del token (solo para conductores)
+func (s *JWTService) ExtractApproved(tokenString string) (bool, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return s.secretKey, nil
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if approved, exists := claims["approved"]; exists {
+			return approved.(bool), nil
+		}
+		// Si no existe "approved" en el token, es un cliente (no conductor)
+		return false, nil
+	}
+
+	return false, errors.New("invalid token")
 }
