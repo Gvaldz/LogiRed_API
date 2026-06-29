@@ -76,6 +76,45 @@ func (r *DriverRepo) GetApprovedDrivers() ([]domain.DriverDetail, error) {
     return drivers, nil
 }
 
+func (r *DriverRepo) GetDriverStats(driverID int32) (*domain.DriverStats, error) {
+	query := `
+		SELECT
+			driver_id,
+			rating,
+			COALESCE(total_trips_completed, 0),
+			COALESCE(cancelled_trips, 0),
+			COALESCE(vehicle_count, 0),
+			COALESCE(days_in_platform, 0),
+			COALESCE(response_time_minutes, 0),
+			created_at,
+			COALESCE(documents_verified, false)
+		FROM driver_stats
+		WHERE driver_id = $1
+	`
+
+	var stats domain.DriverStats
+	err := r.db.QueryRow(query, driverID).Scan(
+		&stats.DriverID,
+		&stats.Rating,
+		&stats.TotalTripsCompleted,
+		&stats.TotalTripsCancelled,
+		&stats.VehicleCount,
+		&stats.DaysInPlatform,
+		&stats.ResponseTimeMinutes,
+		&stats.CreatedAt,
+		&stats.DocumentsVerified,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("conductor no encontrado")
+		}
+		return nil, fmt.Errorf("error al obtener stats del conductor: %w", err)
+	}
+
+	return &stats, nil
+}
+
 /*func (r *DriverRepo) UpdateCitywork(idUser int32, citywork string) error {
     query := "UPDATE drivers SET citywork = $1 WHERE iduser = $2"
     _, err := r.db.Exec(query, citywork, idUser)

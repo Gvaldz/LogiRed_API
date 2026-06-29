@@ -16,15 +16,11 @@ definitions:
       id_ride:
         example: 1
         type: integer
-      idcar:
-        example: 3
-        type: integer
       price:
         example: 150.5
         type: number
     required:
     - id_ride
-    - idcar
     - price
     type: object
   dto.CarResponse:
@@ -43,11 +39,15 @@ definitions:
         type: integer
       iduser:
         type: integer
+      leftview_image:
+        type: string
       max_capacity:
         type: integer
       model:
         type: string
       plates_image:
+        type: string
+      rightview_image:
         type: string
       space_image:
         type: string
@@ -71,8 +71,6 @@ definitions:
       hour:
         type: string
       origin_address:
-        type: string
-      origin_city:
         type: string
       origin_lat:
         type: number
@@ -133,15 +131,65 @@ definitions:
         type: number
       origin_lng:
         type: number
-      origincity:
+    type: object
+  entities.CarInfo:
+    properties:
+      back_view_image:
+        type: string
+      brand:
+        type: string
+      car_registration:
+        type: string
+      color:
+        type: string
+      front_view_image:
+        type: string
+      id:
+        type: integer
+      left_view_image:
+        type: string
+      max_capacity:
+        type: integer
+      model:
+        type: string
+      plates_image:
+        type: string
+      right_view_image:
+        type: string
+      spaces_image:
         type: string
     type: object
   entities.DriverInfo:
     properties:
-      citywork:
+      car:
+        $ref: '#/definitions/entities.CarInfo'
+      rating:
+        type: number
+    type: object
+  entities.MyProfile:
+    properties:
+      birthdate:
+        type: string
+      car:
+        $ref: '#/definitions/entities.CarInfo'
+      email:
+        type: string
+      iduser:
+        type: integer
+      image_url:
+        type: string
+      lastname:
+        type: string
+      name:
+        type: string
+      number_phone:
         type: string
       rating:
         type: number
+      total_trips:
+        type: integer
+      user_type:
+        type: integer
     type: object
   entities.User:
     properties:
@@ -166,8 +214,6 @@ definitions:
     type: object
   entities.UserProfile:
     properties:
-      birthdate:
-        type: string
       driver_info:
         $ref: '#/definitions/entities.DriverInfo'
       email:
@@ -188,13 +234,55 @@ definitions:
 host: api-logired.shop
 info:
   contact: {}
-  description: API para la plataforma móvl LogiRed
+  description: API para la plataforma móvil LogiRed
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
   title: LogiRed API
   version: "1.0"
 paths:
+  /auth/google:
+    post:
+      consumes:
+      - application/json
+      description: Recibe un Firebase ID Token, lo valida y devuelve un JWT igual
+        que /auth/login
+      parameters:
+      - description: Firebase ID Token
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: expires_at del token
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: petición inválida
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: token de Google inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no registrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar sesión con Google (Firebase)
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -252,7 +340,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener los vehículos del conductor autenticado
       tags:
       - cars
@@ -294,13 +382,21 @@ paths:
         in: formData
         name: backview_image
         type: file
+      - description: Imagen lado izquierdo
+        in: formData
+        name: leftview_image
+        type: file
+      - description: Imagen lado derecho
+        in: formData
+        name: rightview_image
+        type: file
+      - description: Imagen del espacio de carga
+        in: formData
+        name: space_image
+        type: file
       - description: Imagen de placas
         in: formData
         name: plates_image
-        type: file
-      - description: Imagen del espacio
-        in: formData
-        name: space_image
         type: file
       produces:
       - application/json
@@ -328,7 +424,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Crear un nuevo vehículo
       tags:
       - cars
@@ -375,7 +471,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Eliminar un vehículo
       tags:
       - cars
@@ -400,12 +496,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: carro no encontrado
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - Bearer: []
       summary: Obtener un vehículo por ID
       tags:
       - cars
@@ -448,13 +552,21 @@ paths:
         in: formData
         name: backview_image
         type: file
+      - description: Imagen lado izquierdo
+        in: formData
+        name: leftview_image
+        type: file
+      - description: Imagen lado derecho
+        in: formData
+        name: rightview_image
+        type: file
+      - description: Imagen del espacio de carga
+        in: formData
+        name: space_image
+        type: file
       - description: Imagen de placas
         in: formData
         name: plates_image
-        type: file
-      - description: Imagen del espacio
-        in: formData
-        name: space_image
         type: file
       produces:
       - application/json
@@ -489,7 +601,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Actualizar un vehículo
       tags:
       - cars
@@ -534,10 +646,51 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Registrar dispositivo para notificaciones
       tags:
       - devices
+  /drivers/{id}/stats:
+    get:
+      description: Devuelve estadísticas detalladas del conductor para machine learning
+        (rating, viajes completados, cancelados, etc.)
+      parameters:
+      - description: ID del conductor
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: estadísticas del conductor
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: conductor no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Obtener estadísticas del conductor
+      tags:
+      - drivers
   /proposals:
     post:
       consumes:
@@ -564,7 +717,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Crear una propuesta
       tags:
       - proposals
@@ -611,7 +764,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Eliminar una propuesta
       tags:
       - proposals
@@ -636,13 +789,21 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: propuesta no encontrada
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Obtener una propuesta por ID
+      security:
+      - Bearer: []
+      summary: Obtener una propuesta por ID con datos del conductor y su vehículo
       tags:
       - proposals
   /proposals/{id}/accept:
@@ -677,10 +838,229 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Aceptar o rechazar una propuesta
       tags:
       - proposals
+  /proposals/ride/{idride}:
+    get:
+      parameters:
+      - description: ID del viaje
+        in: path
+        name: idride
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de propuestas
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener todas las propuestas de un viaje
+      tags:
+      - proposals
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      description: Un pasajero crea una reseña para un conductor
+      parameters:
+      - description: Datos de la reseña
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: mensaje y reseña creada
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error en los datos
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Crear una reseña
+      tags:
+      - reviews
+  /reviews/{id}:
+    put:
+      consumes:
+      - application/json
+      description: El pasajero propietario puede editar su reseña (solo texto y rating)
+      parameters:
+      - description: ID de la reseña
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: mensaje de éxito
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: error en la solicitud
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: reseña no encontrada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Actualizar una reseña
+      tags:
+      - reviews
+  /reviews/driver/{id}:
+    get:
+      description: Devuelve las reseñas de un conductor específico (sin autenticación)
+      parameters:
+      - description: ID del conductor
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de reseñas
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener reseñas de un conductor por ID (público)
+      tags:
+      - reviews
+  /reviews/driver/me:
+    get:
+      description: Devuelve todas las reseñas del conductor actual (requiere autenticación)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de reseñas
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Obtener reseñas del conductor autenticado
+      tags:
+      - reviews
+  /reviews/passenger/me:
+    get:
+      description: Devuelve todas las reseñas escritas por el pasajero actual
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: lista de reseñas
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: error interno
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Obtener reseñas del pasajero autenticado
+      tags:
+      - reviews
   /rides:
     post:
       consumes:
@@ -719,7 +1099,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Crear un nuevo viaje
       tags:
       - rides
@@ -746,12 +1126,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: viaje no encontrado
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - Bearer: []
       summary: Obtener un viaje por ID
       tags:
       - rides
@@ -807,28 +1195,24 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Actualizar estado de un viaje
       tags:
       - rides
-  /rides/{idride}/proposals:
+  /rides/available:
     get:
-      parameters:
-      - description: ID del viaje
-        in: path
-        name: idride
-        required: true
-        type: integer
+      description: Devuelve todos los viajes activos (estado 6) disponibles para cualquier
+        conductor. Requiere autenticación.
       produces:
       - application/json
       responses:
         "200":
-          description: lista de propuestas
+          description: lista de viajes disponibles
           schema:
             additionalProperties: true
             type: object
-        "400":
-          description: ID inválido
+        "401":
+          description: no autenticado
           schema:
             additionalProperties:
               type: string
@@ -839,42 +1223,12 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Obtener todas las propuestas de un viaje
-      tags:
-      - proposals
-  /rides/city/{city}:
-    get:
-      description: Devuelve viajes activos (estado 6) en la ciudad especificada
-      parameters:
-      - description: Nombre de la ciudad
-        in: path
-        name: city
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: lista de viajes
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: ciudad no especificada
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: error interno
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Obtener viajes disponibles por ciudad
+      security:
+      - Bearer: []
+      summary: Obtener todos los viajes disponibles
       tags:
       - rides
-  /rides/client:
+  /rides/client/me:
     get:
       description: Devuelve todos los viajes solicitados por el cliente
       produces:
@@ -898,7 +1252,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener viajes del cliente autenticado
       tags:
       - rides
@@ -926,7 +1280,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener viajes asignados al conductor autenticado
       tags:
       - rides
@@ -955,7 +1309,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener historial de viajes (completados o cancelados)
       tags:
       - rides
@@ -988,7 +1342,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener viajes por estado
       tags:
       - rides
@@ -1017,7 +1371,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Obtener todos los usuarios (solo admin)
       tags:
       - users
@@ -1093,21 +1447,37 @@ paths:
         in: formData
         name: backview_image
         type: file
+      - description: Imagen lado izquierdo (Requerido para conductor)
+        in: formData
+        name: leftview_image
+        type: file
+      - description: Imagen lado derecho (Requerido para conductor)
+        in: formData
+        name: rightview_image
+        type: file
+      - description: Imagen del espacio de carga (Requerido para conductor)
+        in: formData
+        name: space_image
+        type: file
       - description: Imagen de las placas (Requerido para conductor)
         in: formData
         name: plates_image
         type: file
-      - description: Imagen del baúl/espacio (Opcional)
+      - description: Identificación oficial (frente)
         in: formData
-        name: space_image
+        name: document_identificacion_adelante
         type: file
-      - description: 'Documento: Identificación Oficial (Requerido para conductor)'
+      - description: Identificación oficial (reverso)
         in: formData
-        name: document_identificacion
+        name: document_identificacion_atras
         type: file
-      - description: 'Documento: Licencia de conducir (Requerido para conductor)'
+      - description: Licencia de conducir
         in: formData
         name: document_licencia
+        type: file
+      - description: Comprobante de domicilio
+        in: formData
+        name: document_comprobante_domicilio
         type: file
       produces:
       - application/json
@@ -1173,7 +1543,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Eliminar un usuario
       tags:
       - users
@@ -1198,12 +1568,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: usuario no encontrado
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - Bearer: []
       summary: Obtener usuario por ID (versión simplificada)
       tags:
       - users
@@ -1275,8 +1653,36 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Actualizar perfil de usuario (con imagen opcional)
+      tags:
+      - users
+  /users/me:
+    get:
+      description: Devuelve todos los datos del usuario logueado. Si es conductor
+        incluye calificación y vehículo. Incluye total de viajes realizados.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: perfil propio
+          schema:
+            $ref: '#/definitions/entities.MyProfile'
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: usuario no encontrado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Obtener perfil del usuario autenticado
       tags:
       - users
   /users/password-reset:
@@ -1315,7 +1721,7 @@ paths:
       summary: Restablecer contraseña (por email)
       tags:
       - users
-  /users/profile/{id}:
+  /users/profile-driver/{id}:
     get:
       parameters:
       - description: ID del usuario
@@ -1336,13 +1742,21 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: no autenticado
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: usuario no encontrado
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Obtener perfil completo de un usuario (con datos de conductor si aplica)
+      security:
+      - Bearer: []
+      summary: Obtener perfil completo de un conductor
       tags:
       - users
   /users/update-password:
@@ -1379,12 +1793,12 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - Bearer: []
       summary: Actualizar contraseña del usuario autenticado
       tags:
       - users
 securityDefinitions:
-  ApiKeyAuth:
+  Bearer:
     description: Escribe "Bearer <token>" para autenticarte
     in: header
     name: Authorization

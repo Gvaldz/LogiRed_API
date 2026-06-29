@@ -5,11 +5,12 @@ import (
 
 	loginRouters "logired/src/core/services/auth/infrastructure"
 	carsRoutes "logired/src/internal/cars/infrastructure/routes"
-	devicesRoutes "logired/src/internal/devices/infrastructure/routes"
+	deviceRoutes "logired/src/internal/devices/infrastructure/routes"
+	driverRoutes "logired/src/internal/drivers/infrastructure/routes"
 	paymentRoutes "logired/src/internal/payments/infrastructure/routes"
 	proposalRoutes "logired/src/internal/proposals/infrastructure/routes"
 	reviewRoutes "logired/src/internal/reviews/infrastructure/routes"
-	ridesRoutes "logired/src/internal/rides/infrastructure/routes"
+	rideRoutes "logired/src/internal/rides/infrastructure/routes"
 	trackingRoutes "logired/src/internal/tracking/infrastructure/routes"
 	userRouters "logired/src/internal/users/infrastructure"
 
@@ -27,9 +28,10 @@ import (
 func Run(
 	authRoutes 			*loginRouters.AuthRoutes,
 	userRoutes 			*userRouters.UserRoutes,
-	devicesRoutes 		*devicesRoutes.DeviceRoutes,
+	devicesRoutes 		*deviceRoutes.DeviceRoutes,
 	carsRoutes 			*carsRoutes.CarRoutes,
-	ridesRoutes 		*ridesRoutes.RideRoutes,
+	driversRoutes       *driverRoutes.DriverRoutes,
+	ridesRoutes 		*rideRoutes.RideRoutes,
 	proposalRoutes 		*proposalRoutes.ProposalRoutes,
 	reviewRoutes 		*reviewRoutes.ReviewRoutes,
 	trackingRoutes 		*trackingRoutes.TrackingRoutes,
@@ -61,11 +63,12 @@ func Run(
 	userRoutes.AttachRoutes(r)
 	devicesRoutes.AttachRoutes(r)
 	carsRoutes.AttachRoutes(r)
+	driversRoutes.AttachRoutes(r)
 	ridesRoutes.AttachRoutes(r)
 	proposalRoutes.AttachRoutes(r)
 	reviewRoutes.AttachRoutes(r)
 	trackingRoutes.AttachRoutes(r)
 	paymentRoutes.AttachRoutes(r)
 
-	r.Run(":8081")
+	r.Run(":8080")
 }

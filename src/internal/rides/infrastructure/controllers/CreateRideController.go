@@ -35,6 +35,13 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
         return
     }
+
+    userTypeInterface, _ := c.Get("userType")
+    if userType, ok := userTypeInterface.(int); ok && userType == 2 {
+        c.JSON(http.StatusForbidden, gin.H{"error": "Los conductores no pueden publicar viajes"})
+        return
+    }
+
     clientID := userIDInterface.(int32)
 
     var req dto.CreateRideRequest
@@ -45,7 +52,6 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
 
     ride := entities.Ride{
         IdClient:          clientID,
-        OriginCity:        req.OriginCity,
         OriginAddress:     req.OriginAddress,
         OriginLat:         req.OriginLat,
         OriginLng:         req.OriginLng,
@@ -70,7 +76,6 @@ func (ctrl *CreateRideController) Create(c *gin.Context) {
         IdRide:             ride.IdRide,
         IdClient:           ride.IdClient,
         IdDriver:           ride.IdDriver,
-        OriginCity:         ride.OriginCity,
         OriginAddress:      ride.OriginAddress,
         OriginLat:          ride.OriginLat,
         OriginLng:          ride.OriginLng,

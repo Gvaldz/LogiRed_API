@@ -7,12 +7,17 @@ import (
 )
 
 type AuthRoutes struct {
-	LoginController *controllers.LoginController
+	LoginController       *controllers.LoginController
+	GoogleLoginController *controllers.GoogleLoginController
 }
 
-func NewAuthRoutes(loginController *controllers.LoginController) *AuthRoutes {
+func NewAuthRoutes(
+	loginController *controllers.LoginController,
+	googleLoginController *controllers.GoogleLoginController,
+) *AuthRoutes {
 	return &AuthRoutes{
-		LoginController: loginController,
+		LoginController:       loginController,
+		GoogleLoginController: googleLoginController,
 	}
 }
 
@@ -20,5 +25,6 @@ func (r *AuthRoutes) AttachRoutes(router *gin.Engine) {
 	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/login", r.LoginController.Login)
+		authGroup.POST("/google", r.GoogleLoginController.GoogleLogin)
 	}
 }

@@ -39,6 +39,16 @@ func (h *DeleteUserController) Delete(c *gin.Context) {
 		return
 	}
 
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+	if userIDInterface.(int32) != int32(id) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "No tienes permiso para eliminar esta cuenta"})
+		return
+	}
+
 	err = h.deleteUser.Execute(int32(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

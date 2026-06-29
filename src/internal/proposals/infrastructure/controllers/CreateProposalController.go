@@ -46,7 +46,7 @@ func (ctrl *CreateProposalController) Create(c *gin.Context) {
 		IdDriver: driverID,
 		IdRide:   req.IdRide,
 		Comment:  req.Comment,
-		IdStatus: 2, 
+		IdStatus: 2,
 	}
 
 	if err := ctrl.createProposal.Execute(proposal); err != nil {

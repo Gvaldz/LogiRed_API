@@ -57,6 +57,7 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
     getAllUserUseCase := application.NewGetAllUsers(d.UserRepo)
     getUserUseCase := application.NewGetUserByID(d.UserRepo)
     getUserProfileUseCase := application.NewGetUserProfile(d.UserRepo)
+    getMyProfileUseCase := application.NewGetMyProfile(d.UserRepo)
     updateUserUseCase := application.NewUpdateUser(d.UserRepo)
     updatePasswordUseCase := application.NewUpdatePassword(d.UserRepo, d.AuthRepo, d.Hasher)
     ressetPasswordUseCase := application.NewRessetPassword(d.UserRepo, d.AuthRepo, d.Hasher)
@@ -69,6 +70,7 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
     getUsersController := controllers.NewGetAllUsersController(getAllUserUseCase)
     getUserController := controllers.NewGetByUserIDController(getUserUseCase)
     getUserProfileController := controllers.NewGetUserProfileController(getUserProfileUseCase)
+    getMyProfileController := controllers.NewGetMyProfileController(getMyProfileUseCase)
     updateUserController := controllers.NewUpdateUserController(updateUserUseCase, d.StorageService)
     updatePasswordController := controllers.NewUpdatePasswordController(updatePasswordUseCase)
     ressetPasswordController := controllers.NewRessetPasswordController(ressetPasswordUseCase)
@@ -81,6 +83,7 @@ func (d *UserDependencies) GetRoutes() *UserRoutes {
         getUsersController,
         getUserController,
         getUserProfileController,
+        getMyProfileController,
         updateUserController,
         updatePasswordController,
         ressetPasswordController,

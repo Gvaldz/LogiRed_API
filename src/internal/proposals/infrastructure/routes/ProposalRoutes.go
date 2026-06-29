@@ -37,14 +37,17 @@ func NewProposalRoutes(
 }
 
 func (r *ProposalRoutes) AttachRoutes(router *gin.Engine) {
-	// TODAS las rutas de propuestas requieren que sea conductor aprobado
-	proposalsGroup := router.Group("/proposals")
-	proposalsGroup.Use(r.authMiddleware)
-	proposalsGroup.Use(r.driverOnlyApprovedMiddleware)
+	// Solo conductores aprobados pueden crear y eliminar propuestas
+	driverGroup := router.Group("/proposals")
+	driverGroup.Use(r.authMiddleware)
+	driverGroup.Use(r.driverOnlyApprovedMiddleware)
+	driverGroup.POST("", r.createProposalController.Create)
+	driverGroup.DELETE("/:id", r.deleteProposalController.Delete)
 
-	proposalsGroup.POST("", r.createProposalController.Create)
-	proposalsGroup.GET("/:id", r.getProposalByIdController.GetById)
-	proposalsGroup.GET("/ride/:idride", r.getProposalsByRideController.GetByRide)
-	proposalsGroup.PUT("/:id/accept", r.acceptProposalController.Accept)
-	proposalsGroup.DELETE("/:id", r.deleteProposalController.Delete)
+	// Cualquier usuario autenticado puede ver y aceptar propuestas
+	authGroup := router.Group("/proposals")
+	authGroup.Use(r.authMiddleware)
+	authGroup.GET("/:id", r.getProposalByIdController.GetById)
+	authGroup.GET("/ride/:idride", r.getProposalsByRideController.GetByRide)
+	authGroup.PUT("/:id/accept", r.acceptProposalController.Accept)
 }

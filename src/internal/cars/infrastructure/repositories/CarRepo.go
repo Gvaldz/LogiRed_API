@@ -18,8 +18,8 @@ func NewCarRepo(db *sql.DB) *CarRepo {
 }
 
 func (r *CarRepo) CreateCar(car entities.Car) error {
-	query := "INSERT INTO cars (iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
-	_, err := r.db.Exec(query, car.IdDriver, car.CarRegistration, car.Brand, car.Model, car.Color, car.MaxCapacity, car.FrontViewImage, car.BackViewImage, car.PlatesImage, car.SpacesImage)
+	query := "INSERT INTO cars (iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, leftview_image, rightview_image, plates_image, space_image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)"
+	_, err := r.db.Exec(query, car.IdDriver, car.CarRegistration, car.Brand, car.Model, car.Color, car.MaxCapacity, car.FrontViewImage, car.BackViewImage, car.LeftViewImage, car.RightViewImage, car.PlatesImage, car.SpacesImage)
 	if err != nil {
 		return fmt.Errorf("error al crear car: %w", err)
 	}
@@ -66,6 +66,16 @@ func (r *CarRepo) UpdateCar(car entities.Car) error {
 		args = append(args, car.BackViewImage)
 		argCounter++
 	}
+	if car.LeftViewImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("leftview_image = $%d", argCounter))
+		args = append(args, car.LeftViewImage)
+		argCounter++
+	}
+	if car.RightViewImage != "" {
+		setClauses = append(setClauses, fmt.Sprintf("rightview_image = $%d", argCounter))
+		args = append(args, car.RightViewImage)
+		argCounter++
+	}
 	if car.PlatesImage != "" {
 		setClauses = append(setClauses, fmt.Sprintf("plates_image = $%d", argCounter))
 		args = append(args, car.PlatesImage)
@@ -104,7 +114,7 @@ func (r *CarRepo) UpdateCar(car entities.Car) error {
 }
 
 func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
-	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE iduser = $1"
+	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, leftview_image, rightview_image, plates_image, space_image FROM cars WHERE iduser = $1"
 	rows, err := r.db.Query(query, idDriver)
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener cars: %w", err)
@@ -114,7 +124,7 @@ func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
 	var cars []entities.Car
 	for rows.Next() {
 		var car entities.Car
-		if err := rows.Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.PlatesImage, &car.SpacesImage); err != nil {
+		if err := rows.Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.LeftViewImage, &car.RightViewImage, &car.PlatesImage, &car.SpacesImage); err != nil {
 			return nil, fmt.Errorf("error al escanear car: %w", err)
 		}
 		cars = append(cars, car)
@@ -124,8 +134,8 @@ func (r *CarRepo) GetCarsByDriverId(idDriver int32) ([]entities.Car, error) {
 
 func (r *CarRepo) GetCarById(idCar int32) (entities.Car, error) {
 	var car entities.Car
-	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, plates_image, space_image FROM cars WHERE idcar = $1"
-	err := r.db.QueryRow(query, idCar).Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.PlatesImage, &car.SpacesImage)
+	query := "SELECT idcar, iduser, car_registration, brand, model, color, max_capacity, frontview_image, backview_image, leftview_image, rightview_image, plates_image, space_image FROM cars WHERE idcar = $1"
+	err := r.db.QueryRow(query, idCar).Scan(&car.IdCar, &car.IdDriver, &car.CarRegistration, &car.Brand, &car.Model, &car.Color, &car.MaxCapacity, &car.FrontViewImage, &car.BackViewImage, &car.LeftViewImage, &car.RightViewImage, &car.PlatesImage, &car.SpacesImage)
 	if err != nil {
 		return car, fmt.Errorf("car no encontrado o acceso denegado: %w", err)
 	}
@@ -156,8 +166,8 @@ func (repo *CarRepo) CreateCarTx(tx interface{}, car entities.Car) error {
 	query := `
 		INSERT INTO cars (
 			iduser, car_registration, brand, model, color, 
-			max_capacity, frontview_image, backview_image, plates_image, space_image
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+			max_capacity, frontview_image, backview_image, leftview_image, rightview_image, plates_image, space_image
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
 
 	_, err := sqlTx.Exec(query,
 		car.IdDriver,
@@ -168,6 +178,8 @@ func (repo *CarRepo) CreateCarTx(tx interface{}, car entities.Car) error {
 		car.MaxCapacity,
 		car.FrontViewImage,
 		car.BackViewImage,
+		car.LeftViewImage,
+		car.RightViewImage,
 		car.PlatesImage,
 		car.SpacesImage,
 	)

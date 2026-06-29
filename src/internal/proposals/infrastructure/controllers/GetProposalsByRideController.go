@@ -26,7 +26,7 @@ func NewGetProposalsByRideController(uc *application.GetProposalsByRide) *GetPro
 // @Success      200 {object} map[string]interface{} "lista de propuestas"
 // @Failure      400 {object} map[string]string "ID inválido"
 // @Failure      500 {object} map[string]string "error interno"
-// @Router       /rides/{idride}/proposals [get]
+// @Router       /proposals/ride/{idride} [get]
 func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
     idRide, err := strconv.ParseInt(c.Param("idride"), 10, 32)
     if err != nil {
@@ -34,8 +34,19 @@ func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
         return
     }
 
-    proposals, err := ctrl.uc.Execute(int32(idRide))
+    userIDInterface, exists := c.Get("userID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+        return
+    }
+    userID := userIDInterface.(int32)
+
+    proposals, err := ctrl.uc.Execute(int32(idRide), userID)
     if err != nil {
+        if err.Error() == "solo el cliente dueño del viaje puede ver sus propuestas" {
+            c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+            return
+        }
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }

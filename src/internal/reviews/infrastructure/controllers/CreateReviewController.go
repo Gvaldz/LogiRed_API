@@ -29,7 +29,6 @@ func NewCreateReviewController(create *application.CreateReview) *CreateReviewCo
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /reviews [post]
-
 func (ctrl *CreateReviewController) Create(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

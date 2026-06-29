@@ -25,7 +25,6 @@ func NewGetReviewsByPassangerController(get *application.GetReviewsByPassanger) 
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /reviews/passenger/me [get]
-
 func (ctrl *GetReviewsByPassangerController) GetByPassanger(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

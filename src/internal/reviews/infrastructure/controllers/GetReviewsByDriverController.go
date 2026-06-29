@@ -25,7 +25,6 @@ func NewGetReviewsByDriverController(get *application.GetReviewsByDriver) *GetRe
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /reviews/driver/me [get]
-
 func (ctrl *GetReviewsByDriverController) GetByDriver(c *gin.Context) {
 	userIDInterface, exists := c.Get("userID")
 	if !exists {

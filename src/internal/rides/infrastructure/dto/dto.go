@@ -1,7 +1,6 @@
 package dto
 
 type CreateRideRequest struct {
-    OriginCity         string  `json:"origin_city"`
     OriginAddress      string  `json:"origin_address"`
     OriginLat          float64 `json:"origin_lat"`
     OriginLng          float64 `json:"origin_lng"`
@@ -19,7 +18,6 @@ type RideResponse struct {
     IdRide             int32   `json:"idride"`
     IdClient           int32   `json:"idclient"`
     IdDriver           *int32  `json:"iddriver,omitempty"`
-    OriginCity         string  `json:"origincity"`
     OriginAddress      string  `json:"origin_address"`
     OriginLat          float64 `json:"origin_lat"`
     OriginLng          float64 `json:"origin_lng"`

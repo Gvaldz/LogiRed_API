@@ -1,6 +1,5 @@
 package dependencies
 
-/*
 import (
 	"database/sql"
 	"logired/src/internal/drivers/application"
@@ -26,15 +25,11 @@ func NewDriverDependencies(db *sql.DB, authMiddleware gin.HandlerFunc) *DriverDe
 func (d *DriverDependencies) GetRoutes() *routes.DriverRoutes {
 	driverRepo := repositories.NewDriverRepo(d.DB)
 
-	getByCityUseCase := application.NewGetDriversByCity(driverRepo)
-
-	getByCityController := controllers.NewGetRideByCityController(getByCityUseCase)
-
+	getStatsUseCase := application.NewGetDriverStats(driverRepo)
+	getStatsController := controllers.NewGetDriverStatsController(getStatsUseCase)
 
 	return routes.NewDriverRoutes(
-		getByCityController,
+		getStatsController,
 		d.AuthMiddleware,
 	)
 }
-
-*/

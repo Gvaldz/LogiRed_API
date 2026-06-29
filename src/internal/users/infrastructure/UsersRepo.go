@@ -83,7 +83,7 @@ func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
 		&u.IdUser,
 		&u.Name,
 		&u.Lastname,
-		&u.Email,      // CORREGIDO
+		&u.Email,      
 		&u.Password,
 		&u.UserType,
 	)
@@ -244,18 +244,122 @@ func (r *UserRepository) BeginTx() (*sql.Tx, error) {
 
 func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) {
     query := `
-        SELECT 
-            u.iduser, u.name, u.lastname, u.email, u.numberphone, 
-            u.birthdate, u.usertype, u.image_url,
-            d.citywork, d.rating
+        SELECT
+            u.iduser, u.name, u.lastname, u.email, u.numberphone,
+            u.usertype, u.image_url,
+            d.rating,
+            c.idcar, c.car_registration, c.brand, c.model, c.color, c.max_capacity,
+            c.frontview_image, c.backview_image, c.leftview_image, c.rightview_image,
+            c.plates_image, c.space_image
         FROM users u
         LEFT JOIN drivers d ON u.iduser = d.iduser
+        LEFT JOIN cars c ON u.iduser = c.iduser
         WHERE u.iduser = $1
     `
 
     var profile user.UserProfile
-    var citywork sql.NullString
-    var rating   sql.NullFloat64
+    var rating          sql.NullFloat64
+    var idCar           sql.NullInt32
+    var carRegistration sql.NullString
+    var brand           sql.NullString
+    var model           sql.NullString
+    var color           sql.NullString
+    var maxCapacity     sql.NullInt32
+    var frontView       sql.NullString
+    var backView        sql.NullString
+    var leftView        sql.NullString
+    var rightView       sql.NullString
+    var platesImg       sql.NullString
+    var spacesImg       sql.NullString
+
+    err := r.DB.QueryRow(query, id).Scan(
+        &profile.IdUser,
+        &profile.Name,
+        &profile.Lastname,
+        &profile.Email,
+        &profile.NumberPhone,
+        &profile.UserType,
+        &profile.ImageURL,
+        &rating,
+        &idCar,
+        &carRegistration,
+        &brand,
+        &model,
+        &color,
+        &maxCapacity,
+        &frontView,
+        &backView,
+        &leftView,
+        &rightView,
+        &platesImg,
+        &spacesImg,
+    )
+    if err != nil {
+        return user.UserProfile{}, fmt.Errorf("usuario no encontrado: %w", err)
+    }
+
+    // 1. Ahora validamos con 'rating.Valid' para saber si existen datos de conductor
+    if rating.Valid {
+        driverInfo := &user.DriverInfo{
+            // 2. Eliminamos el campo Citywork de aquí
+            Rating: float32(rating.Float64),
+        }
+        
+        if idCar.Valid {
+            driverInfo.Car = &user.CarInfo{
+                IdCar:           idCar.Int32,
+                CarRegistration: carRegistration.String,
+                Brand:           brand.String,
+                Model:           model.String,
+                Color:           color.String,
+                MaxCapacity:     maxCapacity.Int32,
+                FrontViewImage:  frontView.String,
+                BackViewImage:   backView.String,
+                LeftViewImage:   leftView.String,
+                RightViewImage:  rightView.String,
+                PlatesImage:     platesImg.String,
+                SpacesImage:     spacesImg.String,
+            }
+        }
+        profile.DriverInfo = driverInfo
+    }
+
+    return profile, nil
+}
+
+func (r *UserRepository) GetMyProfileByID(id int32) (user.MyProfile, error) {
+    query := `
+        SELECT
+            u.iduser, u.name, u.lastname, u.email, u.numberphone,
+            u.birthdate, u.usertype, u.image_url,
+            d.rating,
+            (SELECT COUNT(*) FROM rides WHERE idclient = u.iduser) AS client_trips,
+            (SELECT COUNT(*) FROM rides WHERE iddriver = u.iduser) AS driver_trips,
+            c.idcar, c.car_registration, c.brand, c.model, c.color, c.max_capacity,
+            c.frontview_image, c.backview_image, c.leftview_image, c.rightview_image,
+            c.plates_image, c.space_image
+        FROM users u
+        LEFT JOIN drivers d ON u.iduser = d.iduser
+        LEFT JOIN cars c ON u.iduser = c.iduser
+        WHERE u.iduser = $1
+    `
+
+    var profile user.MyProfile
+    var rating          sql.NullFloat64
+    var clientTrips     int64
+    var driverTrips     int64
+    var idCar           sql.NullInt32
+    var carRegistration sql.NullString
+    var brand           sql.NullString
+    var model           sql.NullString
+    var color           sql.NullString
+    var maxCapacity     sql.NullInt32
+    var frontView       sql.NullString
+    var backView        sql.NullString
+    var leftView        sql.NullString
+    var rightView       sql.NullString
+    var platesImg       sql.NullString
+    var spacesImg       sql.NullString
 
     err := r.DB.QueryRow(query, id).Scan(
         &profile.IdUser,
@@ -266,18 +370,50 @@ func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) 
         &profile.Birthdate,
         &profile.UserType,
         &profile.ImageURL,
-        &citywork,
         &rating,
+        &clientTrips,
+        &driverTrips,
+        &idCar,
+        &carRegistration,
+        &brand,
+        &model,
+        &color,
+        &maxCapacity,
+        &frontView,
+        &backView,
+        &leftView,
+        &rightView,
+        &platesImg,
+        &spacesImg,
     )
     if err != nil {
-        return user.UserProfile{}, fmt.Errorf("usuario no encontrado: %w", err)
+        return user.MyProfile{}, fmt.Errorf("usuario no encontrado: %w", err)
     }
 
-    if citywork.Valid {
-        profile.DriverInfo = &user.DriverInfo{
-            Citywork: citywork.String,
-            Rating:   float32(rating.Float64),
+    if profile.UserType == 2 {
+        profile.TotalTrips = driverTrips
+        if rating.Valid {
+            r32 := float32(rating.Float64)
+            profile.Rating = &r32
         }
+        if idCar.Valid {
+            profile.Car = &user.CarInfo{
+                IdCar:           idCar.Int32,
+                CarRegistration: carRegistration.String,
+                Brand:           brand.String,
+                Model:           model.String,
+                Color:           color.String,
+                MaxCapacity:     maxCapacity.Int32,
+                FrontViewImage:  frontView.String,
+                BackViewImage:   backView.String,
+                LeftViewImage:   leftView.String,
+                RightViewImage:  rightView.String,
+                PlatesImage:     platesImg.String,
+                SpacesImage:     spacesImg.String,
+            }
+        }
+    } else {
+        profile.TotalTrips = clientTrips
     }
 
     return profile, nil

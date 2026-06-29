@@ -35,8 +35,22 @@ func (ctrl *GetProposalByIdController) GetById(c *gin.Context) {
 		return
 	}
 
-	detail, err := ctrl.getProposalyId.Execute(int32(idProposal))
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+	userID := userIDInterface.(int32)
+
+	userTypeInterface, _ := c.Get("userType")
+	userType, _ := userTypeInterface.(int)
+
+	detail, err := ctrl.getProposalyId.Execute(int32(idProposal), userID, userType)
 	if err != nil {
+		if err.Error() == "no tienes permiso para ver esta propuesta" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}

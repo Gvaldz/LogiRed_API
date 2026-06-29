@@ -10,6 +10,8 @@ type Car struct {
 	MaxCapacity     	int32  `json:"max_capacity"`
 	FrontViewImage  	string `json:"front_view_image"`
 	BackViewImage   	string `json:"back_view_image"`
+	LeftViewImage   	string `json:"left_view_image"`
+	RightViewImage  	string `json:"right_view_image"`
 	PlatesImage      	string `json:"plates_image"`
 	SpacesImage      	string `json:"spaces_image"`
 }
@@ -24,6 +26,8 @@ func newCar(
 	maxCapacity int32,
 	frontviewImage string,
 	backviewImage string,
+	leftviewImage string,
+	rightviewImage string,
 	platesImage string,
 	spacesImage string,
 	) *Car {
@@ -37,6 +41,8 @@ func newCar(
 		MaxCapacity:     maxCapacity,
 		FrontViewImage:  frontviewImage,
 		BackViewImage:   backviewImage,
+		LeftViewImage:   leftviewImage,
+		RightViewImage:  rightviewImage,
 		PlatesImage:     platesImage,
 		SpacesImage:     spacesImage,
 	}

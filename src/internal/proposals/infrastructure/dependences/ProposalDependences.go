@@ -39,8 +39,8 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 
 	createProposalUseCase := application.NewCreateProposal(proposalRepo, rideRepo, d.Notifier)
 	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, rideRepo, d.Notifier)
-	getProposalByIdUseCase := application.NewGetProposalById(proposalRepo)
-	getProposalsByRideUseCase := application.NewGetProposalsByRide(proposalRepo)
+	getProposalByIdUseCase := application.NewGetProposalById(proposalRepo, rideRepo)
+	getProposalsByRideUseCase := application.NewGetProposalsByRide(proposalRepo, rideRepo)
 	deleteProposalUseCase := application.NewDeleteProposal(proposalRepo)
 
 	createProposalController := controllers.NewCreateProposalController(createProposalUseCase)

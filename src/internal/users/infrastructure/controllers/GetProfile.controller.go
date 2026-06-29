@@ -16,7 +16,7 @@ func NewGetUserProfileController(uc *application.GetUserProfile) *GetUserProfile
     return &GetUserProfileController{getProfile: uc}
 }
 // GetProfile godoc
-// @Summary      Obtener perfil completo de un usuario (con datos de conductor si aplica)
+// @Summary      Obtener perfil completo de un conductor
 // @Tags         users
 // @Security     Bearer
 // @Produce      json
@@ -25,7 +25,7 @@ func NewGetUserProfileController(uc *application.GetUserProfile) *GetUserProfile
 // @Failure      400 {object} map[string]string "ID inválido"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      404 {object} map[string]string "usuario no encontrado"
-// @Router       /users/profile/{id} [get]
+// @Router       /users/profile-driver/{id} [get]
 func (ctrl *GetUserProfileController) GetProfile(c *gin.Context) {
     var idInt int32
     if _, err := fmt.Sscanf(c.Param("id"), "%d", &idInt); err != nil {

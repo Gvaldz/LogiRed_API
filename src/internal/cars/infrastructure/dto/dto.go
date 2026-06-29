@@ -18,6 +18,8 @@ type CarResponse struct {
     MaxCapacity     int32  `json:"max_capacity"`
     FrontViewImage  string `json:"frontview_image"`
     BackViewImage   string `json:"backview_image"`
+    LeftViewImage   string `json:"leftview_image"`
+    RightViewImage  string `json:"rightview_image"`
     PlatesImage     string `json:"plates_image"`
     SpacesImage     string `json:"space_image"`
 }

@@ -1,6 +1,5 @@
 package routes
 
-/*
 import (
 	"logired/src/internal/drivers/infrastructure/controllers"
 
@@ -8,17 +7,17 @@ import (
 )
 
 type DriverRoutes struct {
-	getByCityController *controllers.GetDriversByCityController
-	authMiddleware   gin.HandlerFunc
+	getStatsController *controllers.GetDriverStatsController
+	authMiddleware     gin.HandlerFunc
 }
 
 func NewDriverRoutes(
-	getByCity *controllers.GetDriversByCityController,
+	getStats *controllers.GetDriverStatsController,
 	authMiddleware gin.HandlerFunc,
 ) *DriverRoutes {
 	return &DriverRoutes{
-		getByCityController: getByCity,
-		authMiddleware:   authMiddleware,
+		getStatsController: getStats,
+		authMiddleware:     authMiddleware,
 	}
 }
 
@@ -26,7 +25,5 @@ func (r *DriverRoutes) AttachRoutes(router *gin.Engine) {
 	driversGroup := router.Group("/drivers")
 	driversGroup.Use(r.authMiddleware)
 
-	driversGroup.GET("/city/:city", r.getByCityController.GetByCity)
+	driversGroup.GET("/:id/stats", r.getStatsController.GetStats)
 }
-
-*/

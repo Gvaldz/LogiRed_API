@@ -7,8 +7,7 @@ import (
 	"mime/multipart"
 
 	"cloud.google.com/go/storage"
-	"firebase.google.com/go/v4"
-	"google.golang.org/api/option"
+	"logired/src/core"
 )
 
 type StorageService interface {
@@ -20,13 +19,12 @@ type firebaseStorage struct {
 }
 
 func NewFirebaseStorage(credentialsFile, bucketName string) (StorageService, error) {
-	opt := option.WithCredentialsFile(credentialsFile)
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	app, err := core.GetFirebaseApp(credentialsFile)
 	if err != nil { return nil, err }
-	
+
 	client, err := app.Storage(context.Background())
 	if err != nil { return nil, err }
-	
+
 	bucket, err := client.Bucket(bucketName)
 	return &firebaseStorage{bucket: bucket}, err
 }

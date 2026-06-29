@@ -17,7 +17,7 @@ func NewProposalRepo(db *sql.DB) *ProposalRepo {
 }
 
 func (r *ProposalRepo) CreateProposal(proposal entities.Proposal) error {
-	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus) 
+	query := `INSERT INTO proposals (price, comment, iddriver, idride, idproposalstatus)
 	          VALUES ($1, $2, $3, $4, $5)`
 	_, err := r.db.Exec(query, proposal.Price, proposal.Comment, proposal.IdDriver, proposal.IdRide, proposal.IdStatus)
 	if err != nil {
@@ -98,8 +98,8 @@ func (r *ProposalRepo) GetProposalDetailById(idProposal int32) (domain.ProposalD
 
 func (r *ProposalRepo) GetProposalsByRideId(idRide int32) ([]entities.Proposal, error) {
     query := `
-        SELECT idproposal, price, comment, iddriver, idride, idproposalstatus 
-        FROM proposals 
+        SELECT idproposal, price, comment, iddriver, idride, idproposalstatus
+        FROM proposals
         WHERE idride = $1
     `
     rows, err := r.db.Query(query, idRide)

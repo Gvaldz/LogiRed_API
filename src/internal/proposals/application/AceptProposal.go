@@ -27,10 +27,18 @@ func NewAcceptProposal(
 	return &AcceptProposal{repo: repo, rideRepo: rideRepo, notifier: notifier}
 }
 
-func (uc *AcceptProposal) Execute(idProposal int32, idStatus int32) error {
+func (uc *AcceptProposal) Execute(idProposal int32, idStatus int32, requesterID int32) error {
 	proposal, err := uc.repo.GetProposalById(idProposal)
 	if err != nil {
 		return err
+	}
+
+	ride, err := uc.rideRepo.GetRideById(proposal.IdRide)
+	if err != nil {
+		return fmt.Errorf("viaje no encontrado: %w", err)
+	}
+	if ride.IdClient != requesterID {
+		return fmt.Errorf("solo el cliente dueño del viaje puede aceptar propuestas")
 	}
 
 	if err := uc.repo.AcceptProposal(idProposal, idStatus); err != nil {

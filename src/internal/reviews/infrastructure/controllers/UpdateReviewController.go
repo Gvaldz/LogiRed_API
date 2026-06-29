@@ -32,7 +32,6 @@ func NewUpdateReviewController(update *application.UpdateReview) *UpdateReviewCo
 // @Failure      404 {object} map[string]string "reseña no encontrada"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /reviews/{id} [put]
-
 func (ctrl *UpdateReviewController) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	idReview, err := strconv.ParseInt(idParam, 10, 32)

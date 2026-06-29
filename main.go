@@ -10,7 +10,7 @@ import (
 // @description     API para la plataforma móvil LogiRed
 // @license.name    MIT
 // @license.url     https://opensource.org/licenses/MIT
-// @host            localhost:8080
+// @host            api-logired.shop
 // @BasePath        /
 // @securityDefinitions.apiKey Bearer
 // @in header

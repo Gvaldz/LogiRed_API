@@ -9,6 +9,7 @@ import (
     devicesDeps      "logired/src/internal/devices/infrastructure/dependences"
     deviceRepo       "logired/src/internal/devices/infrastructure/repositories"
     driverRepo       "logired/src/internal/drivers/infrastructure/repositories"
+    driversDeps      "logired/src/internal/drivers/infrastructure/dependences"
     paymentDeps      "logired/src/internal/payments/infrastructure/dependences"
     proposalDeps     "logired/src/internal/proposals/infrastructure/dependences"
     reviewDeps       "logired/src/internal/reviews/infrastructure/dependences"
@@ -18,7 +19,7 @@ import (
     storage          "logired/src/core/services/storage"
     "logired/src/server"
     "logired/src/server/middleware"
-    
+
     carRepos         "logired/src/internal/cars/infrastructure/repositories"
     documentRepos    "logired/src/internal/documents/infrastructure/repositories"
 )
@@ -55,9 +56,10 @@ func Init() {
 
     devicesRoutes := devicesDeps.NewDeviceDependencies(db, protectedMiddleware).GetRoutes()
     carsRoutes := carsDeps.NewCarDependencies(db, protectedMiddleware, storageService).GetRoutes()
+    driversRoutes := driversDeps.NewDriverDependencies(db, authMiddleware).GetRoutes()
     ridesRoutes := ridesDeps.NewRideDependencies(db, authMiddleware, driverOnlyApprovedMiddleware, notifier).GetRoutes()
     proposalRoutes := proposalDeps.NewProposalDependencies(db, authMiddleware, driverOnlyApprovedMiddleware, notifier).GetRoutes()
-    reviewRoutes := reviewDeps.NewReviewDependencies(db, protectedMiddleware).GetRoutes()
+    reviewRoutes := reviewDeps.NewReviewDependencies(db, authMiddleware).GetRoutes()
     trackingRoutes := trackingDeps.NewTrackingDependencies(db, tokenService).GetRoutes()
     paymentRoutes := paymentDeps.NewPaymentDependencies(db, protectedMiddleware, cfg.StripeSecretKey).GetRoutes()
 
@@ -65,13 +67,14 @@ func Init() {
         db, hasher, tokenService, authRepo, userRepo, driverRepo, carRepo, docRepo, storageService,
     ).GetRoutes()
 
-    authRoutes := loginDeps.NewAuthDependencies(db, hasher, userRepo).GetRoutes()
+    authRoutes := loginDeps.NewAuthDependencies(db, hasher, userRepo, cfg.FCMCredentialsFile).GetRoutes()
 
     server.Run(
         authRoutes,
         userRoutes,
         devicesRoutes,
         carsRoutes,
+        driversRoutes,
         ridesRoutes,
         proposalRoutes,
         reviewRoutes,

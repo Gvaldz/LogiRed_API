@@ -19,6 +19,68 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/google": {
+            "post": {
+                "description": "Recibe un Firebase ID Token, lo valida y devuelve un JWT igual que /auth/login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Iniciar sesión con Google (Firebase)",
+                "parameters": [
+                    {
+                        "description": "Firebase ID Token",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "expires_at del token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "petición inválida",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "token de Google inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "usuario no registrado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Autentica a un usuario y devuelve un token JWT",
@@ -75,7 +137,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -116,7 +178,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Un conductor registra su carro",
@@ -180,14 +242,26 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "Imagen de placas",
-                        "name": "plates_image",
+                        "description": "Imagen lado izquierdo",
+                        "name": "leftview_image",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Imagen del espacio",
+                        "description": "Imagen lado derecho",
+                        "name": "rightview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen del espacio de carga",
                         "name": "space_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen de placas",
+                        "name": "plates_image",
                         "in": "formData"
                     }
                 ],
@@ -230,6 +304,11 @@ const docTemplate = `{
         },
         "/cars/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -263,6 +342,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "carro no encontrado",
                         "schema": {
@@ -277,7 +365,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "El conductor propietario puede actualizar los datos de su carro (incluye imágenes)",
@@ -343,14 +431,26 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "Imagen de placas",
-                        "name": "plates_image",
+                        "description": "Imagen lado izquierdo",
+                        "name": "leftview_image",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Imagen del espacio",
+                        "description": "Imagen lado derecho",
+                        "name": "rightview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen del espacio de carga",
                         "name": "space_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen de placas",
+                        "name": "plates_image",
                         "in": "formData"
                     }
                 ],
@@ -403,7 +503,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Solo el conductor propietario puede eliminar su carro",
@@ -476,7 +576,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Asocia un token FCM y nombre de dispositivo al usuario autenticado",
@@ -542,11 +642,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/drivers/{id}/stats": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve estadísticas detalladas del conductor para machine learning (rating, viajes completados, cancelados, etc.)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "drivers"
+                ],
+                "summary": "Obtener estadísticas del conductor",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del conductor",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "estadísticas del conductor",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "conductor no encontrado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/proposals": {
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "consumes": [
@@ -590,7 +752,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/proposals/{id}": {
+        "/proposals/ride/{idride}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -598,7 +760,59 @@ const docTemplate = `{
                 "tags": [
                     "proposals"
                 ],
-                "summary": "Obtener una propuesta por ID",
+                "summary": "Obtener todas las propuestas de un viaje",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del viaje",
+                        "name": "idride",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "lista de propuestas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/proposals/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "summary": "Obtener una propuesta por ID con datos del conductor y su vehículo",
                 "parameters": [
                     {
                         "type": "integer",
@@ -625,6 +839,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "propuesta no encontrada",
                         "schema": {
@@ -639,7 +862,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Solo el conductor propietario puede eliminar su propuesta",
@@ -712,7 +935,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "consumes": [
@@ -765,11 +988,301 @@ const docTemplate = `{
                 }
             }
         },
+        "/reviews": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Un pasajero crea una reseña para un conductor",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Crear una reseña",
+                "parameters": [
+                    {
+                        "description": "Datos de la reseña",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "mensaje y reseña creada",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error en los datos",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reviews/driver/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todas las reseñas del conductor actual (requiere autenticación)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Obtener reseñas del conductor autenticado",
+                "responses": {
+                    "200": {
+                        "description": "lista de reseñas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reviews/driver/{id}": {
+            "get": {
+                "description": "Devuelve las reseñas de un conductor específico (sin autenticación)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Obtener reseñas de un conductor por ID (público)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del conductor",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "lista de reseñas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reviews/passenger/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todas las reseñas escritas por el pasajero actual",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Obtener reseñas del pasajero autenticado",
+                "responses": {
+                    "200": {
+                        "description": "lista de reseñas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reviews/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "El pasajero propietario puede editar su reseña (solo texto y rating)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "summary": "Actualizar una reseña",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la reseña",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos a actualizar",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "mensaje de éxito",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "error en la solicitud",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "reseña no encontrada",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/rides": {
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Un cliente crea un viaje para transporte de paquetes",
@@ -831,35 +1344,31 @@ const docTemplate = `{
                 }
             }
         },
-        "/rides/city/{city}": {
+        "/rides/available": {
             "get": {
-                "description": "Devuelve viajes activos (estado 6) en la ciudad especificada",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todos los viajes activos (estado 6) disponibles para cualquier conductor. Requiere autenticación.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "rides"
                 ],
-                "summary": "Obtener viajes disponibles por ciudad",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Nombre de la ciudad",
-                        "name": "city",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Obtener todos los viajes disponibles",
                 "responses": {
                     "200": {
-                        "description": "lista de viajes",
+                        "description": "lista de viajes disponibles",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
-                    "400": {
-                        "description": "ciudad no especificada",
+                    "401": {
+                        "description": "no autenticado",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -879,11 +1388,11 @@ const docTemplate = `{
                 }
             }
         },
-        "/rides/client": {
+        "/rides/client/me": {
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Devuelve todos los viajes solicitados por el cliente",
@@ -927,7 +1436,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Devuelve todos los viajes que el conductor ha aceptado",
@@ -971,7 +1480,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Devuelve viajes con estado 4 o 5 (historial) para el usuario autenticado (cliente o conductor)",
@@ -1015,7 +1524,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "produces": [
@@ -1063,55 +1572,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/rides/{idride}/proposals": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "proposals"
-                ],
-                "summary": "Obtener todas las propuestas de un viaje",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID del viaje",
-                        "name": "idride",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "lista de propuestas",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "ID inválido",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "error interno",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/rides/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Devuelve los detalles de un viaje específico",
                 "produces": [
                     "application/json"
@@ -1146,6 +1613,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "viaje no encontrado",
                         "schema": {
@@ -1162,7 +1638,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Cambia el estado de un viaje (solo el cliente o conductor autorizado)",
@@ -1248,7 +1724,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Devuelve lista de usuarios (solo para administradores)",
@@ -1399,26 +1875,50 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
+                        "description": "Imagen lado izquierdo (Requerido para conductor)",
+                        "name": "leftview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen lado derecho (Requerido para conductor)",
+                        "name": "rightview_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Imagen del espacio de carga (Requerido para conductor)",
+                        "name": "space_image",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
                         "description": "Imagen de las placas (Requerido para conductor)",
                         "name": "plates_image",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Imagen del baúl/espacio (Opcional)",
-                        "name": "space_image",
+                        "description": "Identificación oficial (frente)",
+                        "name": "document_identificacion_adelante",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Documento: Identificación Oficial (Requerido para conductor)",
-                        "name": "document_identificacion",
+                        "description": "Identificación oficial (reverso)",
+                        "name": "document_identificacion_atras",
                         "in": "formData"
                     },
                     {
                         "type": "file",
-                        "description": "Documento: Licencia de conducir (Requerido para conductor)",
+                        "description": "Licencia de conducir",
                         "name": "document_licencia",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Comprobante de domicilio",
+                        "name": "document_comprobante_domicilio",
                         "in": "formData"
                     }
                 ],
@@ -1442,6 +1942,49 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todos los datos del usuario logueado. Si es conductor incluye calificación y vehículo. Incluye total de viajes realizados.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Obtener perfil del usuario autenticado",
+                "responses": {
+                    "200": {
+                        "description": "perfil propio",
+                        "schema": {
+                            "$ref": "#/definitions/entities.MyProfile"
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "usuario no encontrado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1502,15 +2045,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/profile/{id}": {
+        "/users/profile-driver/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "users"
                 ],
-                "summary": "Obtener perfil completo de un usuario (con datos de conductor si aplica)",
+                "summary": "Obtener perfil completo de un conductor",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1536,6 +2084,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "usuario no encontrado",
                         "schema": {
@@ -1552,7 +2109,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Cambia la contraseña verificando la anterior",
@@ -1610,6 +2167,11 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1643,6 +2205,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "usuario no encontrado",
                         "schema": {
@@ -1657,7 +2228,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Actualiza los datos del usuario autenticado (solo el propio usuario)",
@@ -1767,7 +2338,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Elimina la cuenta (solo admin o el propio usuario)",
@@ -1854,7 +2425,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id_ride",
-                "idcar",
                 "price"
             ],
             "properties": {
@@ -1865,10 +2435,6 @@ const docTemplate = `{
                 "id_ride": {
                     "type": "integer",
                     "example": 1
-                },
-                "idcar": {
-                    "type": "integer",
-                    "example": 3
                 },
                 "price": {
                     "type": "number",
@@ -1900,6 +2466,9 @@ const docTemplate = `{
                 "iduser": {
                     "type": "integer"
                 },
+                "leftview_image": {
+                    "type": "string"
+                },
                 "max_capacity": {
                     "type": "integer"
                 },
@@ -1907,6 +2476,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "plates_image": {
+                    "type": "string"
+                },
+                "rightview_image": {
                     "type": "string"
                 },
                 "space_image": {
@@ -1942,9 +2514,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "origin_address": {
-                    "type": "string"
-                },
-                "origin_city": {
                     "type": "string"
                 },
                 "origin_lat": {
@@ -2036,8 +2605,46 @@ const docTemplate = `{
                 },
                 "origin_lng": {
                     "type": "number"
+                }
+            }
+        },
+        "entities.CarInfo": {
+            "type": "object",
+            "properties": {
+                "back_view_image": {
+                    "type": "string"
                 },
-                "origincity": {
+                "brand": {
+                    "type": "string"
+                },
+                "car_registration": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "front_view_image": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "left_view_image": {
+                    "type": "string"
+                },
+                "max_capacity": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "plates_image": {
+                    "type": "string"
+                },
+                "right_view_image": {
+                    "type": "string"
+                },
+                "spaces_image": {
                     "type": "string"
                 }
             }
@@ -2045,11 +2652,49 @@ const docTemplate = `{
         "entities.DriverInfo": {
             "type": "object",
             "properties": {
-                "citywork": {
+                "car": {
+                    "$ref": "#/definitions/entities.CarInfo"
+                },
+                "rating": {
+                    "type": "number"
+                }
+            }
+        },
+        "entities.MyProfile": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "car": {
+                    "$ref": "#/definitions/entities.CarInfo"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "iduser": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number_phone": {
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
+                },
+                "total_trips": {
+                    "type": "integer"
+                },
+                "user_type": {
+                    "type": "integer"
                 }
             }
         },
@@ -2088,9 +2733,6 @@ const docTemplate = `{
         "entities.UserProfile": {
             "type": "object",
             "properties": {
-                "birthdate": {
-                    "type": "string"
-                },
                 "driver_info": {
                     "$ref": "#/definitions/entities.DriverInfo"
                 },
@@ -2119,7 +2761,7 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
+        "Bearer": {
             "description": "Escribe \"Bearer \u003ctoken\u003e\" para autenticarte",
             "type": "apiKey",
             "name": "Authorization",
@@ -2135,7 +2777,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "LogiRed API",
-	Description:      "API para la plataforma móvl LogiRed",
+	Description:      "API para la plataforma móvil LogiRed",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

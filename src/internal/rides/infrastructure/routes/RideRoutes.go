@@ -46,10 +46,10 @@ func NewRideRoutes(
 }
 
 func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
-	// Rutas públicas (requieren autenticación pero no aprobación de conductor)
+	// Clientes crean viajes (solo requieren autenticación)
 	publicGroup := router.Group("/rides")
 	publicGroup.Use(r.authMiddleware)
-	publicGroup.POST("", r.createRideController.Create)  // Clientes crean viajes
+	publicGroup.POST("", r.createRideController.Create)
 
 	// Rutas SOLO para conductores aprobados
 	driverGroup := router.Group("/rides")
@@ -57,8 +57,6 @@ func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
 	driverGroup.Use(r.driverOnlyApprovedMiddleware)
 	driverGroup.GET("/available", r.getRidesByCityController.GetByCity)
 	driverGroup.GET("/driver/me", r.getRidesByDriverController.GetByDriver)
-	driverGroup.GET("/history", r.getRidesHistoryController.GetHistory)
-	driverGroup.GET("/status", r.getRidesByStatusController.GetByStatus)
 
 	// Rutas que ambos pueden usar (cliente + conductor)
 	commonGroup := router.Group("/rides")
@@ -66,4 +64,6 @@ func (r *RideRoutes) AttachRoutes(router *gin.Engine) {
 	commonGroup.GET("/:id", r.getRideByIdController.GetById)
 	commonGroup.PUT("/:id/status", r.updateRideStatusController.Update)
 	commonGroup.GET("/client/me", r.getRidesByClientController.GetByClient)
+	commonGroup.GET("/history", r.getRidesHistoryController.GetHistory)
+	commonGroup.GET("/status", r.getRidesByStatusController.GetByStatus)
 }

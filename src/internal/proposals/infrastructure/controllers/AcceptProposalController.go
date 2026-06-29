@@ -35,6 +35,13 @@ func (ctrl *AcceptProposalController) Accept(c *gin.Context) {
 		return
 	}
 
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+	userID := userIDInterface.(int32)
+
 	var body struct {
 		IdStatus int32 `json:"idstatus" binding:"required"`
 	}
@@ -48,7 +55,11 @@ func (ctrl *AcceptProposalController) Accept(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.acceptProposal.Execute(int32(idProposal), body.IdStatus); err != nil {
+	if err := ctrl.acceptProposal.Execute(int32(idProposal), body.IdStatus, userID); err != nil {
+		if err.Error() == "solo el cliente dueño del viaje puede aceptar propuestas" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

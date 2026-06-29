@@ -26,7 +26,6 @@ func NewGetReviewsByDriverPublicController(get *application.GetReviewsByDriver) 
 // @Failure      400 {object} map[string]string "ID inválido"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /reviews/driver/{id} [get]
-
 func (ctrl *GetReviewsByDriverPublicController) Handle(c *gin.Context) {
 	idParam := c.Param("id")
 	driverID, err := strconv.ParseInt(idParam, 10, 32)

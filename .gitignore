@@ -1,3 +1,5 @@
 .env
 serviceAccountKey.json
 uploads/
+api-logired
+.claude

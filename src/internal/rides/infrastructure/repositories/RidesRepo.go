@@ -24,24 +24,22 @@ func nullInt32ToPtr(n sql.NullInt32) *int32 {
 
 func (r *RideRepo) CreateRide(ride entities.Ride) error {
 	query := `INSERT INTO rides (
-			idclient, 
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
+			idclient,
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
 			destination_lng,
 			distance_km,
-			date, 
-			hour, 
-			aproxweight, 
-			description, 
-			idridestatus) 
-	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
+			date,
+			hour,
+			aproxweight,
+			description,
+			idridestatus)
+	        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 	_, err := r.db.Exec(query,
 		ride.IdClient,
-		ride.OriginCity,
 		ride.OriginAddress,
 		ride.OriginLat,
 		ride.OriginLng,
@@ -62,22 +60,21 @@ func (r *RideRepo) CreateRide(ride entities.Ride) error {
 }
 
 func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
-	query := `SELECT 
-			idride, 
-			idclient, 
+	query := `SELECT
+			idride,
+			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
-			aproxweight, 
-			description, 
+			date,
+			hour,
+			aproxweight,
+			description,
 			idridestatus
 	        FROM rides WHERE idclient = $1`
 	rows, err := r.db.Query(query, idClient)
@@ -94,7 +91,6 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 			&rd.IdRide,
 			&rd.IdClient,
 			&iddriver,
-			&rd.OriginCity,
 			&rd.OriginAddress,
 			&rd.OriginLat,
 			&rd.OriginLng,
@@ -118,29 +114,27 @@ func (r *RideRepo) GetRidesByClientId(idClient int32) ([]entities.Ride, error) {
 func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 	var ride entities.Ride
 	var iddriver sql.NullInt32
-	query := `SELECT 
-			idride, 
-			idclient, 
+	query := `SELECT
+			idride,
+			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
-			aproxweight, 
-			description, 
+			date,
+			hour,
+			aproxweight,
+			description,
 			idridestatus
 	        FROM rides WHERE idride = $1`
 	err := r.db.QueryRow(query, idRide).Scan(
 			&ride.IdRide,
 			&ride.IdClient,
 			&iddriver,
-			&ride.OriginCity,
 			&ride.OriginAddress,
 			&ride.OriginLat,
 			&ride.OriginLng,
@@ -165,24 +159,23 @@ func (r *RideRepo) GetRideById(idRide int32) (entities.Ride, error) {
 
 func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 	query := `
-		SELECT 
-			idride, 
+		SELECT
+			idride,
 			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
+			date,
+			hour,
 			aproxweight,
-			description, 
+			description,
 			idridestatus
-			FROM rides 
+			FROM rides
 			WHERE iddriver = $1
 	`
 	rows, err := r.db.Query(query, idDriver)
@@ -199,7 +192,6 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 			&rd.IdRide,
 			&rd.IdClient,
 			&iddriver,
-			&rd.OriginCity,
 			&rd.OriginAddress,
 			&rd.OriginLat,
 			&rd.OriginLng,
@@ -221,28 +213,28 @@ func (r *RideRepo) GetRidesByDriverId(idDriver int32) ([]entities.Ride, error) {
 }
 
 func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
-	query := `SELECT 
-			idride, 
-			idclient, 
+	query := `SELECT
+			idride,
+			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
+			date,
+			hour,
 			aproxweight,
-			description, 
-			idridestatus 
-            FROM rides 
-            WHERE origincity LIKE $1 AND idridestatus = 6 `
-	rows, err := r.db.Query(query, "%"+city+"%")
+			description,
+			idridestatus
+            FROM rides
+            WHERE idridestatus = 6
+            ORDER BY date DESC`
+	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("error al obtener viajes por ciudad: %w", err)
+		return nil, fmt.Errorf("error al obtener viajes disponibles: %w", err)
 	}
 	defer rows.Close()
 
@@ -254,7 +246,6 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
 			&rd.IdRide,
 			&rd.IdClient,
 			&iddriver,
-			&rd.OriginCity,
 			&rd.OriginAddress,
 			&rd.OriginLat,
 			&rd.OriginLng,
@@ -276,7 +267,7 @@ func (r *RideRepo) GetRidesByCity(city string) ([]entities.Ride, error) {
 }
 
 func (r *RideRepo) UpdateRideStatus(idride int32, idstatus int32) error {
-	query := `UPDATE rides 
+	query := `UPDATE rides
 	          SET idridestatus = $1
 	          WHERE idride = $2`
 	result, err := r.db.Exec(query, idstatus, idride)
@@ -314,47 +305,45 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
     if userType == 1 {
         query = `
 			SELECT
-			idride, 
-			idclient, 
+			idride,
+			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
+			date,
+			hour,
 			aproxweight,
-			description, 
-			idridestatus 
-            FROM rides 
+			description,
+			idridestatus
+            FROM rides
             WHERE idclient = $1 AND idridestatus IN (4, 5)
             ORDER BY date DESC
         `
         args = append(args, userID)
     } else {
         query = `
-            SELECT 
-			idride, 
-			idclient, 
+            SELECT
+			idride,
+			idclient,
 			iddriver,
-			origincity, 
-			origin_address, 
-			origin_lat, 
-			origin_lng, 
-			destination_address, 
-			destination_lat, 
-			destination_lng, 
+			origin_address,
+			origin_lat,
+			origin_lng,
+			destination_address,
+			destination_lat,
+			destination_lng,
 			distance_km,
-			date, 
-			hour, 
+			date,
+			hour,
 			aproxweight,
-			description, 
-			idridestatus 
-            FROM rides 
+			description,
+			idridestatus
+            FROM rides
             WHERE iddriver = $1 AND idridestatus IN (4, 5)
             ORDER BY date DESC
         `
@@ -376,7 +365,6 @@ func (r *RideRepo) GetRidesHistory(userID int32, userType int32) ([]entities.Rid
 			&ride.IdRide,
 			&ride.IdClient,
 			&idDriver,
-			&ride.OriginCity,
 			&ride.OriginAddress,
 			&ride.OriginLat,
 			&ride.OriginLng,
@@ -409,52 +397,50 @@ func (r *RideRepo) GetRidesByStatus(userID int32, userType int32, idstatus int32
 
     if userType == 1 {
         query = `
-            SELECT 
-			idride, 
-			idclient, 
-			iddriver, 
-			origincity, 
-           	origin_address, 
-		   	origin_lat, 
-		   	origin_lng, 
-            destination_address, 
-			destination_lat, 
-			destination_lng, 
-            distance_km, 
-			date, 
-			hour, 
-			aproxweight, 
-			description, 
-			idridestatus 
-            FROM rides 
+            SELECT
+			idride,
+			idclient,
+			iddriver,
+           	origin_address,
+		   	origin_lat,
+		   	origin_lng,
+            destination_address,
+			destination_lat,
+			destination_lng,
+            distance_km,
+			date,
+			hour,
+			aproxweight,
+			description,
+			idridestatus
+            FROM rides
             WHERE idclient = $1 AND idridestatus = $2
             ORDER BY date DESC
         `
-        args = append(args, userID, idstatus) 
+        args = append(args, userID, idstatus)
     } else {
         query = `
             SELECT
-			idride, 
-			idclient, 
-			iddriver, 
-			origincity, 
-           	origin_address, 
-		   	origin_lat, 
-		   	origin_lng, 
-            destination_address, 
-			destination_lat, 
-			destination_lng, 
-            distance_km, 
-			date, 
-			hour, 
-			aproxweight, 
-			description, 
-			idridestatus 
-            FROM rides 
+			idride,
+			idclient,
+			iddriver,
+           	origin_address,
+		   	origin_lat,
+		   	origin_lng,
+            destination_address,
+			destination_lat,
+			destination_lng,
+            distance_km,
+			date,
+			hour,
+			aproxweight,
+			description,
+			idridestatus
+            FROM rides
             WHERE iddriver = $1 AND idridestatus = $2
             ORDER BY date DESC
         `
-        args = append(args, userID, idstatus) 
+        args = append(args, userID, idstatus)
     }
 
     rows, err := r.db.Query(query, args...)
@@ -472,7 +458,6 @@ func (r *RideRepo) GetRidesByStatus(userID int32, userType int32, idstatus int32
 			&ride.IdRide,
 			&ride.IdClient,
 			&idDriver,
-			&ride.OriginCity,
 			&ride.OriginAddress,
 			&ride.OriginLat,
 			&ride.OriginLng,

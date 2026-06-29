@@ -7,7 +7,6 @@ type Proposal struct {
 	IdDriver   int32   `json:"iduser"`
 	IdRide     int32   `json:"id_ride"`
 	IdStatus   int32   `json:"idstatus"`
-	IdCar      int32   `json:"idcar"`
 }
 
 func newProposal(idProposal int32, price float32, idDriver int32, idRide int32, idstatus int32) *Proposal {

@@ -16,4 +16,5 @@ type UserRepository interface {
 	CreateUserTx(tx *sql.Tx, u entities.User) (entities.User, error)
 	BeginTx() (*sql.Tx, error)
     GetUserProfileByID(id int32) (entities.UserProfile, error)
+    GetMyProfileByID(id int32) (entities.MyProfile, error)
 }
