@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"logired/src/internal/users/application"
+	"logired/src/internal/users/infrastructure/dto" 
 	"net/http"
 	"strconv"
 
@@ -22,7 +23,7 @@ func NewGetByUserIDController(getByUserID *application.GetUserByID) *GetByUserID
 // @Security     Bearer
 // @Produce      json
 // @Param        id path int true "ID del usuario"
-// @Success      200 {object} map[string]interface{} "datos del usuario"
+// @Success      200 {object} dto.UserResponse "datos del usuario" 
 // @Failure      400 {object} map[string]string "ID inválido"
 // @Failure      401 {object} map[string]string "no autenticado"
 // @Failure      404 {object} map[string]string "usuario no encontrado"
@@ -41,7 +42,19 @@ func (h *GetByUserIDController) GetByUserID(c *gin.Context) {
 		return
 	}
 
+
+	userResponse := dto.UserResponse{
+		IdUser:      user.IdUser, 
+		Name:        user.Name,
+		Lastname:    user.Lastname,
+		Email:       user.Email,
+		NumberPhone: user.NumberPhone,
+		Birthdate:   user.Birthdate,
+		UserType:    user.UserType,
+		ImageURL:    user.ImageURL,
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data": user,
+		"data": userResponse,
 	})
 }

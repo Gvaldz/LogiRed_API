@@ -39,7 +39,7 @@ func NewCreateUserController(
     }
 }
 
-func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageService, folder string) (string, error) {
+func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageService, folder string, isPrivate bool) (string, error) {
     file, header, err := c.Request.FormFile(fieldName)
     if err != nil {
         return "", fmt.Errorf("error obteniendo el archivo %s: %w", fieldName, err)
@@ -52,7 +52,11 @@ func uploadHelper(c *gin.Context, fieldName string, storage storage.StorageServi
     var url string
     const maxRetries = 3
     for attempt := 1; attempt <= maxRetries; attempt++ {
-        url, err = storage.Upload(file, destination)
+        if isPrivate {
+            url, err = storage.UploadPrivate(file, destination)
+        } else {
+            url, err = storage.Upload(file, destination)
+        }
         if err == nil {
             return url, nil
         }
@@ -134,7 +138,7 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
         return
     }
 
-    imageURL, _ := uploadHelper(c, "image", ctrl.storage, "profiles")
+    imageURL, _ := uploadHelper(c, "image", ctrl.storage, "profiles", false)
 
     user := userEntities.User{
         Name: name, Lastname: lastname, Email: email, NumberPhone: phone,
@@ -169,31 +173,32 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
         var errUpload error
 
         uploadFiles := []struct {
-            field  string
-            folder string
-            name   string
+            field     string
+            folder    string
+            name      string
+            isPrivate bool
         }{
-            {"frontview_image", "cars", "frontView"},
-            {"backview_image", "cars", "backView"},
-            {"leftview_image", "cars", "leftView"},
-            {"rightview_image", "cars", "rightView"},
-            {"space_image", "cars", "spaces"},
-            {"plates_image", "cars", "plates"},
-            {"document_identificacion_adelante", "documents", "docIdAdelante"},
-            {"document_identificacion_atras", "documents", "docIdAtras"},
-            {"document_licencia", "documents", "docLicencia"},
-            {"document_comprobante_domicilio", "documents", "docComprobante"},
+            {"frontview_image", "cars", "frontView", false},
+            {"backview_image", "cars", "backView", false},
+            {"leftview_image", "cars", "leftView", false},
+            {"rightview_image", "cars", "rightView", false},
+            {"space_image", "cars", "spaces", false},
+            {"plates_image", "cars", "plates", false},
+            {"document_identificacion_adelante", "documents", "docIdAdelante", true},
+            {"document_identificacion_atras", "documents", "docIdAtras", true},
+            {"document_licencia", "documents", "docLicencia", true},
+            {"document_comprobante_domicilio", "documents", "docComprobante", true},
         }
 
         semaphore := make(chan struct{}, 3)
         for _, f := range uploadFiles {
             wg.Add(1)
-            go func(field, folder, name string) {
+            go func(field, folder, name string, isPrivate bool) {
                 defer wg.Done()
                 semaphore <- struct{}{}
                 defer func() { <-semaphore }()
 
-                url, err := uploadHelper(c, field, ctrl.storage, folder)
+                url, err := uploadHelper(c, field, ctrl.storage, folder, isPrivate)
                 mu.Lock()
                 defer mu.Unlock()
                 if err != nil && errUpload == nil {
@@ -201,7 +206,7 @@ func (ctrl *CreateUserController) Create(c *gin.Context) {
                 } else {
                     results[name] = url
                 }
-            }(f.field, f.folder, f.name)
+            }(f.field, f.folder, f.name, f.isPrivate)
         }
         wg.Wait()
 

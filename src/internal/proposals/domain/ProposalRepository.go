@@ -32,4 +32,6 @@ type IProposal interface {
 	GetProposalsByRideId(idRide int32) ([]entities.Proposal, error)
 	AcceptProposal(idProposal int32, idStatus int32) error
 	DeleteProposal(idProposal int32, idDriver int32) error
+	GetProposalsByDriverId(idDriver int32) ([]entities.Proposal, error)
+	GetProposalsByClientId(idClient int32) ([]entities.Proposal, error)
 }

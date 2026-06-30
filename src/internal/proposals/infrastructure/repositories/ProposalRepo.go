@@ -125,3 +125,64 @@ func (r *ProposalRepo) GetProposalsByRideId(idRide int32) ([]entities.Proposal, 
     }
     return proposals, nil
 }
+
+func (r *ProposalRepo) GetProposalsByClientId(idClient int32) ([]entities.Proposal, error) {
+    query := `
+        SELECT p.idproposal, p.price, p.comment, p.iddriver, p.idride, p.idproposalstatus
+        FROM proposals p
+        INNER JOIN rides r ON p.idride = r.idride
+        WHERE r.idclient = $1
+    `
+    rows, err := r.db.Query(query, idClient)
+    if err != nil {
+        return nil, fmt.Errorf("error al obtener propuestas del cliente: %w", err)
+    }
+    defer rows.Close()
+
+    var proposals []entities.Proposal
+    for rows.Next() {
+        var p entities.Proposal
+        if err := rows.Scan(
+            &p.IdProposal,
+            &p.Price,
+            &p.Comment,
+            &p.IdDriver,
+            &p.IdRide,
+            &p.IdStatus,
+        ); err != nil {
+            return nil, fmt.Errorf("error al escanear propuesta: %w", err)
+        }
+        proposals = append(proposals, p)
+    }
+    return proposals, nil
+}
+
+func (r *ProposalRepo) GetProposalsByDriverId(idDriver int32) ([]entities.Proposal, error) {
+    query := `
+        SELECT idproposal, price, comment, iddriver, idride, idproposalstatus
+        FROM proposals
+        WHERE iddriver = $1
+    `
+    rows, err := r.db.Query(query, idDriver)
+    if err != nil {
+        return nil, fmt.Errorf("error al obtener propuestas del conductor: %w", err)
+    }
+    defer rows.Close()
+
+    var proposals []entities.Proposal
+    for rows.Next() {
+        var p entities.Proposal
+        if err := rows.Scan(
+            &p.IdProposal,
+            &p.Price,
+            &p.Comment,
+            &p.IdDriver,
+            &p.IdRide,
+            &p.IdStatus,
+        ); err != nil {
+            return nil, fmt.Errorf("error al escanear propuesta: %w", err)
+        }
+        proposals = append(proposals, p)
+    }
+    return proposals, nil
+}

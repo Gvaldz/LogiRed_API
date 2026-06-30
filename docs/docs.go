@@ -752,8 +752,101 @@ const docTemplate = `{
                 }
             }
         },
+        "/proposals/client": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todas las propuestas de todos los viajes creados por el cliente logueado.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "summary": "Obtener todas las propuestas recibidas por el cliente autenticado",
+                "responses": {
+                    "200": {
+                        "description": "lista de propuestas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/proposals/driver": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Devuelve todas las propuestas enviadas por el conductor logueado.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "proposals"
+                ],
+                "summary": "Obtener propuestas del conductor autenticado",
+                "responses": {
+                    "200": {
+                        "description": "lista de propuestas",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error interno",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/proposals/ride/{idride}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -780,6 +873,24 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "ID inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "no autenticado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "no eres el cliente del viaje",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2192,8 +2303,7 @@ const docTemplate = `{
                     "200": {
                         "description": "datos del usuario",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/dto.UserResponse"
                         }
                     },
                     "400": {
@@ -2406,6 +2516,144 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/ws/rides/{id}/publish": {
+            "get": {
+                "description": "Endpoint para que el conductor inicie una conexión WebSocket y transmita su ubicación en un viaje en proceso. (Nota: Swagger UI no puede probar WebSockets interactivos).",
+                "tags": [
+                    "tracking"
+                ],
+                "summary": "Conectar WebSocket para publicar ubicación",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del viaje",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token JWT de autenticación",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols (Conexión WebSocket establecida)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "ID de viaje inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token requerido o inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado (viaje no en proceso o no eres el conductor)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Viaje no encontrado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/rides/{id}/subscribe": {
+            "get": {
+                "description": "Endpoint para que el cliente inicie una conexión WebSocket y reciba la ubicación del conductor en tiempo real. (Nota: Swagger UI no puede probar WebSockets interactivos).",
+                "tags": [
+                    "tracking"
+                ],
+                "summary": "Conectar WebSocket para recibir ubicación",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID del viaje",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Token JWT de autenticación",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols (Conexión WebSocket establecida)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "ID de viaje inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token requerido o inválido",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado (viaje no en proceso o no eres el cliente)",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Viaje no encontrado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2608,6 +2856,35 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UserResponse": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "iduser": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "numberphone": {
+                    "type": "string"
+                },
+                "usertype": {
+                    "type": "integer"
+                }
+            }
+        },
         "entities.CarInfo": {
             "type": "object",
             "properties": {
@@ -2773,7 +3050,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "api-logired.shop",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "LogiRed API",

@@ -30,10 +30,12 @@ func (h *Hub) Unsubscribe(rideID int32, sub *Subscriber) {
     h.mu.Lock()
     defer h.mu.Unlock()
     if subs, ok := h.subscribers[rideID]; ok {
-        delete(subs, sub)
-        close(sub.Send)
-        if len(subs) == 0 {
-            delete(h.subscribers, rideID)
+        if _, exists := subs[sub]; exists {
+            delete(subs, sub)
+            close(sub.Send)
+            if len(subs) == 0 {
+                delete(h.subscribers, rideID)
+            }
         }
     }
 }
@@ -46,5 +48,18 @@ func (h *Hub) Publish(rideID int32, message []byte) {
         case sub.Send <- message:
         default:
         }
+    }
+}
+
+// CloseAll notifica a todos los suscriptores del viaje y cierra sus canales.
+// Usar cuando el conductor se desconecta para que los clientes sepan que el stream terminó.
+func (h *Hub) CloseAll(rideID int32) {
+    h.mu.Lock()
+    defer h.mu.Unlock()
+    if subs, ok := h.subscribers[rideID]; ok {
+        for sub := range subs {
+            close(sub.Send)
+        }
+        delete(h.subscribers, rideID)
     }
 }

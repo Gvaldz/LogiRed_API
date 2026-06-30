@@ -41,6 +41,8 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 	acceptProposalUseCase := application.NewAcceptProposal(proposalRepo, rideRepo, d.Notifier)
 	getProposalByIdUseCase := application.NewGetProposalById(proposalRepo, rideRepo)
 	getProposalsByRideUseCase := application.NewGetProposalsByRide(proposalRepo, rideRepo)
+	getProposalsByDriverUseCase := application.NewGetProposalsByDriver(proposalRepo)
+	getProposalsByClientUseCase := application.NewGetProposalsByClient(proposalRepo)
 	deleteProposalUseCase := application.NewDeleteProposal(proposalRepo)
 
 	createProposalController := controllers.NewCreateProposalController(createProposalUseCase)
@@ -48,12 +50,16 @@ func (d *ProposalDependencies) GetRoutes() *routes.ProposalRoutes {
 	deleteProposalController := controllers.NewDeleteProposalController(deleteProposalUseCase)
 	getProposalByIdController := controllers.NewGetProposalyIdController(getProposalByIdUseCase)
 	getProposalsByRideController := controllers.NewGetProposalsByRideController(getProposalsByRideUseCase)
+	getProposalsByDriverController := controllers.NewGetProposalsByDriverController(getProposalsByDriverUseCase)
+	getProposalsByClientController := controllers.NewGetProposalsByClientController(getProposalsByClientUseCase)
 
 	return routes.NewProposalRoutes(
 		createProposalController,
 		acceptProposalController,
 		getProposalByIdController,
 		getProposalsByRideController,
+		getProposalsByDriverController,
+		getProposalsByClientController,
 		deleteProposalController,
 		d.AuthMiddleware,
 		d.DriverOnlyApprovedMiddleware,

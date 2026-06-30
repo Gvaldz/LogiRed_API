@@ -21,10 +21,13 @@ func NewGetProposalsByRideController(uc *application.GetProposalsByRide) *GetPro
 // GetByRide godoc
 // @Summary      Obtener todas las propuestas de un viaje
 // @Tags         proposals
+// @Security     Bearer
 // @Produce      json
 // @Param        idride path int true "ID del viaje"
 // @Success      200 {object} map[string]interface{} "lista de propuestas"
 // @Failure      400 {object} map[string]string "ID inválido"
+// @Failure      401 {object} map[string]string "no autenticado"
+// @Failure      403 {object} map[string]string "no eres el cliente del viaje"
 // @Failure      500 {object} map[string]string "error interno"
 // @Router       /proposals/ride/{idride} [get]
 func (ctrl *GetProposalsByRideController) GetByRide(c *gin.Context) {
