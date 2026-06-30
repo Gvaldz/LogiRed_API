@@ -5,7 +5,7 @@ type UserProfile struct {
     Name        string      `json:"name"`
     Lastname    string      `json:"lastname"`
     Email       string      `json:"email"`
-    NumberPhone string      `json:"number_phone"`
+    NumberPhone string      `json:"number_phone" encrypt:"true"`
     UserType    int         `json:"user_type"`
     ImageURL    string      `json:"image_url"`
     DriverInfo  *DriverInfo `json:"driver_info,omitempty"`
@@ -36,7 +36,7 @@ type MyProfile struct {
     Name        string   `json:"name"`
     Lastname    string   `json:"lastname"`
     Email       string   `json:"email"`
-    NumberPhone string   `json:"number_phone"`
+    NumberPhone string   `json:"number_phone" encrypt:"true"`
     Birthdate   string   `json:"birthdate"`
     UserType    int      `json:"user_type"`
     ImageURL    string   `json:"image_url"`

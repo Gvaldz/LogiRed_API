@@ -1752,7 +1752,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Cambia el estado de un viaje (solo el cliente o conductor autorizado)",
+                "description": "Cambia el estado de un viaje (solo el cliente o conductor autorizado).\n\n**Catálogo de Estados válidos:**\n* ` + "`" + `1` + "`" + ` - Asignado\n* ` + "`" + `2` + "`" + ` - En camino\n* ` + "`" + `3` + "`" + ` - En proceso\n* ` + "`" + `4` + "`" + ` - Cancelado\n* ` + "`" + `5` + "`" + ` - Completado\n* ` + "`" + `6` + "`" + ` - Pendiente",
                 "consumes": [
                     "application/json"
                 ],
@@ -1772,13 +1772,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Nuevo estado",
+                        "description": "Cuerpo de la petición con el nuevo estado",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/controllers.UpdateStatusRequest"
                         }
                     }
                 ],
@@ -2687,6 +2686,15 @@ const docTemplate = `{
                 "price": {
                     "type": "number",
                     "example": 150.5
+                }
+            }
+        },
+        "controllers.UpdateStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "example": 3
                 }
             }
         },

@@ -23,6 +23,12 @@ definitions:
     - id_ride
     - price
     type: object
+  controllers.UpdateStatusRequest:
+    properties:
+      status:
+        example: 3
+        type: integer
+    type: object
   dto.CarResponse:
     properties:
       backview_image:
@@ -1237,20 +1243,28 @@ paths:
     put:
       consumes:
       - application/json
-      description: Cambia el estado de un viaje (solo el cliente o conductor autorizado)
+      description: |-
+        Cambia el estado de un viaje (solo el cliente o conductor autorizado).
+
+        **Catálogo de Estados válidos:**
+        * `1` - Asignado
+        * `2` - En camino
+        * `3` - En proceso
+        * `4` - Cancelado
+        * `5` - Completado
+        * `6` - Pendiente
       parameters:
       - description: ID del viaje
         in: path
         name: id
         required: true
         type: integer
-      - description: Nuevo estado
+      - description: Cuerpo de la petición con el nuevo estado
         in: body
         name: body
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/controllers.UpdateStatusRequest'
       produces:
       - application/json
       responses:

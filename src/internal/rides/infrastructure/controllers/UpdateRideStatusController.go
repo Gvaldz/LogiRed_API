@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type UpdateStatusRequest struct {
+	Status int32 `json:"status" example:"3"` 
+}
+
 type UpdateRideStatusController struct {
 	UpdateRideStatus *application.UpdateRideStatus
 }
@@ -18,12 +22,20 @@ func NewUpdateRideStatusController(update *application.UpdateRideStatus) *Update
 
 // Update godoc
 // @Summary      Actualizar estado de un viaje
-// @Description  Cambia el estado de un viaje (solo el cliente o conductor autorizado)
+// @Description  Cambia el estado de un viaje (solo el cliente o conductor autorizado).
+// @Description  
+// @Description  **Catálogo de Estados válidos:**
+// @Description  * `1` - Asignado
+// @Description  * `2` - En camino
+// @Description  * `3` - En proceso
+// @Description  * `4` - Cancelado
+// @Description  * `5` - Completado
+// @Description  * `6` - Pendiente
 // @Tags         rides
 // @Accept       json
 // @Produce      json
 // @Param        id path int true "ID del viaje"
-// @Param        body body map[string]interface{} true "Nuevo estado" Example({"status":2})
+// @Param        body body UpdateStatusRequest true "Cuerpo de la petición con el nuevo estado"
 // @Security     Bearer
 // @Success      200 {object} map[string]string "mensaje de éxito"
 // @Failure      400 {object} map[string]string "error en la solicitud"
@@ -46,9 +58,8 @@ func (ctrl *UpdateRideStatusController) Update(c *gin.Context) {
 	}
 	userID := userIDInterface.(int32)
 	_ = userID
-	var req struct {
-		Status int32 `json:"status"`
-	}
+	
+	var req UpdateStatusRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,6 +71,5 @@ func (ctrl *UpdateRideStatusController) Update(c *gin.Context) {
 		return
 	}
 
-	// 5. Respuesta exitosa
 	c.JSON(http.StatusOK, gin.H{"message": "Estado del viaje actualizado correctamente"})
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"logired/src/core/security"
 	users "logired/src/internal/users/domain"
 	user "logired/src/internal/users/domain/entities"
 	"strings"
@@ -19,10 +20,15 @@ func NewUserRepository(DB *sql.DB) users.UserRepository {
 
 func (r *UserRepository) CreateUser(u user.User) (user.User, error) {
 
+	encryptedU, err := security.PrepareForWrite(u)
+	if err != nil {
+		return user.User{}, fmt.Errorf("error al cifrar usuario: %w", err)
+	}
+
 	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING iduser"
 
 	var id int32
-	err := r.DB.QueryRow(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone, u.Email, u.Password, u.UserType, u.ImageURL).Scan(&id)
+	err = r.DB.QueryRow(query, encryptedU.Name, encryptedU.Lastname, encryptedU.Birthdate, encryptedU.NumberPhone, encryptedU.Email, encryptedU.Password, encryptedU.UserType, encryptedU.ImageURL).Scan(&id)
 	if err != nil {
 		return user.User{}, fmt.Errorf("error al crear usuario: %w", err)
 	}
@@ -53,7 +59,11 @@ func (r *UserRepository) GetAllUsers() ([]user.User, error) {
 		if err := rows.Scan(&u.IdUser, &u.Name, &u.Lastname, &u.Email, &u.UserType); err != nil {
 			return nil, fmt.Errorf("error al escanear user: %w", err)
 		}
-		usersList = append(usersList, u)
+		decryptedU, err := security.MaterializeFromRead(u)
+		if err != nil {
+			return nil, fmt.Errorf("error al descifrar user: %w", err)
+		}
+		usersList = append(usersList, decryptedU)
 	}
 
 	return usersList, nil
@@ -72,7 +82,12 @@ func (r *UserRepository) GetUserByID(iduser int32) (user.User, error) {
 	if err != nil {
 		return u, fmt.Errorf("error al obtener usuario: %w", err)
 	}
-	return u, nil
+	
+	decryptedU, err := security.MaterializeFromRead(u)
+	if err != nil {
+		return u, fmt.Errorf("error al descifrar usuario: %w", err)
+	}
+	return decryptedU, nil
 }
 
 func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
@@ -93,10 +108,21 @@ func (r *UserRepository) GetUserByEmail(email string) (user.User, error) {
 		}
 		return u, fmt.Errorf("error al obtener usuario por email: %w", err)
 	}
-	return u, nil
+	
+	decryptedU, err := security.MaterializeFromRead(u)
+	if err != nil {
+		return u, fmt.Errorf("error al descifrar usuario: %w", err)
+	}
+	return decryptedU, nil
 }
 
 func (r *UserRepository) UpdateUser(id int32, u user.User) error {
+    encryptedU, err := security.PrepareForWrite(u)
+    if err != nil {
+        return fmt.Errorf("error al cifrar usuario para update: %w", err)
+    }
+    u = encryptedU
+
     setClauses := []string{}
     args := []interface{}{}
     argCounter := 1
@@ -137,7 +163,7 @@ func (r *UserRepository) UpdateUser(id int32, u user.User) error {
     }
 
     var exists int
-    err := r.DB.QueryRow("SELECT COUNT(*) FROM users WHERE iduser = $1", id).Scan(&exists)
+    err = r.DB.QueryRow("SELECT COUNT(*) FROM users WHERE iduser = $1", id).Scan(&exists)
     if err != nil {
         return fmt.Errorf("error al verificar usuario: %w", err)
     }
@@ -218,10 +244,15 @@ func (r *UserRepository) DeleteUser(id int32) error {
 }
 
 func (r *UserRepository) CreateUserTx(tx *sql.Tx, u user.User) (user.User, error) {
+	encryptedU, err := security.PrepareForWrite(u)
+	if err != nil {
+		return user.User{}, fmt.Errorf("error al cifrar usuario tx: %w", err)
+	}
+
 	query := "INSERT INTO users (name, lastname, birthdate, numberphone, email, password, usertype, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING iduser"
 
 	var id int32
-	err := tx.QueryRow(query, u.Name, u.Lastname, u.Birthdate, u.NumberPhone, u.Email, u.Password, u.UserType, u.ImageURL).Scan(&id)
+	err = tx.QueryRow(query, encryptedU.Name, encryptedU.Lastname, encryptedU.Birthdate, encryptedU.NumberPhone, encryptedU.Email, encryptedU.Password, encryptedU.UserType, encryptedU.ImageURL).Scan(&id)
 	if err != nil {
 		return user.User{}, fmt.Errorf("error al crear usuario: %w", err)
 	}
@@ -324,7 +355,11 @@ func (r *UserRepository) GetUserProfileByID(id int32) (user.UserProfile, error) 
         profile.DriverInfo = driverInfo
     }
 
-    return profile, nil
+	decryptedProfile, err := security.MaterializeFromRead(profile)
+	if err != nil {
+		return user.UserProfile{}, fmt.Errorf("error al descifrar perfil: %w", err)
+	}
+    return decryptedProfile, nil
 }
 
 func (r *UserRepository) GetMyProfileByID(id int32) (user.MyProfile, error) {
@@ -416,5 +451,9 @@ func (r *UserRepository) GetMyProfileByID(id int32) (user.MyProfile, error) {
         profile.TotalTrips = clientTrips
     }
 
-    return profile, nil
+	decryptedProfile, err := security.MaterializeFromRead(profile)
+	if err != nil {
+		return user.MyProfile{}, fmt.Errorf("error al descifrar mi perfil: %w", err)
+	}
+    return decryptedProfile, nil
 }
